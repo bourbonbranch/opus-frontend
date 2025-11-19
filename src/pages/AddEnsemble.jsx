@@ -12,6 +12,7 @@ const AddEnsemble = () => {
     level: 'high-school',
     size: '',
   });
+
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,22 +27,21 @@ const AddEnsemble = () => {
     e.preventDefault();
     setStatus(null);
 
-    // Get current director
-    let directorId = null;
+    // Read director from localStorage
+    let user = null;
     try {
       const stored = localStorage.getItem('opusUser');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        directorId = parsed.id;
-      }
-    } catch (err) {
-      console.warn('Could not read opusUser from localStorage:', err);
+      user = stored ? JSON.parse(stored) : null;
+    } catch {
+      user = null;
     }
 
-    if (!directorId) {
-      setStatus('No director is logged in. Please sign up again.');
+    if (!user || !user.id) {
+      setStatus('Director not found. Please sign up again.');
       return;
     }
+
+    const director_id = user.id; // <-- THIS is the crucial part
 
     setLoading(true);
 
@@ -50,13 +50,12 @@ const AddEnsemble = () => {
         name: formData.name,
         type: formData.type,
         organization_name: formData.school || null,
-        director_id: directorId,
+        director_id: director_id, // <-- REQUIRED
       });
 
-      // After creating ensemble, go to Today dashboard
       navigate('/director/today');
     } catch (err) {
-      console.error('Error creating ensemble:', err);
+      console.error(err);
       setStatus(err.message || 'Failed to create ensemble');
     } finally {
       setLoading(false);
@@ -67,9 +66,11 @@ const AddEnsemble = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
+
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl">
-          {/* Logo + Stepper */}
+
+          {/* Header */}
           <div className="flex flex-col items-center mb-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
@@ -80,7 +81,7 @@ const AddEnsemble = () => {
               </h1>
             </div>
 
-            <div className="flex items-center justify-center gap-4 text-sm">
+            <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
                   <span className="text-xs font-semibold text-white">1</span>
@@ -104,7 +105,7 @@ const AddEnsemble = () => {
             </div>
           </div>
 
-          {/* Card */}
+          {/* Form */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2">
               Create your ensemble
@@ -125,7 +126,6 @@ const AddEnsemble = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  placeholder="e.g., Varsity Choir, Concert Band"
                 />
               </div>
 
@@ -179,13 +179,10 @@ const AddEnsemble = () => {
                   value={formData.school}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  placeholder="e.g., Lincoln High School"
                 />
               </div>
 
-              {status && (
-                <p className="text-sm text-amber-300 mt-1">{status}</p>
-              )}
+              {status && <p className="text-amber-300 text-sm">{status}</p>}
 
               <div className="flex gap-4 pt-4">
                 <button
@@ -198,7 +195,7 @@ const AddEnsemble = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-70"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 disabled:opacity-60"
                 >
                   {loading ? 'Saving…' : 'Continue'}
                 </button>
@@ -216,3 +213,4 @@ const AddEnsemble = () => {
 };
 
 export default AddEnsemble;
+
