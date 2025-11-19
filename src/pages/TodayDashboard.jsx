@@ -32,47 +32,58 @@ const TodayDashboard = () => {
     };
 
     load();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 text-white">
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      {/* Ambient background accents */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[35rem] h-[35rem] bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[35rem] h-[35rem] bg-blue-500/20 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative max-w-6xl mx-auto px-4 py-10">
         {/* Header */}
-        <header className="flex items-center justify-between mb-8">
+        <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
               <span className="text-xl text-white">♪</span>
             </div>
-            <h1 className="text-2xl font-bold">Opus</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Opus</h1>
           </div>
 
           <Link
             to="/add-ensemble"
-            className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 transition"
+            className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 transition shadow-md"
           >
             + Add Ensemble
           </Link>
         </header>
 
         {/* Main card */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
-          <h2 className="text-xl font-semibold mb-4">Today&apos;s Overview</h2>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl md:text-2xl font-semibold">Today's Overview</h2>
+            <span className="text-xs md:text-sm text-gray-300">
+              {new Date().toLocaleDateString()}
+            </span>
+          </div>
 
-          {loading && <p className="text-gray-300">Loading ensembles…</p>}
+          {/* States */}
+          {loading && (
+            <div className="text-gray-300">Loading ensembles…</div>
+          )}
 
           {error && (
-            <p className="text-red-400 font-medium mb-4">
+            <div className="p-4 bg-red-500/20 border border-red-500/40 rounded-xl text-red-100 font-medium">
               {error}
-            </p>
+            </div>
           )}
 
           {!loading && !error && ensembles.length === 0 && (
-            <p className="text-gray-300">
-              You don&apos;t have any ensembles yet. Start by{' '}
+            <div className="text-gray-300">
+              You don't have any ensembles yet. Start by{' '}
               <Link
                 to="/add-ensemble"
                 className="text-purple-300 underline hover:text-purple-200"
@@ -80,41 +91,48 @@ const TodayDashboard = () => {
                 creating your first ensemble
               </Link>
               .
-            </p>
+            </div>
           )}
 
           {!loading && !error && ensembles.length > 0 && (
-            <ul className="space-y-3">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {ensembles.map((ensemble) => (
                 <li
                   key={ensemble.id}
-                  className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 border border-white/10"
+                  className="group bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition hover:bg-white/10"
                 >
-                  <div>
-                    <p className="font-medium">
-                      {ensemble.name}{' '}
-                      <span className="text-sm text-gray-300">
-                        ({ensemble.type})
-                      </span>
-                    </p>
-                    {ensemble.organization_name && (
-                      <p className="text-sm text-gray-300">
-                        {ensemble.organization_name}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">
+                        {ensemble.name}{' '}
+                        <span className="text-sm text-gray-300">
+                          ({ensemble.type})
+                        </span>
                       </p>
-                    )}
+                      {ensemble.organization_name && (
+                        <p className="text-sm text-gray-300 mt-1">
+                          {ensemble.organization_name}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-[10px] md:text-xs uppercase tracking-wide text-gray-400">
+                      Created{' '}
+                      {new Date(ensemble.created_at).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-xs uppercase tracking-wide text-gray-400">
-                    Created {new Date(ensemble.created_at).toLocaleDateString()}
-                  </span>
                 </li>
               ))}
             </ul>
           )}
         </div>
+
+        {/* Footer hint */}
+        <p className="mt-8 text-center text-xs text-gray-300/90">
+          Tip: Click “+ Add Ensemble” to build your program and see it here.
+        </p>
       </div>
     </div>
   );
 };
 
 export default TodayDashboard;
-
