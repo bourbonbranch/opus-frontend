@@ -1,3 +1,4 @@
+// src/pages/AddEnsemble.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createEnsemble } from '../lib/opusApi.js';
@@ -27,7 +28,7 @@ const AddEnsemble = () => {
     e.preventDefault();
     setStatus(null);
 
-    // Read director from localStorage
+    // 1. Read the signed-up director from localStorage
     let user = null;
     try {
       const stored = localStorage.getItem('opusUser');
@@ -41,7 +42,7 @@ const AddEnsemble = () => {
       return;
     }
 
-    const director_id = user.id; // <-- THIS is the crucial part
+    const director_id = user.id; // THIS is what backend needs
 
     setLoading(true);
 
@@ -50,12 +51,13 @@ const AddEnsemble = () => {
         name: formData.name,
         type: formData.type,
         organization_name: formData.school || null,
-        director_id: director_id, // <-- REQUIRED
+        director_id: director_id,
       });
 
+      // 2. On success, go to Today dashboard
       navigate('/director/today');
     } catch (err) {
-      console.error(err);
+      console.error('Error creating ensemble:', err);
       setStatus(err.message || 'Failed to create ensemble');
     } finally {
       setLoading(false);
@@ -69,8 +71,7 @@ const AddEnsemble = () => {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl">
-
-          {/* Header */}
+          {/* Header / stepper */}
           <div className="flex flex-col items-center mb-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
@@ -105,7 +106,7 @@ const AddEnsemble = () => {
             </div>
           </div>
 
-          {/* Form */}
+          {/* Card */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2">
               Create your ensemble
@@ -150,7 +151,7 @@ const AddEnsemble = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                  <label className="block text.sm font-medium text-gray-200 mb-2">
                     Level
                   </label>
                   <select
@@ -182,7 +183,9 @@ const AddEnsemble = () => {
                 />
               </div>
 
-              {status && <p className="text-amber-300 text-sm">{status}</p>}
+              {status && (
+                <p className="text-sm text-amber-300 mt-2">{status}</p>
+              )}
 
               <div className="flex gap-4 pt-4">
                 <button
@@ -213,4 +216,3 @@ const AddEnsemble = () => {
 };
 
 export default AddEnsemble;
-
