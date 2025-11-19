@@ -8,19 +8,14 @@ import SignUp from './pages/SignUp.jsx';
 const App = () => {
   return (
     <Routes>
-      {/* Default to signup for now */}
       <Route path="/" element={<SignUp />} />
-
-      {/* Explicit signup route */}
       <Route path="/signup" element={<SignUp />} />
 
-      {/* Director dashboard */}
-      <Route path="/director/today" element={<TodayDashboard />} />
-
-      {/* Add ensemble */}
+      {/* Add both paths to avoid 404s */}
+      <Route path="/add-ensemble" element={<AddEnsemble />} />
       <Route path="/ensembles/new" element={<AddEnsemble />} />
 
-      {/* Catch-all: send them to Today */}
+      <Route path="/director/today" element={<TodayDashboard />} />
       <Route path="*" element={<Navigate to="/director/today" replace />} />
     </Routes>
   );
