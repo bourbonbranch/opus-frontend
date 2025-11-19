@@ -1,7 +1,6 @@
 // src/pages/SignUp.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MusicIcon, ArrowLeftIcon, CheckIcon } from 'lucide-react';
 import { signupDirector } from '../lib/opusApi';
 
 export function SignUp() {
@@ -43,15 +42,12 @@ export function SignUp() {
         role: formData.role || 'director',
       };
 
-      // Call backend
       const data = await signupDirector(payload);
 
-      // Save director id for later
       if (data && data.id) {
         localStorage.setItem('opusDirectorId', String(data.id));
       }
 
-      // Go to Add Ensemble step
       navigate('/add-ensemble');
     } catch (err) {
       setError(err.message || 'Internal server error');
@@ -71,14 +67,14 @@ export function SignUp() {
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-gray-300 hover:text-white mb-8 transition-colors"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
+            <span className="text-lg">←</span>
             <span>Back</span>
           </button>
 
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-              <MusicIcon className="w-6 h-6 text-white" />
+              <span className="text-white text-xl">♪</span>
             </div>
             <h1 className="text-3xl font-bold text-white drop-shadow-lg">
               Opus
@@ -196,7 +192,7 @@ export function SignUp() {
                 className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2"
               >
                 <span>Create Account</span>
-                <CheckIcon className="w-5 h-5" />
+                <span className="text-lg">✓</span>
               </button>
             </form>
 
