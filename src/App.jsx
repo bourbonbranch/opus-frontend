@@ -1,29 +1,29 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Home from './pages/Home';
-import SignUp from './pages/SignUp';
-import AddEnsemble from './pages/AddEnsemble';
-import Today from './pages/Today';
+import TodayDashboard from './pages/TodayDashboard.jsx';
+import AddEnsemble from './pages/AddEnsemble.jsx';
+import SignUp from './pages/SignUp.jsx';
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
+    <Routes>
+      {/* Default to signup for now */}
+      <Route path="/" element={<SignUp />} />
 
-        {/* SIGNUP PAGE */}
-        <Route path="/signup" element={<SignUp />} />
+      {/* Explicit signup route */}
+      <Route path="/signup" element={<SignUp />} />
 
-        {/* ADD ENSEMBLE PAGE */}
-        <Route path="/ensembles/new" element={<AddEnsemble />} />
+      {/* Director dashboard */}
+      <Route path="/director/today" element={<TodayDashboard />} />
 
-        {/* DIRECTOR DASHBOARD */}
-        <Route path="/director/today" element={<Today />} />
-      </Routes>
-    </Router>
+      {/* Add ensemble */}
+      <Route path="/ensembles/new" element={<AddEnsemble />} />
+
+      {/* Catch-all: send them to Today */}
+      <Route path="*" element={<Navigate to="/director/today" replace />} />
+    </Routes>
   );
-}
+};
 
 export default App;
-
-
