@@ -5,6 +5,7 @@ import { signupDirector } from '../lib/opusApi';
 
 export function SignUp() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -13,6 +14,7 @@ export function SignUp() {
     confirmPassword: '',
     role: 'director',
   });
+
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -25,27 +27,27 @@ export function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passwords do not match.');
       return;
     }
 
     try {
-      setError('');
-
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        role: formData.role || 'director',
+        role: formData.role,
       };
 
-      const data = await signupDirector(payload);
+      const result = await signupDirector(payload);
 
-      if (data && data.id) {
-        localStorage.setItem('opusDirectorId', String(data.id));
+      // store director id for creating ensembles
+      if (result && result.id) {
+        localStorage.setItem('opusDirectorId', String(result.id));
       }
 
       navigate('/add-ensemble');
@@ -62,8 +64,9 @@ export function SignUp() {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          {/* Back Button */}
+          {/* Back button */}
           <button
+            type="button"
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-gray-300 hover:text-white mb-8 transition-colors"
           >
@@ -81,7 +84,7 @@ export function SignUp() {
             </h1>
           </div>
 
-          {/* Sign Up Card */}
+          {/* Card */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2">
               Create your account
@@ -106,6 +109,7 @@ export function SignUp() {
                     placeholder="Jane"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-200 mb-2">
                     Last Name
@@ -184,7 +188,9 @@ export function SignUp() {
               </div>
 
               {error && (
-                <p className="text-sm text-red-400 mt-2">{error}</p>
+                <p className="text-sm text-amber-300">
+                  {error}
+                </p>
               )}
 
               <button
@@ -199,6 +205,7 @@ export function SignUp() {
             <p className="mt-6 text-center text-sm text-gray-300">
               Already have an account?{' '}
               <button
+                type="button"
                 onClick={() => navigate('/director/today')}
                 className="text-purple-400 hover:text-purple-300 font-medium"
               >
