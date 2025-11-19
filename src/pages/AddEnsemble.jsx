@@ -1,11 +1,13 @@
 // src/pages/AddEnsemble.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createEnsemble } from '../lib/opusApi.js';
+import { MusicIcon, CheckIcon } from 'lucide-react';
+import { createEnsemble } from '../lib/opusApi';
 
-const AddEnsemble = () => {
+export function AddEnsemble() {
   const navigate = useNavigate();
-
+  const [directorId, setDirectorId] = useState(null);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     type: 'choir',
@@ -14,10 +16,18 @@ const AddEnsemble = () => {
     size: '',
   });
 
-  const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const stored = localStorage.getItem('opusDirectorId');
+    if (!stored) {
+      setError('No director session found. Please sign up again.');
+      navigate('/signup');
+      return;
+    }
+    setDirectorId(parseInt(stored, 10));
+  }, [navigate]);
 
   const handleChange = (e) => {
+    setError('');
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -26,44 +36,25 @@ const AddEnsemble = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus(null);
 
-    // --- Get director_id ---
-    let director_id = null;
-
-    try {
-      const stored = localStorage.getItem('opusUser');
-      if (stored) {
-        const user = JSON.parse(stored);
-        if (user && user.id) {
-          director_id = user.id;
-        }
-      }
-    } catch {
-      // ignore parse errors
+    if (!directorId) {
+      setError('No director id found. Please sign up again.');
+      return;
     }
 
-    // TEMP: dev fallback so it *always* works
-    if (!director_id) {
-      director_id = 1;
-    }
-
-    setLoading(true);
-
     try {
+      setError('');
+
       await createEnsemble({
         name: formData.name,
         type: formData.type,
         organization_name: formData.school || null,
-        director_id, // <- this is now guaranteed to be present
+        director_id: directorId,
       });
 
       navigate('/director/today');
     } catch (err) {
-      console.error('Error creating ensemble:', err);
-      setStatus(err.message || 'Failed to create ensemble');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to create ensemble');
     }
   };
 
@@ -75,37 +66,38 @@ const AddEnsemble = () => {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl">
-          {/* Logo + steps */}
-          <div className="flex flex-col items-center mb-10">
-            <div className="flex items-center gap-3 mb-6">
+          {/* Logo */}
+          <div className="flex flex-col items-center gap-3 mb-10">
+            <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-                <span className="text-xl font-bold text-white">♪</span>
+                <MusicIcon className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-3xl font-bold text-white drop-shadow-lg">
                 Opus
               </h1>
             </div>
 
-            <div className="flex items-center gap-4 text-sm">
+            {/* Stepper */}
+            <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <span className="text-xs font-semibold text-white">1</span>
+                  <CheckIcon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-gray-300">Account</span>
+                <span className="text-sm text-gray-300">Account</span>
               </div>
-              <div className="w-12 h-0.5 bg-white/20" />
+              <div className="w-10 h-0.5 bg-white/20" />
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <span className="text-xs font-semibold text-white">2</span>
+                  <span className="text-sm font-semibold text-white">2</span>
                 </div>
-                <span className="text-white font-medium">Ensemble</span>
+                <span className="text-sm text-white font-medium">Ensemble</span>
               </div>
-              <div className="w-12 h-0.5 bg:white/20" />
+              <div className="w-10 h-0.5 bg-white/20" />
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <span className="text-xs font-semibold text-gray-400">3</span>
+                  <span className="text-sm font-semibold text-gray-400">3</span>
                 </div>
-                <span className="text-gray-400">Dashboard</span>
+                <span className="text-sm text-gray-400">Dashboard</span>
               </div>
             </div>
           </div>
@@ -116,7 +108,7 @@ const AddEnsemble = () => {
               Create your ensemble
             </h2>
             <p className="text-gray-300 mb-6">
-              Tell us about your choir, band, or orchestra
+              Tell us about your choir, band, or orchestra.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -131,7 +123,7 @@ const AddEnsemble = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  placeholder="Incendium"
+                  placeholder="e.g., Varsity Choir, Concert Band"
                 />
               </div>
 
@@ -185,12 +177,31 @@ const AddEnsemble = () => {
                   value={formData.school}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  placeholder="Incendium"
+                  placeholder="e.g., Lincoln High School"
                 />
               </div>
 
-              {status && (
-                <p className="text-sm text-amber-300 mt-2">{status}</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Approximate Size
+                </label>
+                <select
+                  name="size"
+                  value={formData.size}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                >
+                  <option value="">Select size</option>
+                  <option value="1-25">1-25 members</option>
+                  <option value="26-50">26-50 members</option>
+                  <option value="51-75">51-75 members</option>
+                  <option value="76-100">76-100 members</option>
+                  <option value="100+">100+ members</option>
+                </select>
+              </div>
+
+              {error && (
+                <p className="text-sm text-yellow-300 mt-2">{error}</p>
               )}
 
               <div className="flex gap-4 pt-4">
@@ -203,22 +214,21 @@ const AddEnsemble = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 disabled:opacity-60"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2"
                 >
-                  {loading ? 'Saving…' : 'Continue'}
+                  <span>Continue</span>
+                  <CheckIcon className="w-5 h-5" />
                 </button>
               </div>
             </form>
           </div>
 
           <p className="mt-6 text-center text-sm text-gray-400">
-            You can add more ensembles later from your dashboard
+            You can add more ensembles later from your dashboard.
           </p>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default AddEnsemble;
