@@ -1,9 +1,10 @@
 // src/pages/AddEnsemble.jsx
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createEnsemble } from '../lib/opusApi';
 
-export function AddEnsemble() {
+const AddEnsemble = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -17,51 +18,43 @@ export function AddEnsemble() {
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setError('');
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const directorId = localStorage.getItem('opusDirectorId');
-
-    if (!directorId) {
-      setError('Missing director id – try signing up again.');
-      return;
-    }
-
-    if (!formData.name || !formData.type) {
-      setError('Name and ensemble type are required.');
-      return;
-    }
-
     try {
-      const payload = {
+      const directorId = localStorage.getItem('directorId');
+
+      if (!directorId) {
+        setError('You are not signed in. Please create an account first.');
+        navigate('/signup');
+        return;
+      }
+
+      await createEnsemble({
         name: formData.name,
         type: formData.type,
         organization_name: formData.school || null,
-        director_id: Number(directorId),
         level: formData.level || null,
         size: formData.size || null,
-      };
+        director_id: Number(directorId),
+      });
 
-      await createEnsemble(payload);
-
-      // If we get here, ensemble was created
       navigate('/director/today');
     } catch (err) {
-      setError(err.message || 'Failed to create ensemble.');
+      console.error('Create ensemble error:', err);
+      setError(err.message || 'Failed to create ensemble');
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
-      {/* Ambient background effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
 
@@ -70,7 +63,7 @@ export function AddEnsemble() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-              <span className="text-white text-xl">♪</span>
+              <span className="text-2xl text-white">♪</span>
             </div>
             <h1 className="text-3xl font-bold text-white drop-shadow-lg">
               Opus
@@ -85,18 +78,14 @@ export function AddEnsemble() {
               </div>
               <span className="text-sm text-gray-300">Account</span>
             </div>
-
             <div className="w-12 h-0.5 bg-white/20" />
-
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
                 2
               </div>
               <span className="text-sm text-white font-medium">Ensemble</span>
             </div>
-
             <div className="w-12 h-0.5 bg-white/20" />
-
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 text-sm font-semibold">
                 3
@@ -110,9 +99,15 @@ export function AddEnsemble() {
             <h2 className="text-2xl font-bold text-white mb-2">
               Create your ensemble
             </h2>
-            <p className="text-gray-300 mb-6">
-              Tell us about your choir, band, or orchestra
+            <p className="text-gray-300 mb-4">
+              Tell us about your choir, band, or orchestra.
             </p>
+
+            {error && (
+              <p className="mb-4 text-sm text-yellow-400 font-medium">
+                {error}
+              </p>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -203,12 +198,6 @@ export function AddEnsemble() {
                 </select>
               </div>
 
-              {error && (
-                <p className="text-sm text-amber-300 mt-2">
-                  {error}
-                </p>
-              )}
-
               <div className="flex gap-4 pt-4">
                 <button
                   type="button"
@@ -219,10 +208,9 @@ export function AddEnsemble() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105"
                 >
-                  <span>Continue</span>
-                  <span className="text-lg">✓</span>
+                  Continue
                 </button>
               </div>
             </form>
@@ -235,4 +223,6 @@ export function AddEnsemble() {
       </div>
     </div>
   );
-}
+};
+
+export default AddEnsemble;
