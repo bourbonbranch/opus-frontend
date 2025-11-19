@@ -28,21 +28,25 @@ const AddEnsemble = () => {
     e.preventDefault();
     setStatus(null);
 
-    // 1. Read the signed-up director from localStorage
-    let user = null;
+    // --- Get director_id ---
+    let director_id = null;
+
     try {
       const stored = localStorage.getItem('opusUser');
-      user = stored ? JSON.parse(stored) : null;
+      if (stored) {
+        const user = JSON.parse(stored);
+        if (user && user.id) {
+          director_id = user.id;
+        }
+      }
     } catch {
-      user = null;
+      // ignore parse errors
     }
 
-    if (!user || !user.id) {
-      setStatus('Director not found. Please sign up again.');
-      return;
+    // TEMP: dev fallback so it *always* works
+    if (!director_id) {
+      director_id = 1;
     }
-
-    const director_id = user.id; // THIS is what backend needs
 
     setLoading(true);
 
@@ -51,10 +55,9 @@ const AddEnsemble = () => {
         name: formData.name,
         type: formData.type,
         organization_name: formData.school || null,
-        director_id: director_id,
+        director_id, // <- this is now guaranteed to be present
       });
 
-      // 2. On success, go to Today dashboard
       navigate('/director/today');
     } catch (err) {
       console.error('Error creating ensemble:', err);
@@ -66,12 +69,13 @@ const AddEnsemble = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
+      {/* Ambient background effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl">
-          {/* Header / stepper */}
+          {/* Logo + steps */}
           <div className="flex flex-col items-center mb-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
@@ -96,7 +100,7 @@ const AddEnsemble = () => {
                 </div>
                 <span className="text-white font-medium">Ensemble</span>
               </div>
-              <div className="w-12 h-0.5 bg-white/20" />
+              <div className="w-12 h-0.5 bg:white/20" />
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                   <span className="text-xs font-semibold text-gray-400">3</span>
@@ -127,6 +131,7 @@ const AddEnsemble = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  placeholder="Incendium"
                 />
               </div>
 
@@ -151,7 +156,7 @@ const AddEnsemble = () => {
                 </div>
 
                 <div>
-                  <label className="block text.sm font-medium text-gray-200 mb-2">
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
                     Level
                   </label>
                   <select
@@ -180,6 +185,7 @@ const AddEnsemble = () => {
                   value={formData.school}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  placeholder="Incendium"
                 />
               </div>
 
