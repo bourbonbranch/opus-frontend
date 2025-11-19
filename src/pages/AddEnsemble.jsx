@@ -3,12 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { createEnsemble } from '../lib/opusApi.js';
 
 const AddEnsemble = () => {
-  const [name, setName] = useState('');
-  const [type, setType] = useState('choir'); // DEFAULT TYPE
-  const [description, setDescription] = useState('');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    type: 'choir',
+    school: '',
+    level: 'high-school',
+    size: '',
+  });
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +27,15 @@ const AddEnsemble = () => {
     setLoading(true);
 
     try {
-      await createEnsemble({ name, type, description });
+      // Send what the backend cares about (name + type) plus extras
+      await createEnsemble({
+        name: formData.name,
+        type: formData.type,
+        school: formData.school,
+        level: formData.level,
+        size: formData.size,
+      });
+
       setStatus('Ensemble created ✅');
       navigate('/director/today');
     } catch (err) {
@@ -27,122 +46,178 @@ const AddEnsemble = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '400px',
-          backgroundColor: 'rgba(15,23,42,0.95)',
-          borderRadius: '0.75rem',
-          padding: '1.5rem',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
-        }}
-      >
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-          Add Ensemble
-        </h1>
-        <p style={{ fontSize: '0.9rem', opacity: 0.85, marginBottom: '1rem' }}>
-          Create a new ensemble for your program.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
+      {/* Ambient background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem' }}>
-          {/* NAME */}
-          <div>
-            <label style={{ fontSize: '0.85rem', marginBottom: '0.25rem', display: 'block' }}>
-              Ensemble Name
-            </label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '0.4rem',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: 'white'
-              }}
-            />
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-2xl">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
+              {/* simple text instead of icon for now */}
+              <span className="text-xl font-bold text-white">♪</span>
+            </div>
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+              Opus
+            </h1>
           </div>
 
-          {/* TYPE FIELD */}
-          <div>
-            <label style={{ fontSize: '0.85rem', marginBottom: '0.25rem', display: 'block' }}>
-              Ensemble Type
-            </label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '0.4rem',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: 'white'
-              }}
-            >
-              <option value="choir">Choir</option>
-              <option value="band">Band</option>
-              <option value="orchestra">Orchestra</option>
-              <option value="ensemble">Ensemble</option>
-            </select>
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                <span className="text-sm font-semibold text-white">✓</span>
+              </div>
+              <span className="text-sm text-gray-300">Account</span>
+            </div>
+            <div className="w-12 h-0.5 bg-white/20" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                <span className="text-sm font-semibold text-white">2</span>
+              </div>
+              <span className="text-sm text-white font-medium">Ensemble</span>
+            </div>
+            <div className="w-12 h-0.5 bg-white/20" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                <span className="text-sm font-semibold text-gray-400">3</span>
+              </div>
+              <span className="text-sm text-gray-400">Dashboard</span>
+            </div>
           </div>
 
-          {/* DESCRIPTION */}
-          <div>
-            <label style={{ fontSize: '0.85rem', marginBottom: '0.25rem', display: 'block' }}>
-              Description (optional)
-            </label>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '0.4rem',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: 'white',
-                resize: 'vertical'
-              }}
-            />
+          {/* Add Ensemble Card */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Create your ensemble
+            </h2>
+            <p className="text-gray-300 mb-6">
+              Tell us about your choir, band, or orchestra
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Ensemble Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  placeholder="e.g., Varsity Choir, Concert Band"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Ensemble Type
+                  </label>
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  >
+                    <option value="choir">Choir</option>
+                    <option value="band">Band</option>
+                    <option value="orchestra">Orchestra</option>
+                    <option value="jazz-band">Jazz Band</option>
+                    <option value="marching-band">Marching Band</option>
+                    <option value="chamber">Chamber Ensemble</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Level
+                  </label>
+                  <select
+                    name="level"
+                    value={formData.level}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  >
+                    <option value="elementary">Elementary</option>
+                    <option value="middle-school">Middle School</option>
+                    <option value="high-school">High School</option>
+                    <option value="college">College</option>
+                    <option value="community">Community</option>
+                    <option value="professional">Professional</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  School or Organization
+                </label>
+                <input
+                  type="text"
+                  name="school"
+                  value={formData.school}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  placeholder="e.g., Lincoln High School"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Approximate Size
+                </label>
+                <select
+                  name="size"
+                  value={formData.size}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                >
+                  <option value="">Select size</option>
+                  <option value="1-25">1-25 members</option>
+                  <option value="26-50">26-50 members</option>
+                  <option value="51-75">51-75 members</option>
+                  <option value="76-100">76-100 members</option>
+                  <option value="100+">100+ members</option>
+                </select>
+              </div>
+
+              {status && (
+                <p className="text-sm text-amber-300">{status}</p>
+              )}
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate('/signup')}
+                  className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  <span>{loading ? 'Saving…' : 'Continue'}</span>
+                </button>
+              </div>
+            </form>
           </div>
 
-          {status && (
-            <p style={{ fontSize: '0.85rem', color: '#fbbf24' }}>{status}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: '0.5rem',
-              width: '100%',
-              padding: '0.6rem 1rem',
-              borderRadius: '0.5rem',
-              border: 'none',
-              backgroundColor: loading ? '#1d4ed8aa' : '#2563eb',
-              color: 'white',
-              fontWeight: 600
-            }}
-          >
-            {loading ? 'Saving…' : 'Save Ensemble'}
-          </button>
-        </form>
+          <p className="mt-6 text-center text-sm text-gray-400">
+            You can add more ensembles later from your dashboard
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
 export default AddEnsemble;
+
