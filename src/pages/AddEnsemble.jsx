@@ -1,7 +1,6 @@
 // src/pages/AddEnsemble.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MusicIcon, CheckIcon } from 'lucide-react';
 import { createEnsemble } from '../lib/opusApi';
 
 export function AddEnsemble() {
@@ -66,22 +65,21 @@ export function AddEnsemble() {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl">
-          {/* Logo */}
+          {/* Logo + Stepper */}
           <div className="flex flex-col items-center gap-3 mb-10">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-                <MusicIcon className="w-6 h-6 text-white" />
+                <span className="text-white text-xl">♪</span>
               </div>
               <h1 className="text-3xl font-bold text-white drop-shadow-lg">
                 Opus
               </h1>
             </div>
 
-            {/* Stepper */}
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <CheckIcon className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm">
+                  ✓
                 </div>
                 <span className="text-sm text-gray-300">Account</span>
               </div>
@@ -208,7 +206,7 @@ export function AddEnsemble() {
                 <button
                   type="button"
                   onClick={() => navigate('/signup')}
-                  className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-all"
+                  className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg:white/10 transition-all"
                 >
                   Back
                 </button>
@@ -217,7 +215,7 @@ export function AddEnsemble() {
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2"
                 >
                   <span>Continue</span>
-                  <CheckIcon className="w-5 h-5" />
+                  <span className="text-lg">→</span>
                 </button>
               </div>
             </form>
@@ -231,4 +229,3 @@ export function AddEnsemble() {
     </div>
   );
 }
-
