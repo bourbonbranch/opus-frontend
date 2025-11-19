@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signupDirector } from '../lib/opusApi.js';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ const SignUp = () => {
     confirmPassword: '',
     role: 'director',
   });
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -20,10 +23,36 @@ const SignUp = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // real auth goes here later
-    navigate('/ensembles/new');
+    setStatus(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setStatus('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signupDirector({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      });
+
+      console.log('Signup success:', result);
+
+      // later: store user info/token
+      navigate('/ensembles/new');
+    } catch (err) {
+      console.error('Signup error:', err);
+      setStatus(err.message || 'Sign up failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -287,9 +316,23 @@ const SignUp = () => {
               />
             </div>
 
+            {/* STATUS MESSAGE */}
+            {status && (
+              <p
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#fbbf24',
+                  marginTop: '0.25rem',
+                }}
+              >
+                {status}
+              </p>
+            )}
+
             {/* SUBMIT */}
             <button
               type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '0.8rem 1rem',
@@ -299,12 +342,13 @@ const SignUp = () => {
                 border: 'none',
                 color: 'white',
                 fontWeight: 600,
-                cursor: 'pointer',
+                cursor: loading ? 'default' : 'pointer',
                 fontSize: '1rem',
                 boxShadow: '0 20px 40px rgba(59,130,246,0.4)',
+                opacity: loading ? 0.7 : 1,
               }}
             >
-              Create Account
+              {loading ? 'Creating account…' : 'Create Account'}
             </button>
           </form>
 
