@@ -35,7 +35,7 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      const result = await signupDirector({
+      const user = await signupDirector({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -43,9 +43,16 @@ const SignUp = () => {
         role: formData.role,
       });
 
-      console.log('Signup success:', result);
+      console.log('Signup success:', user);
 
-      // later: store user info/token
+      // 🔹 Save the director in localStorage for later use
+      try {
+        localStorage.setItem('opusUser', JSON.stringify(user));
+      } catch (storageErr) {
+        console.warn('Could not save user to localStorage:', storageErr);
+      }
+
+      // Go to ensemble creation
       navigate('/ensembles/new');
     } catch (err) {
       console.error('Signup error:', err);
@@ -381,3 +388,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
