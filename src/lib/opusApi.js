@@ -1,47 +1,93 @@
 // src/lib/opusApi.js
 
-const API_BASE =
+const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   'https://opus-backend-production.up.railway.app';
 
-// Small helper to handle errors consistently
-async function handleJsonResponse(res, defaultMessage) {
+// Shared helper to handle responses
+async function handleResponse(res) {
+  const text = await res.text();
+  let data = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    // ignore JSON parse errors, treat as plain text
+  }
+
   if (!res.ok) {
-    let message = defaultMessage;
-    try {
-      const data = await res.json();
-      if (data && data.error) message = data.error;
-    } catch {
-      // ignore JSON parse error, use defaultMessage
-    }
+    const message =
+      (data && (data.error || data.message)) ||
+      text ||
+      `Request failed with status ${res.status}`;
     throw new Error(message);
   }
-  return res.json();
+
+  return data;
 }
 
-// ---- DIRECTOR SIGNUP ----
-export async function signupDirector(payload) {
-  const res = await fetch(`${API_BASE}/signup`, {
+/**
+ * Sign up a new director.
+ * Expects backend POST /signup to return at least { id, ... }.
+ */
+export async function signupDirector({
+  firstName,
+  lastName,
+  email,
+  password,
+  role = 'director',
+}) {
+  const res = await fetch(`${API_BASE_URL}/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      password,
+      role,
+    }),
   });
 
-  return handleJsonResponse(res, 'Signup failed');
+  return handleResponse(res);
 }
 
-// ---- ENSEMBLES ----
-export async function createEnsemble(payload) {
-  const res = await fetch(`${API_BASE}/ensembles`, {
+/**
+ * Create a new ensemble.
+ * Expects backend POST /ensembles to return the created ensemble row.
+ */
+export async function createEnsemble({
+  name,
+  type,
+  organization_name,
+  level,
+  size,
+  director_id,
+}) {
+  const res = await fetch(`${API_BASE_URL}/ensembles`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      name,
+      type,
+      organization_name,
+      level,
+      size,
+      director_id,
+    }),
   });
 
-  return handleJsonResponse(res, 'Failed to create ensemble');
+  return handleResponse(res);
 }
 
-export async function fetchEnsembles() {
-  const res = await fetch(`${API_BASE}/ensembles`);
-  return handleJsonResponse(res, 'Failed to load ensembles');
+/**
+ * Fetch all ensembles (optionally for a specific director later).
+ * Right now your backend GET /ensembles just returns all of them.
+ */
+export async function getEnsembles() {
+  const res = await fetch(`${API_BASE_URL}/ensembles`, {
+    method: 'GET',
+  });
+
+  return handleResponse(res);
 }
