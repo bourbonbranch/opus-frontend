@@ -2,8 +2,9 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-// CREATE ENSEMBLE
+// CREATE ENSEMBLE -----------------------------------
 export async function createEnsemble(data) {
+  // data should include: name, type, organization_name, director_id
   const res = await fetch(`${API_BASE_URL}/ensembles`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -18,10 +19,12 @@ export async function createEnsemble(data) {
   return res.json();
 }
 
-// GET ENSEMBLES (optionally by directorId)
+// GET ENSEMBLES (optionally filtered by director) ---
 export async function getEnsembles(directorId) {
   const url = directorId
-    ? `${API_BASE_URL}/ensembles?directorId=${encodeURIComponent(directorId)}`
+    ? `${API_BASE_URL}/ensembles?directorId=${encodeURIComponent(
+        directorId
+      )}`
     : `${API_BASE_URL}/ensembles`;
 
   const res = await fetch(url);
@@ -33,7 +36,7 @@ export async function getEnsembles(directorId) {
   return res.json();
 }
 
-// SIGN UP DIRECTOR
+// SIGN UP DIRECTOR ----------------------------------
 export async function signupDirector(data) {
   const res = await fetch(`${API_BASE_URL}/auth/signup-director`, {
     method: 'POST',
@@ -46,5 +49,6 @@ export async function signupDirector(data) {
     throw new Error(err.error || 'Failed to sign up');
   }
 
+  // backend returns: { id, firstName, lastName, email, role, createdAt }
   return res.json();
 }
