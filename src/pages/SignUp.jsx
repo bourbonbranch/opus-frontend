@@ -1,9 +1,10 @@
 // src/pages/SignUp.jsx
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signupDirector } from '../lib/opusApi';
 
-export function SignUp() {
+const SignUp = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -18,11 +19,10 @@ export function SignUp() {
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setError('');
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -35,23 +35,22 @@ export function SignUp() {
     }
 
     try {
-      const payload = {
+      const result = await signupDirector({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
         role: formData.role,
-      };
+      });
 
-      const result = await signupDirector(payload);
-
-      // store director id for creating ensembles
+      // assuming backend returns { id, ... }
       if (result && result.id) {
-        localStorage.setItem('opusDirectorId', String(result.id));
+        localStorage.setItem('directorId', String(result.id));
       }
 
       navigate('/add-ensemble');
     } catch (err) {
+      console.error('Signup error:', err);
       setError(err.message || 'Internal server error');
     }
   };
@@ -64,9 +63,8 @@ export function SignUp() {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          {/* Back button */}
+          {/* Back Button */}
           <button
-            type="button"
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-gray-300 hover:text-white mb-8 transition-colors"
           >
@@ -77,14 +75,14 @@ export function SignUp() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-              <span className="text-white text-xl">♪</span>
+              <span className="text-2xl text-white">♪</span>
             </div>
             <h1 className="text-3xl font-bold text-white drop-shadow-lg">
               Opus
             </h1>
           </div>
 
-          {/* Card */}
+          {/* Sign Up Card */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2">
               Create your account
@@ -92,6 +90,10 @@ export function SignUp() {
             <p className="text-gray-300 mb-6">
               Start managing your ensemble today
             </p>
+
+            {error && (
+              <p className="mb-4 text-sm text-red-400 font-medium">{error}</p>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -109,7 +111,6 @@ export function SignUp() {
                     placeholder="Jane"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-200 mb-2">
                     Last Name
@@ -187,18 +188,11 @@ export function SignUp() {
                 />
               </div>
 
-              {error && (
-                <p className="text-sm text-amber-300">
-                  {error}
-                </p>
-              )}
-
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105"
               >
-                <span>Create Account</span>
-                <span className="text-lg">✓</span>
+                Create Account
               </button>
             </form>
 
@@ -217,4 +211,6 @@ export function SignUp() {
       </div>
     </div>
   );
-}
+};
+
+export default SignUp;
