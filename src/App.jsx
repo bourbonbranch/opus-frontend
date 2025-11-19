@@ -1,30 +1,29 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import TodayDashboard from './pages/TodayDashboard.jsx';
-import AddEnsemble from './pages/AddEnsemble.jsx';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-const App = () => {
+import Home from './pages/Home';
+import SignUp from './pages/SignUp';
+import AddEnsemble from './pages/AddEnsemble';
+import Today from './pages/Today';
+
+function App() {
   return (
-    <div className="min-h-screen w-full" style={{
-      background: 'linear-gradient(to bottom right, #111827, #4c1d95, #1d4ed8)',
-      color: 'white'
-    }}>
+    <Router>
       <Routes>
-        {/* default redirect */}
-        <Route path="/" element={<Navigate to="/director/today" replace />} />
+        <Route path="/" element={<Home />} />
 
-        {/* Today dashboard */}
-        <Route path="/director/today" element={<TodayDashboard />} />
+        {/* SIGNUP PAGE */}
+        <Route path="/signup" element={<SignUp />} />
 
-        {/* Add Ensemble */}
+        {/* ADD ENSEMBLE PAGE */}
         <Route path="/ensembles/new" element={<AddEnsemble />} />
 
-        {/* catch-all */}
-        <Route path="*" element={<Navigate to="/director/today" replace />} />
+        {/* DIRECTOR DASHBOARD */}
+        <Route path="/director/today" element={<Today />} />
       </Routes>
-    </div>
+    </Router>
   );
-};
+}
 
 export default App;
+
 
