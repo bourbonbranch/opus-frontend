@@ -1,36 +1,53 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+// src/lib/opusApi.js
 
-export async function createEnsemble(payload) {
-  const response = await fetch(`${API_BASE_URL}/ensembles`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
+// Base URL for your backend (Railway)
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// ----------------------------------------------------------------------
+// CREATE ENSEMBLE
+// ----------------------------------------------------------------------
+export async function createEnsemble(data) {
+  const res = await fetch(`${API_BASE_URL}/ensembles`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || 'Failed to create ensemble');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to create ensemble");
   }
 
-  return response.json();
+  return res.json();
 }
 
-// ✅ NEW: fetch all ensembles
+// ----------------------------------------------------------------------
+// GET ENSEMBLES
+// ----------------------------------------------------------------------
 export async function getEnsembles() {
-  const response = await fetch(`${API_BASE_URL}/ensembles`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+  const res = await fetch(`${API_BASE_URL}/ensembles`);
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || 'Failed to fetch ensembles');
+  if (!res.ok) {
+    throw new Error("Failed to fetch ensembles");
   }
 
-  return response.json();
+  return res.json();
+}
+
+// ----------------------------------------------------------------------
+// SIGN UP DIRECTOR (NEW FUNCTION YOU NEEDED)
+// ----------------------------------------------------------------------
+export async function signupDirector(data) {
+  const res = await fetch(`${API_BASE_URL}/auth/signup-director`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to sign up");
+  }
+
+  return res.json();
 }
