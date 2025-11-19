@@ -4,6 +4,7 @@ import { createEnsemble } from '../lib/opusApi.js';
 
 const AddEnsemble = () => {
   const [name, setName] = useState('');
+  const [type, setType] = useState('choir'); // DEFAULT TYPE
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ const AddEnsemble = () => {
     setLoading(true);
 
     try {
-      await createEnsemble({ name, description });
+      await createEnsemble({ name, type, description });
       setStatus('Ensemble created ✅');
       navigate('/director/today');
     } catch (err) {
@@ -53,6 +54,7 @@ const AddEnsemble = () => {
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem' }}>
+          {/* NAME */}
           <div>
             <label style={{ fontSize: '0.85rem', marginBottom: '0.25rem', display: 'block' }}>
               Ensemble Name
@@ -67,12 +69,36 @@ const AddEnsemble = () => {
                 borderRadius: '0.4rem',
                 border: '1px solid #475569',
                 backgroundColor: '#0f172a',
-                color: 'white',
-                outline: 'none'
+                color: 'white'
               }}
             />
           </div>
 
+          {/* TYPE FIELD */}
+          <div>
+            <label style={{ fontSize: '0.85rem', marginBottom: '0.25rem', display: 'block' }}>
+              Ensemble Type
+            </label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '0.4rem',
+                border: '1px solid #475569',
+                backgroundColor: '#0f172a',
+                color: 'white'
+              }}
+            >
+              <option value="choir">Choir</option>
+              <option value="band">Band</option>
+              <option value="orchestra">Orchestra</option>
+              <option value="ensemble">Ensemble</option>
+            </select>
+          </div>
+
+          {/* DESCRIPTION */}
           <div>
             <label style={{ fontSize: '0.85rem', marginBottom: '0.25rem', display: 'block' }}>
               Description (optional)
@@ -88,7 +114,6 @@ const AddEnsemble = () => {
                 border: '1px solid #475569',
                 backgroundColor: '#0f172a',
                 color: 'white',
-                outline: 'none',
                 resize: 'vertical'
               }}
             />
@@ -109,8 +134,7 @@ const AddEnsemble = () => {
               border: 'none',
               backgroundColor: loading ? '#1d4ed8aa' : '#2563eb',
               color: 'white',
-              fontWeight: 600,
-              cursor: loading ? 'default' : 'pointer'
+              fontWeight: 600
             }}
           >
             {loading ? 'Saving…' : 'Save Ensemble'}
@@ -122,4 +146,3 @@ const AddEnsemble = () => {
 };
 
 export default AddEnsemble;
-
