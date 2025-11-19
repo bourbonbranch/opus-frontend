@@ -1,12 +1,11 @@
 // src/pages/AddEnsemble.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createEnsemble } from '../lib/opusApi';
 
 export function AddEnsemble() {
   const navigate = useNavigate();
-  const [directorId, setDirectorId] = useState(null);
-  const [error, setError] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     type: 'choir',
@@ -15,15 +14,7 @@ export function AddEnsemble() {
     size: '',
   });
 
-  useEffect(() => {
-    const stored = localStorage.getItem('opusDirectorId');
-    if (!stored) {
-      setError('No director session found. Please sign up again.');
-      navigate('/signup');
-      return;
-    }
-    setDirectorId(parseInt(stored, 10));
-  }, [navigate]);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setError('');
@@ -35,25 +26,36 @@ export function AddEnsemble() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    const directorId = localStorage.getItem('opusDirectorId');
 
     if (!directorId) {
-      setError('No director id found. Please sign up again.');
+      setError('Missing director id – try signing up again.');
+      return;
+    }
+
+    if (!formData.name || !formData.type) {
+      setError('Name and ensemble type are required.');
       return;
     }
 
     try {
-      setError('');
-
-      await createEnsemble({
+      const payload = {
         name: formData.name,
         type: formData.type,
         organization_name: formData.school || null,
-        director_id: directorId,
-      });
+        director_id: Number(directorId),
+        level: formData.level || null,
+        size: formData.size || null,
+      };
 
+      await createEnsemble(payload);
+
+      // If we get here, ensemble was created
       navigate('/director/today');
     } catch (err) {
-      setError(err.message || 'Failed to create ensemble');
+      setError(err.message || 'Failed to create ensemble.');
     }
   };
 
@@ -64,49 +66,52 @@ export function AddEnsemble() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-3xl">
-          {/* Logo + Stepper */}
-          <div className="flex flex-col items-center gap-3 mb-10">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-                <span className="text-white text-xl">♪</span>
+        <div className="w-full max-w-2xl">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
+              <span className="text-white text-xl">♪</span>
+            </div>
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+              Opus
+            </h1>
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
+                ✓
               </div>
-              <h1 className="text-3xl font-bold text-white drop-shadow-lg">
-                Opus
-              </h1>
+              <span className="text-sm text-gray-300">Account</span>
             </div>
 
-            <div className="flex items-center gap-4 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm">
-                  ✓
-                </div>
-                <span className="text-sm text-gray-300">Account</span>
+            <div className="w-12 h-0.5 bg-white/20" />
+
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
+                2
               </div>
-              <div className="w-10 h-0.5 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-white">2</span>
-                </div>
-                <span className="text-sm text-white font-medium">Ensemble</span>
+              <span className="text-sm text-white font-medium">Ensemble</span>
+            </div>
+
+            <div className="w-12 h-0.5 bg-white/20" />
+
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 text-sm font-semibold">
+                3
               </div>
-              <div className="w-10 h-0.5 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-gray-400">3</span>
-                </div>
-                <span className="text-sm text-gray-400">Dashboard</span>
-              </div>
+              <span className="text-sm text-gray-400">Dashboard</span>
             </div>
           </div>
 
-          {/* Card */}
+          {/* Add Ensemble Card */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2">
               Create your ensemble
             </h2>
             <p className="text-gray-300 mb-6">
-              Tell us about your choir, band, or orchestra.
+              Tell us about your choir, band, or orchestra
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -190,23 +195,25 @@ export function AddEnsemble() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                 >
                   <option value="">Select size</option>
-                  <option value="1-25">1-25 members</option>
-                  <option value="26-50">26-50 members</option>
-                  <option value="51-75">51-75 members</option>
-                  <option value="76-100">76-100 members</option>
+                  <option value="1-25">1–25 members</option>
+                  <option value="26-50">26–50 members</option>
+                  <option value="51-75">51–75 members</option>
+                  <option value="76-100">76–100 members</option>
                   <option value="100+">100+ members</option>
                 </select>
               </div>
 
               {error && (
-                <p className="text-sm text-yellow-300 mt-2">{error}</p>
+                <p className="text-sm text-amber-300 mt-2">
+                  {error}
+                </p>
               )}
 
               <div className="flex gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => navigate('/signup')}
-                  className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg:white/10 transition-all"
+                  className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-all"
                 >
                   Back
                 </button>
@@ -215,14 +222,14 @@ export function AddEnsemble() {
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center justify-center gap-2"
                 >
                   <span>Continue</span>
-                  <span className="text-lg">→</span>
+                  <span className="text-lg">✓</span>
                 </button>
               </div>
             </form>
           </div>
 
           <p className="mt-6 text-center text-sm text-gray-400">
-            You can add more ensembles later from your dashboard.
+            You can add more ensembles later from your dashboard
           </p>
         </div>
       </div>
