@@ -1,247 +1,114 @@
+// src/pages/TodayDashboard.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getEnsembles } from '../lib/opusApi.js';
+import { getEnsembles } from '../lib/opusApi';
 
 const TodayDashboard = () => {
   const [ensembles, setEnsembles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
+
     const load = async () => {
+      setLoading(true);
+      setError('');
+
       try {
-        setError(null);
-        setLoading(true);
         const data = await getEnsembles();
-        // if your API returns { ensembles: [...] } instead of [...], adjust here
-        setEnsembles(Array.isArray(data) ? data : data.ensembles || []);
+        if (isMounted) {
+          setEnsembles(Array.isArray(data) ? data : []);
+        }
       } catch (err) {
-        setError(err.message || 'Failed to load ensembles');
+        console.error('Error loading ensembles:', err);
+        if (isMounted) {
+          setError(err.message || 'Failed to load ensembles');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     load();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background:
-          'linear-gradient(to bottom right, #111827, #4c1d95, #1d4ed8)',
-        padding: '2.5rem 1rem',
-        color: 'white'
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1100,
-          margin: '0 auto'
-        }}
-      >
-        {/* Top bar / "Opus" logo */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            marginBottom: '2rem'
-          }}
-        >
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 14,
-              background:
-                'linear-gradient(to bottom right, #a855f7, #3b82f6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 20,
-              fontWeight: 700,
-              boxShadow: '0 10px 25px rgba(0,0,0,0.55)'
-            }}
-          >
-            ♪
-          </div>
-          <h1
-            style={{
-              fontSize: '1.6rem',
-              fontWeight: 700
-            }}
-          >
-            Opus Director
-          </h1>
-        </div>
-
-        {/* Header row */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '1rem',
-            marginBottom: '1.5rem'
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                fontSize: '1.8rem',
-                fontWeight: 700,
-                marginBottom: 4
-              }}
-            >
-              Today
-            </h2>
-            <p
-              style={{
-                fontSize: '0.95rem',
-                opacity: 0.9
-              }}
-            >
-              Overview of your ensembles and activity.
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 text-white">
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
+              <span className="text-xl text-white">♪</span>
+            </div>
+            <h1 className="text-2xl font-bold">Opus</h1>
           </div>
 
           <Link
-            to="/ensembles/new"
-            style={{
-              textDecoration: 'none',
-              borderRadius: 999,
-              padding: '0.6rem 1.3rem',
-              background:
-                'linear-gradient(to right, #a855f7, #3b82f6)',
-              color: 'white',
-              fontWeight: 600,
-              boxShadow: '0 12px 30px rgba(37, 99, 235, 0.55)'
-            }}
+            to="/add-ensemble"
+            className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 transition"
           >
-            + New Ensemble
+            + Add Ensemble
           </Link>
-        </div>
+        </header>
 
         {/* Main card */}
-        <div
-          style={{
-            backgroundColor: 'rgba(15,23,42,0.95)',
-            borderRadius: 18,
-            padding: '1.75rem',
-            border: '1px solid rgba(148,163,184,0.4)',
-            boxShadow: '0 24px 60px rgba(15,23,42,0.9)'
-          }}
-        >
-          <h3
-            style={{
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              marginBottom: 12
-            }}
-          >
-            Ensembles
-          </h3>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+          <h2 className="text-xl font-semibold mb-4">Today&apos;s Overview</h2>
 
-          {loading && (
-            <p style={{ fontSize: '0.9rem', opacity: 0.9 }}>Loading ensembles…</p>
-          )}
+          {loading && <p className="text-gray-300">Loading ensembles…</p>}
 
-          {error && !loading && (
-            <p style={{ fontSize: '0.9rem', color: '#fbbf24' }}>
+          {error && (
+            <p className="text-red-400 font-medium mb-4">
               {error}
             </p>
           )}
 
           {!loading && !error && ensembles.length === 0 && (
-            <p style={{ fontSize: '0.9rem', opacity: 0.9 }}>
-              You don't have any ensembles yet.{' '}
+            <p className="text-gray-300">
+              You don&apos;t have any ensembles yet. Start by{' '}
               <Link
-                to="/ensembles/new"
-                style={{ color: '#93c5fd', textDecoration: 'underline' }}
+                to="/add-ensemble"
+                className="text-purple-300 underline hover:text-purple-200"
               >
-                Create your first ensemble.
+                creating your first ensemble
               </Link>
+              .
             </p>
           )}
 
           {!loading && !error && ensembles.length > 0 && (
-            <div
-              style={{
-                marginTop: '0.5rem',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '0.85rem'
-              }}
-            >
-              {ensembles.map((ens) => (
-                <div
-                  key={ens.id || ens._id || ens.name}
-                  style={{
-                    padding: '0.9rem 1rem',
-                    borderRadius: 12,
-                    backgroundColor: '#020617',
-                    border: '1px solid rgba(30,64,175,0.6)'
-                  }}
+            <ul className="space-y-3">
+              {ensembles.map((ensemble) => (
+                <li
+                  key={ensemble.id}
+                  className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 border border-white/10"
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 600,
-                        fontSize: '0.98rem'
-                      }}
-                    >
-                      {ens.name}
-                    </div>
-                    {ens.type && (
-                      <span
-                        style={{
-                          fontSize: '0.7rem',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: 999,
-                          backgroundColor: '#1d4ed8',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em'
-                        }}
-                      >
-                        {ens.type}
+                  <div>
+                    <p className="font-medium">
+                      {ensemble.name}{' '}
+                      <span className="text-sm text-gray-300">
+                        ({ensemble.type})
                       </span>
+                    </p>
+                    {ensemble.organization_name && (
+                      <p className="text-sm text-gray-300">
+                        {ensemble.organization_name}
+                      </p>
                     )}
                   </div>
-
-                  {ens.school && (
-                    <div
-                      style={{
-                        fontSize: '0.85rem',
-                        opacity: 0.9,
-                        marginBottom: 2
-                      }}
-                    >
-                      {ens.school}
-                    </div>
-                  )}
-
-                  {ens.level && (
-                    <div
-                      style={{
-                        fontSize: '0.8rem',
-                        opacity: 0.75
-                      }}
-                    >
-                      Level: {ens.level}
-                    </div>
-                  )}
-                </div>
+                  <span className="text-xs uppercase tracking-wide text-gray-400">
+                    Created {new Date(ensemble.created_at).toLocaleDateString()}
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       </div>
@@ -250,3 +117,4 @@ const TodayDashboard = () => {
 };
 
 export default TodayDashboard;
+
