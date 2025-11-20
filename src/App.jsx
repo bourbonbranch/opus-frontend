@@ -11,6 +11,7 @@ import { CalendarView } from './pages/CalendarView';
 import Roster from './pages/Roster';
 import StudentCheckIn from './pages/StudentCheckIn';
 import LiveAttendance from './pages/LiveAttendance';
+import Messages from './pages/Messages';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -62,6 +63,7 @@ const App = () => {
             <Route path="roster" element={<Roster />} />
             <Route path="events" element={<Events />} />
             <Route path="calendar" element={<CalendarView />} />
+            <Route path="messages" element={<Messages />} />
             <Route path="ensembles/:ensembleId/roster" element={<Roster />} />
           </Route>
 
