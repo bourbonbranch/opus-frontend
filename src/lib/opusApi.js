@@ -124,6 +124,17 @@ export async function createRoom(payload) {
   return handleResponse(res);
 }
 
+export async function updateRoom(id, payload) {
+  const res = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
 export async function logAttendance(payload) {
   // expects: { roster_id, room_id, status? }
   const res = await fetch(`${API_BASE_URL}/attendance`, {

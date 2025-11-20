@@ -9,6 +9,7 @@ import { RoomSetup } from './pages/RoomSetup';
 import { Events } from './pages/Events';
 import { CalendarView } from './pages/CalendarView';
 import Roster from './pages/Roster';
+import StudentCheckIn from './pages/StudentCheckIn';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/checkin/:roomId" element={<StudentCheckIn />} />
           <Route path="/add-ensemble" element={<AddEnsemble />} />
           <Route path="/ensembles/new" element={<AddEnsemble />} />
 

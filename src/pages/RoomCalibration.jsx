@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { QRCodeSVG } from 'qrcode.react'; // We need to install this package
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
+import { updateRoom } from '../lib/opusApi';
+import { ArrowLeftIcon, BluetoothIcon, CheckCircleIcon, SaveIcon } from 'lucide-react';
 
 const RoomCalibration = () => {
     const { roomId } = useParams();
+    const navigate = useNavigate();
     const [scanning, setScanning] = useState(false);
     const [beaconFound, setBeaconFound] = useState(null);
+    const [saving, setSaving] = useState(false);
 
-    // URL for this page to be opened on mobile
-    const mobileUrl = window.location.href;
+    // URL for student check-in (this would be the student-facing page)
+    // For now, we'll point to a generic check-in page with the room ID
+    const checkInUrl = `${window.location.origin}/checkin/${roomId}`;
 
     const startScan = async () => {
         setScanning(true);
@@ -21,7 +26,13 @@ const RoomCalibration = () => {
                     acceptAllDevices: true,
                     optionalServices: ['battery_service'] // Example service
                 });
-                setBeaconFound({ name: device.name || 'Unknown Device', id: device.id });
+                setBeaconFound({
+                    name: device.name || 'Unknown Device',
+                    id: device.id,
+                    uuid: device.id, // Using ID as UUID for now
+                    major: 1,
+                    minor: 1
+                });
             } catch (error) {
                 console.error(error);
                 alert('Bluetooth scan failed or cancelled: ' + error.message);
@@ -31,53 +42,113 @@ const RoomCalibration = () => {
         } else {
             // Simulation for non-supported browsers
             setTimeout(() => {
-                setBeaconFound({ name: 'Simulated Beacon', id: '00:11:22:33:44:55' });
+                setBeaconFound({
+                    name: 'Simulated Beacon',
+                    id: '00:11:22:33:44:55',
+                    uuid: '00:11:22:33:44:55',
+                    major: 1,
+                    minor: 1
+                });
                 setScanning(false);
             }, 2000);
         }
     };
 
+    const handleSave = async () => {
+        if (!beaconFound) return;
+        setSaving(true);
+        try {
+            await updateRoom(roomId, {
+                beacon_uuid: beaconFound.uuid,
+                beacon_major: beaconFound.major,
+                beacon_minor: beaconFound.minor
+            });
+            alert('Room calibrated successfully!');
+            navigate('/director/rooms');
+        } catch (err) {
+            alert('Failed to save calibration: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
-        <div style={{ minHeight: '100vh', background: '#111827', color: 'white', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ maxWidth: '500px', width: '100%', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>Room Calibration</h1>
-                <p style={{ color: '#9ca3af', marginBottom: '30px' }}>Room ID: {roomId}</p>
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-8 flex flex-col items-center justify-center text-white">
+            <div className="max-w-md w-full text-center space-y-8">
+                <div>
+                    <h1 className="text-3xl font-bold mb-2">Room Calibration</h1>
+                    <p className="text-gray-300">Room ID: {roomId}</p>
+                </div>
 
                 {/* QR Code Section */}
-                <div style={{ background: 'white', padding: '20px', borderRadius: '10px', display: 'inline-block', marginBottom: '30px' }}>
-                    <QRCodeSVG value={mobileUrl} size={200} />
-                    <p style={{ color: '#333', marginTop: '10px', fontSize: '14px', fontWeight: '600' }}>Scan with phone to calibrate</p>
+                <div className="bg-white p-6 rounded-2xl shadow-2xl inline-block">
+                    <QRCodeSVG value={checkInUrl} size={200} />
+                    <p className="text-gray-900 mt-4 font-semibold text-sm">Scan to Check In</p>
                 </div>
 
-                <div style={{ marginBottom: '30px' }}>
-                    <p style={{ marginBottom: '10px' }}>Or calibrate from this device:</p>
+                <div className="space-y-4">
+                    <p className="text-gray-300">Or calibrate beacon for this room:</p>
+
                     <button
                         onClick={startScan}
-                        disabled={scanning}
-                        style={{
-                            padding: '15px 30px',
-                            background: scanning ? '#4b5563' : '#3b82f6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '50px',
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            cursor: scanning ? 'wait' : 'pointer',
-                            width: '100%'
-                        }}
+                        disabled={scanning || beaconFound}
+                        className={`w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${scanning
+                                ? 'bg-gray-700 cursor-wait'
+                                : beaconFound
+                                    ? 'bg-green-600/20 text-green-400 border border-green-500/50'
+                                    : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30'
+                            }`}
                     >
-                        {scanning ? 'Scanning for Beacons...' : 'Start Bluetooth Scan'}
+                        {scanning ? (
+                            'Scanning...'
+                        ) : beaconFound ? (
+                            <>
+                                <CheckCircleIcon className="w-6 h-6" />
+                                Beacon Found
+                            </>
+                        ) : (
+                            <>
+                                <BluetoothIcon className="w-6 h-6" />
+                                Start Bluetooth Scan
+                            </>
+                        )}
                     </button>
+
+                    {beaconFound && (
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 text-left animate-fade-in">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <p className="font-bold text-white">{beaconFound.name}</p>
+                                    <p className="text-sm text-gray-400 font-mono">{beaconFound.id}</p>
+                                </div>
+                                <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-lg border border-green-500/30">
+                                    Signal Strong
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                            >
+                                {saving ? 'Saving...' : (
+                                    <>
+                                        <SaveIcon className="w-5 h-5" />
+                                        Save Calibration
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                {beaconFound && (
-                    <div style={{ background: '#065f46', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-                        <p style={{ fontWeight: 'bold', margin: 0 }}>✅ Beacon Detected!</p>
-                        <p style={{ margin: '5px 0 0', fontSize: '14px', opacity: 0.8 }}>{beaconFound.name} ({beaconFound.id})</p>
-                    </div>
-                )}
-
-                <Link to="/rooms" style={{ color: '#9ca3af', textDecoration: 'underline' }}>← Back to Rooms</Link>
+                <Link
+                    to="/director/rooms"
+                    className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                >
+                    <ArrowLeftIcon className="w-4 h-4" />
+                    Back to Rooms
+                </Link>
             </div>
         </div>
     );
