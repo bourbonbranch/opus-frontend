@@ -58,18 +58,48 @@ export async function createEnsemble(payload) {
 }
 
 // ─────────────── GET ENSEMBLES ───────────────
+// Optional directorId override, but still works exactly the same
+// if you call getEnsembles() with no arguments.
+export async function getEnsembles(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
 
-export async function getEnsembles() {
-  const directorId = localStorage.getItem('directorId');
-
-  if (!directorId) {
+  if (!id) {
     // This error will be shown in the red box on the dashboard
     throw new Error('Please sign in or create an account first.');
   }
 
   const res = await fetch(
-    `${API_BASE_URL}/ensembles?director_id=${encodeURIComponent(directorId)}`
+    `${API_BASE_URL}/ensembles?director_id=${encodeURIComponent(id)}`
   );
+
+  return handleResponse(res);
+}
+
+// ─────────────── ROSTER (NEW) ───────────────
+
+// Get roster for a specific ensemble
+export async function getRoster(ensembleId) {
+  if (!ensembleId) {
+    throw new Error('ensembleId is required to load roster.');
+  }
+
+  const res = await fetch(
+    `${API_BASE_URL}/roster?ensemble_id=${encodeURIComponent(ensembleId)}`
+  );
+
+  return handleResponse(res);
+}
+
+// Add a single roster member
+export async function addRosterMember(payload) {
+  // expects: { ensemble_id, first_name, last_name, email?, phone?, status?, external_id? }
+  const res = await fetch(`${API_BASE_URL}/roster`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
 
   return handleResponse(res);
 }
