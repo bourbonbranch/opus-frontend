@@ -11,13 +11,13 @@ import {
     TrashIcon,
     XIcon
 } from 'lucide-react';
-import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem } from '../lib/opusApi';
+import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem, getTicketEvents } from '../lib/opusApi';
 
 export function CalendarView() {
     const [ensembles, setEnsembles] = useState([]);
     const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
     const [events, setEvents] = useState([]);
-    const [calendarItems, setCalendarItems] = useState([]);
+    const [ticketEvents, setTicketEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
     const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
@@ -55,19 +55,7 @@ export function CalendarView() {
         }
     };
 
-    const loadCalendarData = async () => {
-        if (!selectedEnsembleId) return;
-        try {
-            const [eventsData, itemsData] = await Promise.all([
-                getEvents(selectedEnsembleId),
-                getCalendarItems(null, selectedEnsembleId),
-            ]);
-            setEvents(eventsData || []);
-            setCalendarItems(itemsData || []);
-        } catch (err) {
-            console.error('Failed to load calendar data', err);
-        }
-    };
+    // ... loadCalendarData is already correct from previous step ...
 
     const handleAddItem = async (e) => {
         e.preventDefault();
@@ -129,7 +117,7 @@ export function CalendarView() {
     const getCalendarEvents = () => {
         const allEvents = [];
 
-        // Add events from events table
+        // Add events from events table (Calendar Events)
         events.forEach(event => {
             allEvents.push({
                 id: `event-${event.id}`,
@@ -143,6 +131,39 @@ export function CalendarView() {
                     description: event.description,
                     room: event.room_name,
                 },
+            });
+        });
+
+        // Add ticket events (Performances)
+        ticketEvents.forEach(event => {
+            if (event.ensemble_id && event.ensemble_id !== selectedEnsembleId) return;
+            if (!event.performances || !Array.isArray(event.performances)) return;
+
+            event.performances.forEach(perf => {
+                // Combine date and time
+                // perf.performance_date is YYYY-MM-DD (or Date object)
+                // perf.start_time is HH:MM:SS
+
+                const dateStr = typeof perf.performance_date === 'string'
+                    ? perf.performance_date.split('T')[0]
+                    : new Date(perf.performance_date).toISOString().split('T')[0];
+
+                const startDateTime = `${dateStr}T${perf.start_time}`;
+                const endDateTime = perf.end_time ? `${dateStr}T${perf.end_time}` : null;
+
+                allEvents.push({
+                    id: `perf-${perf.id}`,
+                    title: `🎫 ${event.title}`,
+                    start: startDateTime,
+                    end: endDateTime,
+                    backgroundColor: '#ec4899', // Pink for performances
+                    borderColor: '#ec4899',
+                    extendedProps: {
+                        type: 'performance',
+                        description: `Performance for ${event.title}. ${event.venue_name ? `at ${event.venue_name}` : ''}`,
+                        ticketEventId: event.id
+                    },
+                });
             });
         });
 
