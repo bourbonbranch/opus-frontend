@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarIcon, PlusIcon, MapPinIcon, ClockIcon, TrashIcon, EditIcon } from 'lucide-react';
+import { CalendarIcon, PlusIcon, MapPinIcon, ClockIcon, TrashIcon, RepeatIcon } from 'lucide-react';
 import { getEnsembles, getEvents, createEvent, deleteEvent, getRooms } from '../lib/opusApi';
 
 export function Events() {
@@ -16,6 +16,10 @@ export function Events() {
         start_time: '',
         end_time: '',
         description: '',
+        is_recurring: false,
+        recurrence_pattern: 'weekly',
+        recurrence_days: [],
+        recurrence_end_date: '',
     });
     const [creating, setCreating] = useState(false);
 
@@ -63,19 +67,84 @@ export function Events() {
         }
     };
 
+    const generateRecurringEvents = () => {
+        const events = [];
+        const startDate = new Date(newEvent.start_time);
+        const endDate = new Date(newEvent.end_time);
+        const recurEndDate = new Date(newEvent.recurrence_end_date);
+
+        const duration = endDate - startDate; // Duration in milliseconds
+
+        let currentDate = new Date(startDate);
+
+        while (currentDate <= recurEndDate) {
+            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+            // Check if this day matches the recurrence pattern
+            if (newEvent.recurrence_pattern === 'daily' ||
+                (newEvent.recurrence_pattern === 'weekly' && newEvent.recurrence_days.includes(dayOfWeek))) {
+
+                const eventStart = new Date(currentDate);
+                const eventEnd = new Date(currentDate.getTime() + duration);
+
+                events.push({
+                    ensemble_id: selectedEnsembleId,
+                    room_id: newEvent.room_id || null,
+                    name: newEvent.name,
+                    type: newEvent.type,
+                    start_time: eventStart.toISOString(),
+                    end_time: eventEnd.toISOString(),
+                    description: newEvent.description,
+                });
+            }
+
+            // Move to next day
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return events;
+    };
+
     const handleAddEvent = async (e) => {
         e.preventDefault();
         setCreating(true);
         try {
-            await createEvent({
-                ensemble_id: selectedEnsembleId,
-                room_id: newEvent.room_id || null,
-                name: newEvent.name,
-                type: newEvent.type,
-                start_time: newEvent.start_time,
-                end_time: newEvent.end_time,
-                description: newEvent.description,
-            });
+            if (newEvent.is_recurring) {
+                // Generate and create multiple events
+                const recurringEvents = generateRecurringEvents();
+
+                if (recurringEvents.length === 0) {
+                    alert('No events match your recurrence pattern. Please check your settings.');
+                    setCreating(false);
+                    return;
+                }
+
+                if (recurringEvents.length > 100) {
+                    if (!confirm(`This will create ${recurringEvents.length} events. Continue?`)) {
+                        setCreating(false);
+                        return;
+                    }
+                }
+
+                // Create all events
+                for (const event of recurringEvents) {
+                    await createEvent(event);
+                }
+
+                alert(`Successfully created ${recurringEvents.length} recurring events!`);
+            } else {
+                // Create single event
+                await createEvent({
+                    ensemble_id: selectedEnsembleId,
+                    room_id: newEvent.room_id || null,
+                    name: newEvent.name,
+                    type: newEvent.type,
+                    start_time: newEvent.start_time,
+                    end_time: newEvent.end_time,
+                    description: newEvent.description,
+                });
+            }
+
             setNewEvent({
                 name: '',
                 type: 'rehearsal',
@@ -83,6 +152,10 @@ export function Events() {
                 start_time: '',
                 end_time: '',
                 description: '',
+                is_recurring: false,
+                recurrence_pattern: 'weekly',
+                recurrence_days: [],
+                recurrence_end_date: '',
             });
             setIsAddModalOpen(false);
             loadEvents();
@@ -100,6 +173,20 @@ export function Events() {
             loadEvents();
         } catch (err) {
             alert('Failed to delete event: ' + err.message);
+        }
+    };
+
+    const toggleRecurrenceDay = (day) => {
+        if (newEvent.recurrence_days.includes(day)) {
+            setNewEvent({
+                ...newEvent,
+                recurrence_days: newEvent.recurrence_days.filter(d => d !== day),
+            });
+        } else {
+            setNewEvent({
+                ...newEvent,
+                recurrence_days: [...newEvent.recurrence_days, day],
+            });
         }
     };
 
@@ -132,6 +219,8 @@ export function Events() {
         };
         return colors[type] || colors.other;
     };
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     if (loading) {
         return (
@@ -341,6 +430,76 @@ export function Events() {
                                 </div>
                             </div>
 
+                            {/* Recurring Event Section */}
+                            <div className="border-t border-white/10 pt-4">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={newEvent.is_recurring}
+                                        onChange={(e) => setNewEvent({ ...newEvent, is_recurring: e.target.checked })}
+                                        className="w-5 h-5 rounded bg-white/5 border-white/10 text-purple-500 focus:ring-2 focus:ring-purple-500"
+                                    />
+                                    <div className="flex items-center gap-2">
+                                        <RepeatIcon className="w-5 h-5 text-purple-300" />
+                                        <span className="text-sm font-medium text-white">Recurring Event</span>
+                                    </div>
+                                </label>
+
+                                {newEvent.is_recurring && (
+                                    <div className="mt-4 space-y-4 p-4 bg-white/5 rounded-lg border border-white/10">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                Repeat Pattern
+                                            </label>
+                                            <select
+                                                value={newEvent.recurrence_pattern}
+                                                onChange={(e) => setNewEvent({ ...newEvent, recurrence_pattern: e.target.value })}
+                                                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            >
+                                                <option value="daily">Every Day</option>
+                                                <option value="weekly">Specific Days of Week</option>
+                                            </select>
+                                        </div>
+
+                                        {newEvent.recurrence_pattern === 'weekly' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                    Select Days *
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    {dayNames.map((day, index) => (
+                                                        <button
+                                                            key={index}
+                                                            type="button"
+                                                            onClick={() => toggleRecurrenceDay(index)}
+                                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${newEvent.recurrence_days.includes(index)
+                                                                    ? 'bg-purple-500 text-white'
+                                                                    : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                                }`}
+                                                        >
+                                                            {day}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                Repeat Until *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={newEvent.recurrence_end_date}
+                                                onChange={(e) => setNewEvent({ ...newEvent, recurrence_end_date: e.target.value })}
+                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                required={newEvent.is_recurring}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Description (optional)
@@ -375,7 +534,7 @@ export function Events() {
                                     disabled={creating}
                                     className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50"
                                 >
-                                    {creating ? 'Creating...' : 'Add Event'}
+                                    {creating ? 'Creating...' : newEvent.is_recurring ? 'Create Recurring Events' : 'Add Event'}
                                 </button>
                             </div>
                         </form>
