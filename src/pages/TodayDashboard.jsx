@@ -37,6 +37,17 @@ const TodayDashboard = () => {
     };
   }, []);
 
+  // Friendlier error text for auth-related issues
+  const isAuthError =
+    error &&
+    (error.toLowerCase().includes('director_id') ||
+      error.toLowerCase().includes('sign in') ||
+      error.toLowerCase().includes('create an account'));
+
+  const friendlyError = isAuthError
+    ? 'You need to create an account before viewing your ensembles.'
+    : error;
+
   return (
     <div
       style={{
@@ -167,7 +178,29 @@ const TodayDashboard = () => {
               fontWeight: 500,
             }}
           >
-            {error}
+            {friendlyError}
+            {isAuthError && (
+              <div
+                style={{
+                  marginTop: '8px',
+                  fontSize: '13px',
+                  color: '#7f1d1d',
+                }}
+              >
+                <span>Go to </span>
+                <Link
+                  to="/signup"
+                  style={{
+                    color: '#b91c1c',
+                    fontWeight: 600,
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Sign Up
+                </Link>
+                <span> to create your director account.</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -209,8 +242,12 @@ const TodayDashboard = () => {
                   border: '1px solid #e5e7eb',
                   background: '#f9fafb',
                   padding: '14px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
                 }}
               >
+                {/* Top info */}
                 <div
                   style={{
                     display: 'flex',
@@ -264,6 +301,53 @@ const TodayDashboard = () => {
                       ? new Date(ensemble.created_at).toLocaleDateString()
                       : '—'}
                   </span>
+                </div>
+
+                {/* Actions row */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '8px',
+                    marginTop: '4px',
+                  }}
+                >
+                  {/* View roster button */}
+                  <Link
+                    to={`/ensembles/${ensemble.id}/roster`}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #d1d5db',
+                      background: '#ffffff',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: '#111827',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    View roster
+                  </Link>
+
+                  {/* Placeholder for future attendance feature */}
+                  <button
+                    type="button"
+                    disabled
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background:
+                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'white',
+                      opacity: 0.6,
+                      cursor: 'not-allowed',
+                    }}
+                  >
+                    Take attendance (coming soon)
+                  </button>
                 </div>
               </div>
             ))}
