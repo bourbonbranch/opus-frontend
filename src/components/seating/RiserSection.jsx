@@ -83,31 +83,39 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
     return (
         <div
             ref={setNodeRef}
-            className={`w-full border-x border-t border-white/20 relative box-border transition-colors
-        ${isOver ? 'bg-purple-500/20' : 'bg-white/5'}
-        ${rowNum === 1 ? 'border-b' : ''}
+            className={`w-full border-x border-t border-white/30 relative box-border transition-colors
+        ${isOver ? 'bg-purple-500/30' : 'bg-white/10 hover:bg-white/20'}
+        ${rowNum === 1 ? 'border-b border-white/30' : ''}
       `}
             style={{
                 height: depthPx,
             }}
         >
             {/* Row Label */}
-            <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-xs text-white/30 font-mono">
+            <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-xs text-white/50 font-mono font-bold">
                 R{rowNum}
             </div>
 
             {/* Only show placed students, not empty spots */}
-            <div className="w-full h-full flex items-center justify-center px-4 gap-2">
+            <div className="w-full h-full flex items-center justify-center px-4 gap-1">
                 {studentsInRow.map(student => {
                     const studentData = student.student || { name: `Student ${student.studentId}`, section: 'Unknown' };
+                    const sectionColor = getSectionColor(studentData.section).replace('bg-', 'border-');
 
                     return (
                         <div
                             key={student.studentId}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg ${getSectionColor(studentData.section)}`}
+                            className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] relative group z-10`}
                             title={studentData.name}
                         >
-                            {studentData.name.split(' ').map(n => n[0]).join('')}
+                            {/* Hover Name Tag */}
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20 pointer-events-none z-50">
+                                {studentData.name}
+                            </div>
+
+                            <span className="text-sm font-bold text-white">
+                                {studentData.name.split(' ').map(n => n[0]).join('')}
+                            </span>
                         </div>
                     );
                 })}
