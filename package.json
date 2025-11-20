@@ -8,6 +8,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/react": "^6.1.19",
+    "@fullcalendar/timegrid": "^6.1.19",
     "lucide-react": "^0.460.0",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
@@ -16,6 +20,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",
+    "tailwindcss": "^4.1.17",
     "vite": "^5.4.0"
   }
 }

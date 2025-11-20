@@ -1,21 +1,25 @@
-// src/pages/TodayDashboard.jsx
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  CalendarIcon,
+  DollarSignIcon,
+  TicketIcon,
+  MessageSquareIcon,
+  TrendingUpIcon,
+  UsersIcon
+} from 'lucide-react';
 import { getEnsembles } from '../lib/opusApi';
 
-const TodayDashboard = () => {
+export function TodayDashboard() {
   const [ensembles, setEnsembles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
-
     const load = async () => {
       setLoading(true);
       setError('');
-
       try {
         const data = await getEnsembles();
         if (isMounted) {
@@ -30,363 +34,163 @@ const TodayDashboard = () => {
         if (isMounted) setLoading(false);
       }
     };
-
     load();
     return () => {
       isMounted = false;
     };
   }, []);
 
-  // Friendlier error text for auth-related issues
-  const isAuthError =
-    error &&
-    (error.toLowerCase().includes('director_id') ||
-      error.toLowerCase().includes('sign in') ||
-      error.toLowerCase().includes('create an account'));
-
-  const friendlyError = isAuthError
-    ? 'You need to create an account before viewing your ensembles.'
-    : error;
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '20px',
-      }}
-    >
-      <div
-        style={{
-          background: 'white',
-          padding: '40px',
-          borderRadius: '10px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-          width: '100%',
-          maxWidth: '900px',
-        }}
-      >
-        {/* Header */}
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '24px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '20px',
-              }}
-            >
-              ♪
+    <div className="p-8 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-white mb-2 drop-shadow-lg">
+          Today's Overview
+        </h1>
+        <p className="text-gray-200">
+          Monday, January 15, 2024 • Quick snapshot of your ensemble
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+              <UsersIcon className="w-6 h-6 text-green-300" />
             </div>
-            <h1
-              style={{
-                fontSize: '28px',
-                fontWeight: '800',
-                margin: 0,
-                color: '#333',
-              }}
-            >
-              Opus
-            </h1>
+            <span className="text-sm text-gray-300">Today</span>
           </div>
-
-          <Link
-            to="/add-ensemble"
-            style={{
-              padding: '10px 18px',
-              borderRadius: '5px',
-              border: '1px solid #e5e7eb',
-              background: '#f9fafb',
-              fontWeight: 600,
-              fontSize: '14px',
-              color: '#111827',
-              textDecoration: 'none',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.06)',
-            }}
-          >
-            + Add Ensemble
-          </Link>
-        </header>
-
-        {/* Title / Date */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: '20px',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '22px',
-              fontWeight: '700',
-              margin: 0,
-              color: '#111827',
-            }}
-          >
-            Today&apos;s Overview
-          </h2>
-          <span
-            style={{
-              fontSize: '13px',
-              color: '#6b7280',
-            }}
-          >
-            {new Date().toLocaleDateString()}
-          </span>
+          <p className="text-sm text-gray-200 mb-1">Attendance</p>
+          <p className="text-3xl font-bold text-white">34/40</p>
+          <p className="text-sm text-gray-300 mt-2">2 late • 4 absent</p>
         </div>
 
-        {/* Content states */}
-        {loading && (
-          <p
-            style={{
-              color: '#6b7280',
-              margin: 0,
-            }}
-          >
-            Loading ensembles…
-          </p>
-        )}
-
-        {error && (
-          <div
-            style={{
-              background: '#fee',
-              border: '1px solid #fcc',
-              padding: '12px',
-              borderRadius: '5px',
-              marginBottom: '16px',
-              color: '#c33',
-              fontWeight: 500,
-            }}
-          >
-            {friendlyError}
-            {isAuthError && (
-              <div
-                style={{
-                  marginTop: '8px',
-                  fontSize: '13px',
-                  color: '#7f1d1d',
-                }}
-              >
-                <span>Go to </span>
-                <Link
-                  to="/signup"
-                  style={{
-                    color: '#b91c1c',
-                    fontWeight: 600,
-                    textDecoration: 'underline',
-                  }}
-                >
-                  Sign Up
-                </Link>
-                <span> to create your director account.</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {!loading && !error && ensembles.length === 0 && (
-          <p
-            style={{
-              color: '#6b7280',
-              margin: 0,
-            }}
-          >
-            You don&apos;t have any ensembles yet. Start by{' '}
-            <Link
-              to="/add-ensemble"
-              style={{
-                color: '#667eea',
-                textDecoration: 'underline',
-                fontWeight: 600,
-              }}
-            >
-              creating your first ensemble
-            </Link>
-            .
-          </p>
-        )}
-
-        {!loading && !error && ensembles.length > 0 && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '16px',
-            }}
-          >
-            <div style={{ display: 'grid', gap: '15px' }}>
-              <Link
-                to="/rooms"
-                style={{
-                  display: 'block',
-                  padding: '15px',
-                  background: 'white',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  color: '#111827',
-                  fontWeight: '600',
-                  textAlign: 'center',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-                }}
-              >
-                Manage Rooms & Attendance →
-              </Link>
+        <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <DollarSignIcon className="w-6 h-6 text-purple-300" />
             </div>
-            {ensembles.map((ensemble) => (
-              <div
-                key={ensemble.id}
-                style={{
-                  borderRadius: '8px',
-                  border: '1px solid #e5e7eb',
-                  background: '#f9fafb',
-                  padding: '14px 16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                }}
-              >
-                {/* Top info */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: '8px',
-                  }}
-                >
-                  <div>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontWeight: 600,
-                        color: '#111827',
-                      }}
-                    >
-                      {ensemble.name}{' '}
-                      <span
-                        style={{
-                          fontSize: '13px',
-                          color: '#6b7280',
-                          fontWeight: 400,
-                        }}
-                      >
-                        ({ensemble.type})
-                      </span>
-                    </p>
-                    {ensemble.organization_name && (
-                      <p
-                        style={{
-                          margin: '4px 0 0',
-                          fontSize: '13px',
-                          color: '#4b5563',
-                        }}
-                      >
-                        {ensemble.organization_name}
-                      </p>
-                    )}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      color: '#9ca3af',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Created{' '}
-                    {ensemble.created_at
-                      ? new Date(ensemble.created_at).toLocaleDateString()
-                      : '—'}
-                  </span>
+            <TrendingUpIcon className="w-5 h-5 text-green-400" />
+          </div>
+          <p className="text-sm text-gray-200 mb-1">Fundraising</p>
+          <p className="text-3xl font-bold text-white">$18.8k</p>
+          <p className="text-sm text-gray-300 mt-2">75% of $25k goal</p>
+        </div>
+
+        <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+              <TicketIcon className="w-6 h-6 text-blue-300" />
+            </div>
+            <span className="text-sm text-gray-300">Spring Concert</span>
+          </div>
+          <p className="text-sm text-gray-200 mb-1">Tickets Sold</p>
+          <p className="text-3xl font-bold text-white">156</p>
+          <p className="text-sm text-gray-300 mt-2">$3,120 revenue</p>
+        </div>
+
+        <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center">
+              <MessageSquareIcon className="w-6 h-6 text-pink-300" />
+            </div>
+            <span className="px-2 py-1 bg-red-500/20 text-red-300 text-xs font-semibold rounded-full">
+              5
+            </span>
+          </div>
+          <p className="text-sm text-gray-200 mb-1">Messages</p>
+          <p className="text-3xl font-bold text-white">5</p>
+          <p className="text-sm text-gray-300 mt-2">Unread messages</p>
+          <p className="text-xs text-gray-400">23 total conversations</p>
+        </div>
+      </div>
+
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upcoming Events */}
+        <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5" />
+              Upcoming Events
+            </h2>
+            <Link to="/director/calendar" className="text-sm text-purple-300 hover:text-purple-200 font-medium">
+              View All
+            </Link>
+          </div>
+          <div className="space-y-3">
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <CalendarIcon className="w-5 h-5 text-purple-300" />
                 </div>
-
-                {/* Actions row */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: '8px',
-                    marginTop: '4px',
-                  }}
-                >
-                  {/* View roster button */}
-                  <Link
-                    to={`/ensembles/${ensemble.id}/roster`}
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #d1d5db',
-                      background: '#ffffff',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#111827',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    View roster
-                  </Link>
-
-                  {/* Placeholder for future attendance feature */}
-                  <button
-                    type="button"
-                    disabled
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      background:
-                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: 'white',
-                      opacity: 0.6,
-                      cursor: 'not-allowed',
-                    }}
-                  >
-                    Take attendance (coming soon)
-                  </button>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white">Wednesday Rehearsal</h3>
+                  <p className="text-sm text-gray-300">Jan 17 • 3:00 PM</p>
+                  <p className="text-xs text-gray-400 mt-1">Main Hall</p>
                 </div>
               </div>
-            ))}
+            </div>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <CalendarIcon className="w-5 h-5 text-blue-300" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white">Spring Concert</h3>
+                  <p className="text-sm text-gray-300">Jan 20 • 7:00 PM</p>
+                  <p className="text-xs text-gray-400 mt-1">Auditorium</p>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
 
-        {/* Footer tip */}
-        <p
-          style={{
-            marginTop: '24px',
-            fontSize: '12px',
-            textAlign: 'center',
-            color: '#6b7280',
-          }}
-        >
-          Tip: Use &ldquo;+ Add Ensemble&rdquo; to build your program and see it
-          appear here.
-        </p>
+        {/* Recent Messages */}
+        <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <MessageSquareIcon className="w-5 h-5" />
+              Recent Messages
+            </h2>
+            <Link to="/director/messages" className="text-sm text-purple-300 hover:text-purple-200 font-medium">
+              View All
+            </Link>
+          </div>
+          <div className="space-y-3">
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-semibold text-white">EJ</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-semibold text-white">Emma Johnson</h3>
+                    <span className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0 mt-1.5" />
+                  </div>
+                  <p className="text-sm text-gray-300 truncate">Unable to attend Friday</p>
+                  <p className="text-xs text-gray-400 mt-1">2h ago</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-semibold text-white">MC</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-semibold text-white">Michael Chen</h3>
+                    <span className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0 mt-1.5" />
+                  </div>
+                  <p className="text-sm text-gray-300 truncate">Music folder question</p>
+                  <p className="text-xs text-gray-400 mt-1">5h ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default TodayDashboard;
+}
