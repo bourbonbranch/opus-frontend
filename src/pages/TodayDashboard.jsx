@@ -32,103 +32,255 @@ const TodayDashboard = () => {
     };
 
     load();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 text-white">
-      {/* Ambient background accents */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[35rem] h-[35rem] bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[35rem] h-[35rem] bg-blue-500/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative max-w-6xl mx-auto px-4 py-10">
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '20px',
+      }}
+    >
+      <div
+        style={{
+          background: 'white',
+          padding: '40px',
+          borderRadius: '10px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+          width: '100%',
+          maxWidth: '900px',
+        }}
+      >
         {/* Header */}
-        <header className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
-              <span className="text-xl text-white">♪</span>
+        <header
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '20px',
+              }}
+            >
+              ♪
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold">Opus</h1>
+            <h1
+              style={{
+                fontSize: '28px',
+                fontWeight: '800',
+                margin: 0,
+                color: '#333',
+              }}
+            >
+              Opus
+            </h1>
           </div>
 
           <Link
             to="/add-ensemble"
-            className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 transition shadow-md"
+            style={{
+              padding: '10px 18px',
+              borderRadius: '5px',
+              border: '1px solid #e5e7eb',
+              background: '#f9fafb',
+              fontWeight: 600,
+              fontSize: '14px',
+              color: '#111827',
+              textDecoration: 'none',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.06)',
+            }}
           >
             + Add Ensemble
           </Link>
         </header>
 
-        {/* Main card */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl md:text-2xl font-semibold">Today's Overview</h2>
-            <span className="text-xs md:text-sm text-gray-300">
-              {new Date().toLocaleDateString()}
-            </span>
-          </div>
-
-          {/* States */}
-          {loading && (
-            <div className="text-gray-300">Loading ensembles…</div>
-          )}
-
-          {error && (
-            <div className="p-4 bg-red-500/20 border border-red-500/40 rounded-xl text-red-100 font-medium">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && ensembles.length === 0 && (
-            <div className="text-gray-300">
-              You don't have any ensembles yet. Start by{' '}
-              <Link
-                to="/add-ensemble"
-                className="text-purple-300 underline hover:text-purple-200"
-              >
-                creating your first ensemble
-              </Link>
-              .
-            </div>
-          )}
-
-          {!loading && !error && ensembles.length > 0 && (
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {ensembles.map((ensemble) => (
-                <li
-                  key={ensemble.id}
-                  className="group bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition hover:bg-white/10"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">
-                        {ensemble.name}{' '}
-                        <span className="text-sm text-gray-300">
-                          ({ensemble.type})
-                        </span>
-                      </p>
-                      {ensemble.organization_name && (
-                        <p className="text-sm text-gray-300 mt-1">
-                          {ensemble.organization_name}
-                        </p>
-                      )}
-                    </div>
-                    <span className="text-[10px] md:text-xs uppercase tracking-wide text-gray-400">
-                      Created{' '}
-                      {new Date(ensemble.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+        {/* Title / Date */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            marginBottom: '20px',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '22px',
+              fontWeight: '700',
+              margin: 0,
+              color: '#111827',
+            }}
+          >
+            Today&apos;s Overview
+          </h2>
+          <span
+            style={{
+              fontSize: '13px',
+              color: '#6b7280',
+            }}
+          >
+            {new Date().toLocaleDateString()}
+          </span>
         </div>
 
-        {/* Footer hint */}
-        <p className="mt-8 text-center text-xs text-gray-300/90">
-          Tip: Click “+ Add Ensemble” to build your program and see it here.
+        {/* Content states */}
+        {loading && (
+          <p
+            style={{
+              color: '#6b7280',
+              margin: 0,
+            }}
+          >
+            Loading ensembles…
+          </p>
+        )}
+
+        {error && (
+          <div
+            style={{
+              background: '#fee',
+              border: '1px solid #fcc',
+              padding: '12px',
+              borderRadius: '5px',
+              marginBottom: '16px',
+              color: '#c33',
+              fontWeight: 500,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && ensembles.length === 0 && (
+          <p
+            style={{
+              color: '#6b7280',
+              margin: 0,
+            }}
+          >
+            You don&apos;t have any ensembles yet. Start by{' '}
+            <Link
+              to="/add-ensemble"
+              style={{
+                color: '#667eea',
+                textDecoration: 'underline',
+                fontWeight: 600,
+              }}
+            >
+              creating your first ensemble
+            </Link>
+            .
+          </p>
+        )}
+
+        {!loading && !error && ensembles.length > 0 && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: '16px',
+            }}
+          >
+            {ensembles.map((ensemble) => (
+              <div
+                key={ensemble.id}
+                style={{
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  background: '#f9fafb',
+                  padding: '14px 16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                  }}
+                >
+                  <div>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontWeight: 600,
+                        color: '#111827',
+                      }}
+                    >
+                      {ensemble.name}{' '}
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          color: '#6b7280',
+                          fontWeight: 400,
+                        }}
+                      >
+                        ({ensemble.type})
+                      </span>
+                    </p>
+                    {ensemble.organization_name && (
+                      <p
+                        style={{
+                          margin: '4px 0 0',
+                          fontSize: '13px',
+                          color: '#4b5563',
+                        }}
+                      >
+                        {ensemble.organization_name}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: '#9ca3af',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Created{' '}
+                    {ensemble.created_at
+                      ? new Date(ensemble.created_at).toLocaleDateString()
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Footer tip */}
+        <p
+          style={{
+            marginTop: '24px',
+            fontSize: '12px',
+            textAlign: 'center',
+            color: '#6b7280',
+          }}
+        >
+          Tip: Use &ldquo;+ Add Ensemble&rdquo; to build your program and see it
+          appear here.
         </p>
       </div>
     </div>
