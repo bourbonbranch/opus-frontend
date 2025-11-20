@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 
-export default function RiserConfigurationPanel({ section, onUpdate }) {
+export default function RiserConfigurationPanel({ section, onUpdate, onRemove }) {
     if (!section) return null;
 
     return (
@@ -122,7 +122,10 @@ export default function RiserConfigurationPanel({ section, onUpdate }) {
                 </div>
 
                 <div className="pt-4 border-t border-white/10">
-                    <button className="w-full flex items-center justify-center gap-2 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors text-sm font-medium">
+                    <button
+                        onClick={onRemove}
+                        className="w-full flex items-center justify-center gap-2 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors text-sm font-medium"
+                    >
                         <Trash2 className="w-4 h-4" />
                         Remove Section
                     </button>

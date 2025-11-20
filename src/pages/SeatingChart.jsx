@@ -19,12 +19,13 @@ export default function SeatingChart() {
     const [placedStudents, setPlacedStudents] = useState([]);
     const [activeId, setActiveId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isConfigOpen, setIsConfigOpen] = useState(false);
 
     // Riser State
     const [riserSections, setRiserSections] = useState([
         {
             id: 1,
-            name: 'C',
+            name: '1',
             rows: 4,
             moduleWidth: 6,
             treadDepth: 24,
@@ -41,6 +42,23 @@ export default function SeatingChart() {
         useSensor(MouseSensor, { activationConstraint: { distance: 10 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
     );
+
+    const handleAddSection = () => {
+        const newId = Math.max(...riserSections.map(r => r.id)) + 1;
+        setRiserSections(prev => [...prev, {
+            id: newId,
+            name: String(newId),
+            rows: 4,
+            moduleWidth: 6,
+            treadDepth: 24,
+            singerSpacing: 22,
+            centerGap: 3,
+            adaRow: null,
+            connectedTo: { sectionId: null, side: null }
+        }]);
+        setSelectedSectionId(newId);
+        setIsConfigOpen(true);
+    };
 
     const handleDragStart = (event) => {
         setActiveId(event.active.id);
@@ -62,9 +80,6 @@ export default function SeatingChart() {
                         const filtered = prev.filter(s => s.studentId !== active.id);
 
                         // Remove any student currently in the target spot (swap or replace?)
-                        // For now, let's just replace (kick out the other student)
-                        // Or better, if occupied, don't place (or swap).
-                        // Let's implement simple replacement/placement.
                         const withoutOccupant = filtered.filter(s =>
                             !(s.sectionId === sectionId && s.row === row && s.index === index)
                         );
@@ -135,7 +150,10 @@ export default function SeatingChart() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm font-medium">
+                            <button
+                                onClick={() => setIsConfigOpen(!isConfigOpen)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${isConfigOpen ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}
+                            >
                                 <Settings className="w-4 h-4" />
                                 Configuration
                             </button>
@@ -152,7 +170,10 @@ export default function SeatingChart() {
                             isCurved={isCurved}
                             placedStudents={placedStudents}
                             selectedSectionId={selectedSectionId}
-                            onSelectSection={setSelectedSectionId}
+                            onSelectSection={(id) => {
+                                setSelectedSectionId(id);
+                                setIsConfigOpen(true);
+                            }}
                         />
 
                         {/* Zoom Controls overlay */}
@@ -170,16 +191,34 @@ export default function SeatingChart() {
                     </div>
 
                     {/* Configuration Panel (Bottom or Overlay) */}
-                    <div className="absolute top-20 right-6 w-80 bg-gray-800/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden">
-                        <RiserConfigurationPanel
-                            section={riserSections.find(r => r.id === selectedSectionId)}
-                            onUpdate={(updates) => {
-                                setRiserSections(prev => prev.map(r =>
-                                    r.id === selectedSectionId ? { ...r, ...updates } : r
-                                ));
-                            }}
-                        />
-                    </div>
+                    {isConfigOpen && (
+                        <div className="absolute top-20 right-6 w-80 bg-gray-800/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-[calc(100vh-140px)] flex flex-col z-20">
+                            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                                <h3 className="font-semibold">Riser Configuration</h3>
+                                <button onClick={handleAddSection} className="text-xs bg-purple-600 px-2 py-1 rounded hover:bg-purple-700 transition-colors">
+                                    + Add Section
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto">
+                                <RiserConfigurationPanel
+                                    section={riserSections.find(r => r.id === selectedSectionId)}
+                                    onUpdate={(updates) => {
+                                        setRiserSections(prev => prev.map(r =>
+                                            r.id === selectedSectionId ? { ...r, ...updates } : r
+                                        ));
+                                    }}
+                                    onRemove={() => {
+                                        if (riserSections.length > 1) {
+                                            setRiserSections(prev => prev.filter(r => r.id !== selectedSectionId));
+                                            setSelectedSectionId(riserSections[0].id);
+                                        } else {
+                                            alert("You must have at least one section.");
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <DragOverlay>
