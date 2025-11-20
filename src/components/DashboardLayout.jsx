@@ -94,7 +94,7 @@ export function DashboardLayout() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
 
             {/* Sidebar */}
-            <aside className="w-64 bg-gray-900/95 backdrop-blur-xl border-r border-gray-700 flex flex-col relative z-10 shadow-2xl">
+            <aside className="w-64 bg-gray-900/95 backdrop-blur-xl border-r border-gray-700 flex flex-col relative z-50 shadow-2xl">
                 <div className="p-6 border-b border-gray-700">
                     <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                         <h1 className="text-2xl font-bold">Opus</h1>

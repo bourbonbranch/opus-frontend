@@ -85,7 +85,7 @@ export default function SeatingChart() {
         placedStudents.find(s => s.studentId === activeId);
 
     return (
-        <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
+        <div className="flex h-full bg-transparent text-white overflow-hidden">
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
