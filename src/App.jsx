@@ -1,31 +1,42 @@
-import Roster from './pages/Roster';
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+// src/App.jsx
 
-import TodayDashboard from './pages/TodayDashboard.jsx';
-import AddEnsemble from './pages/AddEnsemble.jsx';
-import SignUp from './pages/SignUp.jsx';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+import SignUp from './pages/SignUp';
+import AddEnsemble from './pages/AddEnsemble';
+import TodayDashboard from './pages/TodayDashboard';
+import Roster from './pages/Roster'; // make sure this file exists
 
 const App = () => {
   return (
-    <Routes>
-  {/* Signup */}
-  <Route path="/" element={<SignUp />} />
-  <Route path="/signup" element={<SignUp />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Signup */}
+        <Route path="/" element={<SignUp />} />
+        <Route path="/signup" element={<SignUp />} />
 
-  {/* Create Ensemble */}
-  <Route path="/add-ensemble" element={<AddEnsemble />} />
-  <Route path="/ensembles/new" element={<AddEnsemble />} />
+        {/* Create Ensemble */}
+        <Route path="/add-ensemble" element={<AddEnsemble />} />
+        <Route path="/ensembles/new" element={<AddEnsemble />} />
 
-  {/* Dashboard */}
-  <Route path="/director/today" element={<TodayDashboard />} />
+        {/* Dashboard */}
+        <Route path="/director/today" element={<TodayDashboard />} />
 
-  {/* Roster Management */}
-  <Route path="/ensembles/:id/roster" element={<RosterPage />} />
-  <Route path="/ensembles/:id/roster/add" element={<AddRosterMemberPage />} />
+        {/* Roster page for a specific ensemble */}
+        <Route
+          path="/ensembles/:ensembleId/roster"
+          element={<Roster />}
+        />
 
-  {/* Catch-all */}
-  <Route path="*" element={<Navigate to="/director/today" replace />} />
-</Routes>
+        {/* Catch-all */}
+        <Route
+          path="*"
+          element={<Navigate to="/director/today" replace />}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
 export default App;
