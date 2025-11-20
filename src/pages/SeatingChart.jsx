@@ -34,7 +34,7 @@ export default function SeatingChart() {
 
     const handleAddSection = () => {
         const newId = riserSections.length > 0 ? Math.max(...riserSections.map(r => r.id)) + 1 : 1;
-        setRiserSections(prev => [...prev, {
+        let newSection = {
             id: newId,
             name: String(newId),
             moduleWidth: 6,
@@ -42,7 +42,19 @@ export default function SeatingChart() {
             singerSpacing: 22,
             centerGap: 3,
             adaRow: null,
-        }]);
+        };
+
+        // Copy settings from last section if it exists
+        if (riserSections.length > 0) {
+            const lastSection = riserSections[riserSections.length - 1];
+            newSection = {
+                ...lastSection,
+                id: newId,
+                name: String(newId),
+            };
+        }
+
+        setRiserSections(prev => [...prev, newSection]);
         setSelectedSectionId(newId);
         setIsConfigOpen(true);
     };

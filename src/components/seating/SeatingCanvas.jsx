@@ -83,6 +83,27 @@ export default function SeatingCanvas({
             limitToBounds={false}
             wheel={{ step: 0.1 }}
         >
+            {/* Fixed Director / Stage Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-40 flex justify-center pb-8">
+                <div className="flex flex-col items-center gap-3">
+                    {/* Screen/Stage Representation */}
+                    <div className="w-[600px] h-12 bg-gradient-to-t from-purple-500/20 to-transparent rounded-b-3xl border-b border-purple-500/50 flex items-end justify-center pb-2">
+                        <span className="text-xs uppercase tracking-[0.5em] text-purple-300/50 font-light">Stage / Director</span>
+                    </div>
+
+                    {/* Director Bubble */}
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] z-20 relative">
+                            <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
+                            <User className="w-8 h-8 text-purple-100 relative z-10" />
+                        </div>
+                        <div className="px-4 py-1 bg-gray-800/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
+                            <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">Director</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <Controls />
             <TransformComponent
                 wrapperClass="w-full h-full"
@@ -159,27 +180,6 @@ export default function SeatingCanvas({
                         )}
 
 
-
-                        {/* Director / Screen Position - Fixed above risers */}
-                        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '-300px' }}>
-                            <div className="flex flex-col items-center gap-3">
-                                {/* Screen/Stage Representation */}
-                                <div className="w-[600px] h-12 bg-gradient-to-b from-purple-500/20 to-transparent rounded-t-3xl border-t border-purple-500/50 flex items-center justify-center mb-4">
-                                    <span className="text-xs uppercase tracking-[0.5em] text-purple-300/50 font-light">Stage / Director</span>
-                                </div>
-
-                                {/* Director Bubble */}
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] z-20 relative">
-                                        <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
-                                        <User className="w-8 h-8 text-purple-100 relative z-10" />
-                                    </div>
-                                    <div className="px-4 py-1 bg-gray-800/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
-                                        <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">Director</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Empty State */}
                         {riserSections.length === 0 && (
