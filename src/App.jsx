@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardLayout } from './components/DashboardLayout';
+import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AddEnsemble from './pages/AddEnsemble';
 import { TodayDashboard } from './pages/TodayDashboard';
@@ -44,7 +45,8 @@ const App = () => {
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<Navigate to="/director/today" replace />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/add-ensemble" element={<AddEnsemble />} />
           <Route path="/ensembles/new" element={<AddEnsemble />} />
