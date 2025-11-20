@@ -14,6 +14,7 @@ import LiveAttendance from './pages/LiveAttendance';
 import Messages from './pages/Messages';
 import Tickets from './pages/Tickets';
 import CreateEvent from './pages/CreateEvent';
+import SeatingChart from './pages/SeatingChart';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -69,6 +70,7 @@ const App = () => {
             <Route path="tickets" element={<Tickets />} />
             <Route path="tickets/events/new" element={<CreateEvent />} />
             <Route path="ensembles/:ensembleId/roster" element={<Roster />} />
+            <Route path="seating" element={<SeatingChart />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/director/today" replace />} />
