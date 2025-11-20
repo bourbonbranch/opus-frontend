@@ -1,11 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import { Settings, Users, ZoomIn, ZoomOut, Maximize, RotateCcw } from 'lucide-react';
+import { Settings, Users } from 'lucide-react';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
-import DraggableStudent from '../components/seating/DraggableStudent';
 
 // Mock Data
 const MOCK_STUDENTS = Array.from({ length: 50 }, (_, i) => ({
@@ -127,13 +125,13 @@ export default function SeatingChart() {
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col relative">
+                <div className="flex-1 flex flex-col relative min-w-0">
                     {/* Toolbar */}
-                    <div className="h-16 border-b border-white/10 bg-gray-800/50 backdrop-blur-xl flex items-center justify-between px-6 z-10">
-                        <div className="flex items-center gap-4">
-                            <h1 className="font-bold text-xl">Seating Chart</h1>
-                            <div className="h-6 w-px bg-white/20 mx-2" />
-                            <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+                    <div className="h-16 border-b border-white/10 bg-gray-800/50 backdrop-blur-xl flex items-center justify-between px-6 z-10 shrink-0">
+                        <div className="flex items-center gap-4 min-w-0">
+                            <h1 className="font-bold text-xl truncate">Seating Chart</h1>
+                            <div className="h-6 w-px bg-white/20 mx-2 shrink-0" />
+                            <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1 shrink-0">
                                 <button
                                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!isCurved ? 'bg-purple-600 text-white' : 'hover:bg-white/10'}`}
                                     onClick={() => setIsCurved(false)}
@@ -149,7 +147,7 @@ export default function SeatingChart() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 shrink-0">
                             <button
                                 onClick={() => setIsConfigOpen(!isConfigOpen)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${isConfigOpen ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}
@@ -175,19 +173,6 @@ export default function SeatingChart() {
                                 setIsConfigOpen(true);
                             }}
                         />
-
-                        {/* Zoom Controls overlay */}
-                        <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-gray-800/80 backdrop-blur rounded-lg p-2 border border-white/10 shadow-xl">
-                            <button className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom In">
-                                <ZoomIn className="w-5 h-5" />
-                            </button>
-                            <button className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom Out">
-                                <ZoomOut className="w-5 h-5" />
-                            </button>
-                            <button className="p-2 hover:bg-white/10 rounded transition-colors" title="Reset View">
-                                <RotateCcw className="w-5 h-5" />
-                            </button>
-                        </div>
                     </div>
 
                     {/* Configuration Panel (Bottom or Overlay) */}
