@@ -83,9 +83,9 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
     return (
         <div
             ref={setNodeRef}
-            className={`w-full border-x border-t border-white/30 relative box-border transition-colors
-        ${isOver ? 'bg-purple-500/30' : 'bg-white/10 hover:bg-white/20'}
-        ${rowNum === 1 ? 'border-b border-white/30' : ''}
+            className={`w-full border-x border-t border-purple-500/30 relative box-border transition-colors
+        ${isOver ? 'bg-purple-500/40' : 'bg-gradient-to-b from-purple-900/20 to-purple-900/10 hover:from-purple-900/30 hover:to-purple-900/20'}
+        ${rowNum === 1 ? 'border-b border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : ''}
       `}
             style={{
                 height: depthPx,

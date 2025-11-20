@@ -107,39 +107,23 @@ export default function SeatingCanvas({
                 </div>
             </div>
 
-            {/* Debug Overlay - EXTENDED */}
-            <div className="absolute top-4 left-4 z-50 bg-black/90 text-green-400 p-4 rounded font-mono text-xs pointer-events-none max-w-md overflow-hidden">
-                <div className="font-bold mb-2">DEBUG INFO</div>
-                Sections: {riserSections.length}<br />
-                Curved: {isCurved ? 'Yes' : 'No'}<br />
-                Global Rows: {globalRows}<br />
-                <div className="my-1 border-t border-white/20"></div>
-                First Section:<br />
-                {riserSections[0] ? JSON.stringify(riserSections[0]).slice(0, 100) + '...' : 'None'}<br />
-                <div className="my-1 border-t border-white/20"></div>
-                Pos[0]: {positions[0] ? `x:${Math.round(positions[0].x)}, y:${Math.round(positions[0].y)}, rot:${Math.round(positions[0].rotation)}` : 'N/A'}
-            </div>
-
             <Controls />
             <TransformComponent
                 wrapperClass="w-full h-full"
                 contentClass="w-full h-full"
             >
                 <div
-                    className="w-[4000px] h-[4000px] relative border-2 border-blue-500/50"
+                    className="w-[4000px] h-[4000px] relative"
                     style={{
                         backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                         backgroundSize: '40px 40px'
                     }}
                 >
-                    {/* Fixed center point - RED BORDER FOR DEBUG */}
-                    <div className="absolute border-4 border-red-500 w-10 h-10 flex items-center justify-center text-red-500 text-xs" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
-                        CENTER
+                    {/* Fixed center point */}
+                    <div className="absolute" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
 
                         {/* Riser Container relative to center */}
-                        <div className="absolute top-1/2 left-1/2 w-0 h-0 overflow-visible">
-
-                            {/* Stage Front marker removed */}
+                        <div className="absolute top-0 left-0 w-0 h-0 overflow-visible">
 
                             {/* Riser Sections */}
                             {riserSections.length > 0 && (
