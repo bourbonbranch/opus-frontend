@@ -103,3 +103,33 @@ export async function addRosterMember(payload) {
 
   return handleResponse(res);
 }
+
+// ─────────────── ROOMS & ATTENDANCE ───────────────
+
+export async function getRooms(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+
+  const res = await fetch(`${API_BASE_URL}/rooms?director_id=${encodeURIComponent(id)}`);
+  return handleResponse(res);
+}
+
+export async function createRoom(payload) {
+  // expects: { name, director_id, beacon_uuid?, beacon_major?, beacon_minor? }
+  const res = await fetch(`${API_BASE_URL}/rooms`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function logAttendance(payload) {
+  // expects: { roster_id, room_id, status? }
+  const res = await fetch(`${API_BASE_URL}/attendance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}

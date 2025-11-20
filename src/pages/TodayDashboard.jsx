@@ -234,6 +234,24 @@ const TodayDashboard = () => {
               gap: '16px',
             }}
           >
+            <div style={{ display: 'grid', gap: '15px' }}>
+              <Link
+                to="/rooms"
+                style={{
+                  display: 'block',
+                  padding: '15px',
+                  background: 'white',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: '#111827',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                }}
+              >
+                Manage Rooms & Attendance →
+              </Link>
+            </div>
             {ensembles.map((ensemble) => (
               <div
                 key={ensemble.id}

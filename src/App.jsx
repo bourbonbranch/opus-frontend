@@ -6,7 +6,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import SignUp from './pages/SignUp';
 import AddEnsemble from './pages/AddEnsemble';
 import TodayDashboard from './pages/TodayDashboard';
-import Roster from './pages/Roster'; // make sure this file exists
+import Roster from './pages/Roster';
+import Rooms from './pages/Rooms';
+import RoomCalibration from './pages/RoomCalibration'; // make sure this file exists
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -56,6 +58,10 @@ const App = () => {
           path="/ensembles/:ensembleId/roster"
           element={<Roster />}
         />
+
+        {/* Rooms & Attendance */}
+        <Route path="/rooms" element={<Rooms />} />
+        <Route path="/rooms/:roomId/calibration" element={<RoomCalibration />} />
 
         {/* Catch-all */}
         <Route
