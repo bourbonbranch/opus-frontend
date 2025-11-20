@@ -32,25 +32,40 @@ export default function SeatingCanvas({
     const calculateCurvedPositions = () => {
         if (!isCurved || riserSections.length === 0) return [];
 
-        const totalSections = riserSections.length;
-        const arcAngle = 120; // Total arc span in degrees
-        const anglePerSection = arcAngle / Math.max(1, totalSections - 1);
-        const radius = 400; // Arc radius in pixels
+        const radius = 800; // Flatter curve (larger radius) for AMC feel
+
+        // Calculate total width to center the arrangement
+        let currentAngle = 0;
+        const sectionAngles = riserSections.map(section => {
+            const widthPx = section.moduleWidth * 40;
+            // Angle subtended by this section: s = r * theta => theta = s / r
+            const angleDeg = (widthPx / radius) * (180 / Math.PI);
+            return angleDeg;
+        });
+
+        const totalAngle = sectionAngles.reduce((sum, a) => sum + a, 0);
+        const startAngle = -totalAngle / 2;
 
         return riserSections.map((section, index) => {
-            // Calculate angle for this section (centered at 0)
-            const centerIndex = (totalSections - 1) / 2;
-            const angleOffset = (index - centerIndex) * anglePerSection;
-            const angleRad = (angleOffset * Math.PI) / 180;
+            const widthPx = section.moduleWidth * 40;
+            const sectionAngle = sectionAngles[index];
+
+            // Center of this section is at startAngle + (sum of prev angles) + half this angle
+            const prevAngles = sectionAngles.slice(0, index).reduce((sum, a) => sum + a, 0);
+            const centerAngle = startAngle + prevAngles + (sectionAngle / 2);
+
+            const angleRad = (centerAngle * Math.PI) / 180;
 
             // Position on arc
+            // x = sin(angle) * radius
+            // y = -cos(angle) * radius + radius (offset to start at 0)
             const x = Math.sin(angleRad) * radius;
-            const y = -Math.cos(angleRad) * radius + radius; // Offset so arc opens toward director
+            const y = -Math.cos(angleRad) * radius + radius;
 
             return {
                 x,
                 y,
-                rotation: angleOffset // Tangent to arc
+                rotation: centerAngle // Rotate to face center
             };
         });
     };
@@ -143,21 +158,39 @@ export default function SeatingCanvas({
                             </div>
                         )}
 
-                        {/* Director Position - Fixed above risers, always visible */}
-                        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '-200px' }}>
-                            <div className="flex flex-col items-center gap-2 opacity-90">
-                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 border-2 border-purple-400 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.4)] backdrop-blur">
-                                    <User className="w-8 h-8 text-white" />
+
+
+                        {/* Director / Screen Position - Fixed above risers */}
+                        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '-300px' }}>
+                            <div className="flex flex-col items-center gap-3">
+                                {/* Screen/Stage Representation */}
+                                <div className="w-[600px] h-12 bg-gradient-to-b from-purple-500/20 to-transparent rounded-t-3xl border-t border-purple-500/50 flex items-center justify-center mb-4">
+                                    <span className="text-xs uppercase tracking-[0.5em] text-purple-300/50 font-light">Stage / Director</span>
                                 </div>
-                                <span className="text-sm uppercase tracking-widest font-semibold text-white bg-gray-900/80 px-3 py-1 rounded-full">Director</span>
+
+                                {/* Director Bubble */}
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] z-20 relative">
+                                        <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
+                                        <User className="w-8 h-8 text-purple-100 relative z-10" />
+                                    </div>
+                                    <div className="px-4 py-1 bg-gray-800/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
+                                        <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">Director</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Empty State */}
                         {riserSections.length === 0 && (
-                            <div className="absolute left-1/2 top-0 -translate-x-1/2 text-center">
-                                <div className="text-gray-400 text-lg font-medium bg-gray-900/50 px-6 py-4 rounded-lg border border-white/10">
-                                    Click <span className="text-green-400 font-bold">"Add Section"</span> to start building your seating chart
+                            <div className="absolute left-1/2 top-0 -translate-x-1/2 text-center pt-20">
+                                <div className="text-gray-400 text-lg font-medium bg-gray-900/80 px-8 py-6 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
+                                    <p className="mb-4">Start building your seating chart</p>
+                                    <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
+                                        <span>Click</span>
+                                        <span className="px-2 py-1 bg-green-600/20 text-green-400 rounded border border-green-600/30 font-bold">+ Add Section</span>
+                                        <span>to begin</span>
+                                    </div>
                                 </div>
                             </div>
                         )}
