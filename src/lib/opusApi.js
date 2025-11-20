@@ -135,6 +135,15 @@ export async function updateRoom(id, payload) {
   return handleResponse(res);
 }
 
+export async function getAttendance(roomId, date) {
+  const params = new URLSearchParams();
+  params.append('room_id', roomId);
+  if (date) params.append('date', date);
+
+  const res = await fetch(`${API_BASE_URL}/attendance?${params}`);
+  return handleResponse(res);
+}
+
 export async function logAttendance(payload) {
   // expects: { roster_id, room_id, status? }
   const res = await fetch(`${API_BASE_URL}/attendance`, {

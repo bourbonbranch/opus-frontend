@@ -92,6 +92,21 @@ const Rooms = () => {
                                         <p style={{ margin: '5px 0 0', color: '#666', fontSize: '14px' }}>ID: {room.id}</p>
                                     </div>
                                     <Link
+                                        to={`/rooms/${room.id}/live`}
+                                        style={{
+                                            padding: '8px 15px',
+                                            background: '#8b5cf6',
+                                            color: 'white',
+                                            textDecoration: 'none',
+                                            borderRadius: '5px',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            marginRight: '10px'
+                                        }}
+                                    >
+                                        Live View
+                                    </Link>
+                                    <Link
                                         to={`/rooms/${room.id}/calibration`}
                                         style={{
                                             padding: '8px 15px',
