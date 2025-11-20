@@ -1,7 +1,7 @@
 // src/pages/Roster.jsx
 
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getRoster, addRosterMember } from '../lib/opusApi';
 
 const Roster = () => {
