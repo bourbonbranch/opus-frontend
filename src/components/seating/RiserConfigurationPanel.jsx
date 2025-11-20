@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 
-export default function RiserConfigurationPanel({ section, onUpdate, onRemove }) {
+export default function RiserConfigurationPanel({ section, globalRows, onUpdate, onRemove }) {
     if (!section) return null;
 
     return (
@@ -17,54 +17,32 @@ export default function RiserConfigurationPanel({ section, onUpdate, onRemove })
                     <label className="text-sm text-gray-300">Presets</label>
                     <div className="grid grid-cols-2 gap-2">
                         <button
-                            onClick={() => onUpdate({ rows: 3, moduleWidth: 6, treadDepth: 18 })}
+                            onClick={() => onUpdate({ moduleWidth: 6, treadDepth: 18 })}
                             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
                         >
                             <div className="font-medium text-white">Wenger Standard</div>
-                            <div className="text-gray-400">3-Step, 6' Wide</div>
+                            <div className="text-gray-400">6' Wide, 18" Deep</div>
                         </button>
                         <button
-                            onClick={() => onUpdate({ rows: 4, moduleWidth: 6, treadDepth: 18 })}
+                            onClick={() => onUpdate({ moduleWidth: 6, treadDepth: 18 })}
                             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
                         >
                             <div className="font-medium text-white">Wenger 4-Step</div>
-                            <div className="text-gray-400">4-Step, 6' Wide</div>
+                            <div className="text-gray-400">6' Wide, 18" Deep</div>
                         </button>
                         <button
-                            onClick={() => onUpdate({ rows: 3, moduleWidth: 4, treadDepth: 18 })}
+                            onClick={() => onUpdate({ moduleWidth: 4, treadDepth: 18 })}
                             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
                         >
                             <div className="font-medium text-white">Wenger Short</div>
-                            <div className="text-gray-400">3-Step, 4' Wide</div>
+                            <div className="text-gray-400">4' Wide, 18" Deep</div>
                         </button>
                         <button
-                            onClick={() => onUpdate({ rows: 3, moduleWidth: 6, treadDepth: 24 })}
+                            onClick={() => onUpdate({ moduleWidth: 6, treadDepth: 24 })}
                             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
                         >
                             <div className="font-medium text-white">Deep Tread</div>
-                            <div className="text-gray-400">3-Step, 24" Depth</div>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Rows Control */}
-                <div className="space-y-2">
-                    <label className="text-sm text-gray-300">Rows</label>
-                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-1 border border-white/10">
-                        <button
-                            onClick={() => onUpdate({ rows: Math.max(2, section.rows - 1) })}
-                            className="p-2 hover:bg-white/10 rounded-md transition-colors disabled:opacity-50"
-                            disabled={section.rows <= 2}
-                        >
-                            <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="font-mono font-medium">{section.rows}</span>
-                        <button
-                            onClick={() => onUpdate({ rows: Math.min(6, section.rows + 1) })}
-                            className="p-2 hover:bg-white/10 rounded-md transition-colors disabled:opacity-50"
-                            disabled={section.rows >= 6}
-                        >
-                            <Plus className="w-4 h-4" />
+                            <div className="text-gray-400">6' Wide, 24" Deep</div>
                         </button>
                     </div>
                 </div>
@@ -150,7 +128,7 @@ export default function RiserConfigurationPanel({ section, onUpdate, onRemove })
                         className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-purple-500"
                     >
                         <option value="">None</option>
-                        {Array.from({ length: section.rows }, (_, i) => (
+                        {Array.from({ length: globalRows }, (_, i) => (
                             <option key={i + 1} value={i + 1}>Row {i + 1}</option>
                         ))}
                     </select>

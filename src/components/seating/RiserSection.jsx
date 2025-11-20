@@ -2,17 +2,15 @@ import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import SingerSpot from './SingerSpot';
 
-export default function RiserSection({ section, isSelected, onSelect, placedStudents }) {
+export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents }) {
     const PIXELS_PER_FOOT = 40;
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
     const widthPx = section.moduleWidth * PIXELS_PER_FOOT;
     const depthPx = (section.treadDepth * PIXELS_PER_INCH);
 
-    // Generate rows (Row 1 is front/bottom, Row N is back/top)
-    // We render from back to front for visual stacking if needed, but for 2D plan view it doesn't matter much.
-    // Let's render top-down (Back row first).
-    const rows = Array.from({ length: section.rows }, (_, i) => section.rows - i);
+    // Generate rows using globalRows
+    const rows = Array.from({ length: globalRows }, (_, i) => globalRows - i);
 
     return (
         <div
