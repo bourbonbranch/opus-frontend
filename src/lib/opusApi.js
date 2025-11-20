@@ -171,3 +171,34 @@ export async function deleteEvent(eventId) {
   return handleResponse(res);
 }
 
+// ─────────────── CALENDAR ITEMS ───────────────
+
+export async function getCalendarItems(directorId, ensembleId) {
+  const params = new URLSearchParams();
+  if (ensembleId) {
+    params.append('ensemble_id', ensembleId);
+  } else if (directorId) {
+    params.append('director_id', directorId);
+  }
+  const res = await fetch(`${API_BASE_URL}/calendar-items?${params}`);
+  return handleResponse(res);
+}
+
+export async function createCalendarItem(payload) {
+  // expects: { director_id?, ensemble_id?, title, type, date, description?, color? }
+  const res = await fetch(`${API_BASE_URL}/calendar-items`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteCalendarItem(itemId) {
+  const res = await fetch(`${API_BASE_URL}/calendar-items/${itemId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
