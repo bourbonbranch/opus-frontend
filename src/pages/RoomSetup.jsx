@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapPinIcon, RadioIcon, PlusIcon } from 'lucide-react';
 import { getRooms, createRoom } from '../lib/opusApi';
 
@@ -147,22 +148,29 @@ export function RoomSetup() {
                                 </div>
                             </div>
 
-                            {!room.beacon_uuid && (
-                                <button
-                                    onClick={() => handleCalibrate(room.id)}
-                                    className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg"
+                            <div className="flex gap-3">
+                                <Link
+                                    to={`/rooms/${room.id}/live`}
+                                    className="flex-1 px-4 py-3 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors text-center"
                                 >
-                                    Start Calibration
-                                </button>
-                            )}
-                            {room.beacon_uuid && (
-                                <button
-                                    onClick={() => handleCalibrate(room.id)}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
-                                >
-                                    Recalibrate Room
-                                </button>
-                            )}
+                                    Live View
+                                </Link>
+                                {!room.beacon_uuid ? (
+                                    <Link
+                                        to={`/rooms/${room.id}/calibration`}
+                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg text-center"
+                                    >
+                                        Start Calibration
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        to={`/rooms/${room.id}/calibration`}
+                                        className="flex-1 px-4 py-3 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors text-center"
+                                    >
+                                        Recalibrate
+                                    </Link>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
