@@ -56,24 +56,36 @@ export default function SeatingChart() {
         setActiveId(null);
 
         if (over) {
-            const spotId = over.id;
-            if (typeof spotId === 'string' && spotId.includes('-')) {
-                const [sectionId, row, index] = spotId.split('-').map(Number);
+            const dropId = over.id;
 
-                if (!isNaN(sectionId) && !isNaN(row) && !isNaN(index)) {
-                    setPlacedStudents(prev => {
-                        const filtered = prev.filter(s => s.studentId !== active.id);
-                        const withoutOccupant = filtered.filter(s =>
-                            !(s.sectionId === sectionId && s.row === row && s.index === index)
-                        );
+            // Check if dropped on a row (format: sectionId-row-rowNum)
+            if (typeof dropId === 'string' && dropId.includes('-row-')) {
+                const parts = dropId.split('-');
+                const sectionId = parseInt(parts[0]);
+                const row = parseInt(parts[3]);
 
-                        return [...withoutOccupant, {
-                            studentId: active.id,
-                            sectionId,
-                            row,
-                            index
-                        }];
-                    });
+                if (!isNaN(sectionId) && !isNaN(row)) {
+                    // Get student data
+                    const student = students.find(s => s.id === active.id);
+
+                    if (student) {
+                        setPlacedStudents(prev => {
+                            // Remove student from previous position if already placed
+                            const filtered = prev.filter(s => s.studentId !== active.id);
+
+                            // Calculate next available index in this row
+                            const studentsInRow = filtered.filter(s => s.sectionId === sectionId && s.row === row);
+                            const nextIndex = studentsInRow.length + 1;
+
+                            return [...filtered, {
+                                studentId: active.id,
+                                sectionId,
+                                row,
+                                index: nextIndex,
+                                student: student // Include full student data
+                            }];
+                        });
+                    }
                 }
             }
         }
