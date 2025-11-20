@@ -12,6 +12,41 @@ export default function RiserConfigurationPanel({ section, onUpdate, onRemove })
             </div>
 
             <div className="p-4 space-y-6 overflow-y-auto">
+                {/* Presets */}
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-300">Presets</label>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={() => onUpdate({ rows: 3, moduleWidth: 6, treadDepth: 18 })}
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
+                        >
+                            <div className="font-medium text-white">Wenger Standard</div>
+                            <div className="text-gray-400">3-Step, 6' Wide</div>
+                        </button>
+                        <button
+                            onClick={() => onUpdate({ rows: 4, moduleWidth: 6, treadDepth: 18 })}
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
+                        >
+                            <div className="font-medium text-white">Wenger 4-Step</div>
+                            <div className="text-gray-400">4-Step, 6' Wide</div>
+                        </button>
+                        <button
+                            onClick={() => onUpdate({ rows: 3, moduleWidth: 4, treadDepth: 18 })}
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
+                        >
+                            <div className="font-medium text-white">Wenger Short</div>
+                            <div className="text-gray-400">3-Step, 4' Wide</div>
+                        </button>
+                        <button
+                            onClick={() => onUpdate({ rows: 3, moduleWidth: 6, treadDepth: 24 })}
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
+                        >
+                            <div className="font-medium text-white">Deep Tread</div>
+                            <div className="text-gray-400">3-Step, 24" Depth</div>
+                        </button>
+                    </div>
+                </div>
+
                 {/* Rows Control */}
                 <div className="space-y-2">
                     <label className="text-sm text-gray-300">Rows</label>

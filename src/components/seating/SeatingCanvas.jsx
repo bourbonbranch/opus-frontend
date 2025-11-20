@@ -27,23 +27,28 @@ export default function SeatingCanvas({
                     contentClass="w-full h-full"
                 >
                     <div
-                        className="w-[5000px] h-[5000px] relative bg-grid-pattern"
+                        className="w-[3000px] h-[3000px] relative bg-grid-pattern"
                         style={{
                             backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
                             backgroundSize: '40px 40px' // 1 foot grid
                         }}
                     >
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center">
+                            {/* Stage Marker */}
+                            <div className="absolute top-[500px] w-[800px] h-1 bg-purple-500/30 rounded-full flex items-center justify-center">
+                                <span className="bg-gray-950 px-2 text-xs text-purple-400 uppercase tracking-widest font-semibold">Stage Front</span>
+                            </div>
+
                             {/* Director Position */}
-                            <div className="absolute left-1/2 top-[400px] -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-                                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                            <div className="absolute top-[600px] flex flex-col items-center gap-2 opacity-50">
+                                <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                     <User className="w-6 h-6" />
                                 </div>
                                 <span className="text-xs uppercase tracking-widest font-semibold">Director</span>
                             </div>
 
                             {/* Riser Sections Container */}
-                            <div className="flex justify-center items-end gap-1">
+                            <div className="flex justify-center items-end gap-1 origin-bottom">
                                 {riserSections.map((section, index) => {
                                     // Calculate rotation for curved layout
                                     // Center section is 0 deg
