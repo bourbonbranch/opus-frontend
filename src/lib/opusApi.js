@@ -2,47 +2,74 @@
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  'https://opus-backend-production.up.railway.app'; // your Railway URL
+  'https://opus-backend-production.up.railway.app';
 
+// Helper to handle responses
 async function handleResponse(res) {
+  const text = await res.text();
+
   if (!res.ok) {
-    let message = 'Request failed';
+    // Try to parse JSON if possible, otherwise return plain text
     try {
-      const data = await res.json();
-      if (data && data.error) message = data.error;
+      const data = JSON.parse(text);
+      const message = data.message || data.error || text || 'Request failed';
+      throw new Error(message);
     } catch {
-      // response wasn't JSON, ignore
+      throw new Error(text || 'Request failed');
     }
-    throw new Error(message);
   }
-  return res.json();
+
+  // If there was no body, return null
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }
 
-// --- AUTH ---
+// ───────────────── SIGNUP ─────────────────
 
 export async function signupDirector(payload) {
   const res = await fetch(`${API_BASE_URL}/directors/signup`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(payload),
   });
 
   return handleResponse(res);
 }
 
-// --- ENSEMBLES ---
+// ─────────────── CREATE ENSEMBLE ───────────────
 
 export async function createEnsemble(payload) {
   const res = await fetch(`${API_BASE_URL}/ensembles`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(payload),
   });
 
   return handleResponse(res);
 }
 
+// ─────────────── GET ENSEMBLES ───────────────
+
 export async function getEnsembles() {
-  const res = await fetch(`${API_BASE_URL}/ensembles`);
+  const directorId = localStorage.getItem('directorId');
+
+  if (!directorId) {
+    // This error will be shown in the red box on the dashboard
+    throw new Error('Please sign in or create an account first.');
+  }
+
+  const res = await fetch(
+    `${API_BASE_URL}/ensembles?director_id=${encodeURIComponent(directorId)}`
+  );
+
   return handleResponse(res);
 }
