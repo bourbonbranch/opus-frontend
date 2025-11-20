@@ -29,6 +29,11 @@ export function DashboardLayout() {
             label: 'Roster',
         },
         {
+            to: '/director/events',
+            icon: CalendarIcon,
+            label: 'Events',
+        },
+        {
             to: '/director/calendar',
             icon: CalendarIcon,
             label: 'Calendar',

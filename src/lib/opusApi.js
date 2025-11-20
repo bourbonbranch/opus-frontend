@@ -133,3 +133,41 @@ export async function logAttendance(payload) {
   });
   return handleResponse(res);
 }
+
+// ─────────────── EVENTS ───────────────
+
+export async function getEvents(ensembleId) {
+  const res = await fetch(`${API_BASE_URL}/events?ensemble_id=${ensembleId}`);
+  return handleResponse(res);
+}
+
+export async function createEvent(payload) {
+  // expects: { ensemble_id, room_id?, name, type, start_time, end_time, description? }
+  const res = await fetch(`${API_BASE_URL}/events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function updateEvent(eventId, payload) {
+  const res = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteEvent(eventId) {
+  const res = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
