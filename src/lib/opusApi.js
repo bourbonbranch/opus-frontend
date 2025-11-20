@@ -244,3 +244,169 @@ export async function sendMessage(payload) {
   });
   return handleResponse(res);
 }
+
+// ─────────────── TICKETS ───────────────
+
+// Events
+export async function getEvents(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+
+  const res = await fetch(`${API_BASE_URL}/events?director_id=${id}`);
+  return handleResponse(res);
+}
+
+export async function getEvent(eventId) {
+  const res = await fetch(`${API_BASE_URL}/events/${eventId}`);
+  return handleResponse(res);
+}
+
+export async function createEvent(eventData) {
+  const res = await fetch(`${API_BASE_URL}/events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventData),
+  });
+  return handleResponse(res);
+}
+
+export async function updateEvent(eventId, eventData) {
+  const res = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventData),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteEvent(eventId) {
+  const res = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// Performances
+export async function getPerformances(eventId) {
+  const res = await fetch(`${API_BASE_URL}/performances?event_id=${eventId}`);
+  return handleResponse(res);
+}
+
+export async function createPerformance(performanceData) {
+  const res = await fetch(`${API_BASE_URL}/performances`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(performanceData),
+  });
+  return handleResponse(res);
+}
+
+export async function updatePerformance(performanceId, performanceData) {
+  const res = await fetch(`${API_BASE_URL}/performances/${performanceId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(performanceData),
+  });
+  return handleResponse(res);
+}
+
+export async function deletePerformance(performanceId) {
+  const res = await fetch(`${API_BASE_URL}/performances/${performanceId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// Ticket Types
+export async function getTicketTypes(eventId) {
+  const res = await fetch(`${API_BASE_URL}/ticket-types?event_id=${eventId}`);
+  return handleResponse(res);
+}
+
+export async function createTicketType(ticketTypeData) {
+  const res = await fetch(`${API_BASE_URL}/ticket-types`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(ticketTypeData),
+  });
+  return handleResponse(res);
+}
+
+export async function updateTicketType(ticketTypeId, ticketTypeData) {
+  const res = await fetch(`${API_BASE_URL}/ticket-types/${ticketTypeId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(ticketTypeData),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteTicketType(ticketTypeId) {
+  const res = await fetch(`${API_BASE_URL}/ticket-types/${ticketTypeId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// Student Sale Links
+export async function generateStudentLinks(eventId) {
+  const res = await fetch(`${API_BASE_URL}/events/${eventId}/generate-student-links`, {
+    method: 'POST',
+  });
+  return handleResponse(res);
+}
+
+export async function getStudentSaleLinks(eventId) {
+  const res = await fetch(`${API_BASE_URL}/student-sale-links?event_id=${eventId}`);
+  return handleResponse(res);
+}
+
+export async function getEventByStudentCode(code) {
+  const res = await fetch(`${API_BASE_URL}/student-sale-links/${code}`);
+  return handleResponse(res);
+}
+
+// Orders
+export async function createOrder(orderData) {
+  const res = await fetch(`${API_BASE_URL}/orders`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(orderData),
+  });
+  return handleResponse(res);
+}
+
+export async function getOrder(orderId) {
+  const res = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+  return handleResponse(res);
+}
+
+export async function getOrders(eventId) {
+  const res = await fetch(`${API_BASE_URL}/orders?event_id=${eventId}`);
+  return handleResponse(res);
+}
+
+// Reports
+export async function getStudentSalesReport(eventId) {
+  const res = await fetch(`${API_BASE_URL}/reports/student-sales?event_id=${eventId}`);
+  return handleResponse(res);
+}
+
+export async function getEventSummary(eventId) {
+  const res = await fetch(`${API_BASE_URL}/reports/event-summary?event_id=${eventId}`);
+  return handleResponse(res);
+}
