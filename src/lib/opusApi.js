@@ -222,3 +222,25 @@ export async function deleteCalendarItem(itemId) {
   });
   return handleResponse(res);
 }
+
+// ─────────────── MESSAGES ───────────────
+
+export async function getMessages(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+
+  const res = await fetch(`${API_BASE_URL}/messages?director_id=${id}`);
+  return handleResponse(res);
+}
+
+export async function sendMessage(payload) {
+  // expects: { director_id, ensemble_id?, subject, content, recipients_summary, recipient_ids }
+  const res = await fetch(`${API_BASE_URL}/messages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}

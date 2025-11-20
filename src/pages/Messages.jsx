@@ -1,22 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusIcon, SearchIcon, UsersIcon, SendIcon, CheckCheckIcon, ClockIcon } from 'lucide-react';
-import { getRoster, getEnsembles } from '../lib/opusApi';
-
-// Mock data until backend is ready
-const MOCK_MESSAGES = [
-    { id: 1, subject: 'Rehearsal Cancelled', content: 'Due to weather, rehearsal is cancelled tonight.', recipients: 'All Students', created_at: '2023-10-27T10:00:00Z', read_count: 45, total_count: 50 },
-    { id: 2, subject: 'Uniform Fitting', content: 'Please sign up for a slot.', recipients: 'Chamber Choir', created_at: '2023-10-26T14:30:00Z', read_count: 12, total_count: 24 },
-];
+import { getRoster, getEnsembles, getMessages, sendMessage } from '../lib/opusApi';
 
 export default function Messages() {
-    const [messages, setMessages] = useState(MOCK_MESSAGES);
+    const [messages, setMessages] = useState([]);
     const [isComposeOpen, setIsComposeOpen] = useState(false);
     const [ensembles, setEnsembles] = useState([]);
     const [roster, setRoster] = useState([]);
-    const [selectedEnsemble, setSelectedEnsemble] = useState('all');
 
     // Compose state
     const [recipientType, setRecipientType] = useState('all'); // 'all', 'ensemble', 'individual'
+    const [selectedEnsembleId, setSelectedEnsembleId] = useState('');
     const [selectedRecipients, setSelectedRecipients] = useState([]);
     const [subject, setSubject] = useState('');
     const [content, setContent] = useState('');
@@ -28,15 +23,16 @@ export default function Messages() {
 
     const loadData = async () => {
         try {
-            // In real implementation, we'd fetch messages here
-            // const msgs = await getMessages();
-            // setMessages(msgs);
+            const directorId = localStorage.getItem('directorId');
+            if (directorId) {
+                const msgs = await getMessages(directorId);
+                setMessages(msgs || []);
+            }
 
             const ens = await getEnsembles();
             setEnsembles(ens || []);
 
             // Fetch all students for individual selection
-            // This might need optimization for large programs
             if (ens.length > 0) {
                 const allStudents = [];
                 for (const e of ens) {
@@ -54,30 +50,49 @@ export default function Messages() {
         e.preventDefault();
         setSending(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            const newMessage = {
-                id: Date.now(),
+        try {
+            const directorId = localStorage.getItem('directorId');
+            let recipientIds = [];
+            let recipientsSummary = '';
+
+            if (recipientType === 'all') {
+                recipientIds = roster.map(s => s.id);
+                recipientsSummary = 'All Students';
+            } else if (recipientType === 'ensemble') {
+                if (!selectedEnsembleId) throw new Error('Please select an ensemble');
+                const ensembleStudents = roster.filter(s => s.ensemble_id === parseInt(selectedEnsembleId));
+                recipientIds = ensembleStudents.map(s => s.id);
+                const ensembleName = ensembles.find(e => e.id === parseInt(selectedEnsembleId))?.name;
+                recipientsSummary = ensembleName || 'Ensemble';
+            } else {
+                recipientIds = selectedRecipients;
+                recipientsSummary = `${selectedRecipients.length} Recipients`;
+            }
+
+            await sendMessage({
+                director_id: directorId,
+                ensemble_id: selectedEnsembleId || null,
                 subject,
                 content,
-                recipients: recipientType === 'all' ? 'All Students' :
-                    recipientType === 'individual' ? `${selectedRecipients.length} Recipients` : 'Selected Group',
-                created_at: new Date().toISOString(),
-                read_count: 0,
-                total_count: recipientType === 'all' ? 100 : selectedRecipients.length
-            };
+                recipients_summary: recipientsSummary,
+                recipient_ids: recipientIds
+            });
 
-            setMessages([newMessage, ...messages]);
-            setSending(false);
+            await loadData(); // Refresh list
             setIsComposeOpen(false);
             resetForm();
-        }, 1000);
+        } catch (err) {
+            alert('Failed to send message: ' + err.message);
+        } finally {
+            setSending(false);
+        }
     };
 
     const resetForm = () => {
         setSubject('');
         setContent('');
         setRecipientType('all');
+        setSelectedEnsembleId('');
         setSelectedRecipients([]);
     };
 
@@ -108,32 +123,38 @@ export default function Messages() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Message List */}
                 <div className="lg:col-span-3 space-y-4">
-                    {messages.map((msg) => (
-                        <div key={msg.id} className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/15 transition-colors cursor-pointer group">
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-purple-500/20 rounded-lg text-purple-300">
-                                        <UsersIcon className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors">{msg.subject}</h3>
-                                        <p className="text-sm text-gray-400">To: {msg.recipients}</p>
-                                    </div>
-                                </div>
-                                <span className="text-sm text-gray-400 flex items-center gap-1">
-                                    <ClockIcon className="w-3 h-3" />
-                                    {new Date(msg.created_at).toLocaleDateString()}
-                                </span>
-                            </div>
-                            <p className="text-gray-300 mb-4 line-clamp-2">{msg.content}</p>
-                            <div className="flex items-center gap-4 text-sm">
-                                <div className="flex items-center gap-1.5 text-green-400 bg-green-400/10 px-3 py-1 rounded-full">
-                                    <CheckCheckIcon className="w-4 h-4" />
-                                    <span>{msg.read_count} / {msg.total_count} Read</span>
-                                </div>
-                            </div>
+                    {messages.length === 0 ? (
+                        <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+                            <p className="text-gray-400">No messages sent yet</p>
                         </div>
-                    ))}
+                    ) : (
+                        messages.map((msg) => (
+                            <div key={msg.id} className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/15 transition-colors cursor-pointer group">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-purple-500/20 rounded-lg text-purple-300">
+                                            <UsersIcon className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors">{msg.subject}</h3>
+                                            <p className="text-sm text-gray-400">To: {msg.recipients_summary}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-sm text-gray-400 flex items-center gap-1">
+                                        <ClockIcon className="w-3 h-3" />
+                                        {new Date(msg.created_at).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <p className="text-gray-300 mb-4 line-clamp-2">{msg.content}</p>
+                                <div className="flex items-center gap-4 text-sm">
+                                    <div className="flex items-center gap-1.5 text-green-400 bg-green-400/10 px-3 py-1 rounded-full">
+                                        <CheckCheckIcon className="w-4 h-4" />
+                                        <span>{msg.read_count} / {msg.total_count} Read</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
@@ -153,19 +174,34 @@ export default function Messages() {
                             <div className="space-y-3">
                                 <label className="text-sm font-medium text-gray-300">Send To</label>
                                 <div className="flex gap-3">
-                                    {['all', 'individual'].map((type) => (
+                                    {['all', 'ensemble', 'individual'].map((type) => (
                                         <button
                                             key={type}
                                             onClick={() => setRecipientType(type)}
-                                            className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${recipientType === type
+                                            className={`flex - 1 py - 2 px - 4 rounded - lg border text - sm font - medium transition - all capitalize ${recipientType === type
                                                     ? 'bg-purple-600 border-purple-500 text-white'
                                                     : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-                                                }`}
+                                                } `}
                                         >
-                                            {type === 'all' ? 'All Students' : 'Select Students'}
+                                            {type}
                                         </button>
                                     ))}
                                 </div>
+
+                                {recipientType === 'ensemble' && (
+                                    <div className="mt-4">
+                                        <select
+                                            value={selectedEnsembleId}
+                                            onChange={(e) => setSelectedEnsembleId(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        >
+                                            <option value="">Select Ensemble...</option>
+                                            {ensembles.map(e => (
+                                                <option key={e.id} value={e.id}>{e.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
 
                                 {recipientType === 'individual' && (
                                     <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 max-h-48 overflow-y-auto">
