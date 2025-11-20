@@ -83,12 +83,7 @@ export default function SeatingCanvas({
                     {/* Fixed center point */}
                     <div className="absolute" style={{ top: '2000px', left: '2000px' }}>
 
-                        {/* Stage Front Line - Always visible */}
-                        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '-400px' }}>
-                            <div className="w-[800px] h-2 bg-purple-500/40 rounded-full flex items-center justify-center">
-                                <span className="bg-gray-950 px-4 py-1 text-sm text-purple-300 uppercase tracking-widest font-bold">Stage Front</span>
-                            </div>
-                        </div>
+                        {/* Stage Front marker removed */}
 
                         {/* Riser Sections */}
                         {riserSections.length > 0 && (
@@ -148,13 +143,13 @@ export default function SeatingCanvas({
                             </div>
                         )}
 
-                        {/* Director Position - Fixed below risers, always visible */}
-                        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '300px' }}>
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-2 border-purple-400/50 flex items-center justify-center shadow-[0_0_40px_rgba(168,85,247,0.3)] backdrop-blur">
-                                    <User className="w-8 h-8 text-purple-300" />
+                        {/* Director Position - Fixed above risers, always visible */}
+                        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '-200px' }}>
+                            <div className="flex flex-col items-center gap-2 opacity-90">
+                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 border-2 border-purple-400 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.4)] backdrop-blur">
+                                    <User className="w-8 h-8 text-white" />
                                 </div>
-                                <span className="text-sm uppercase tracking-widest font-bold text-purple-300 bg-gray-950/80 px-3 py-1 rounded-full">Director</span>
+                                <span className="text-sm uppercase tracking-widest font-semibold text-white bg-gray-900/80 px-3 py-1 rounded-full">Director</span>
                             </div>
                         </div>
 
