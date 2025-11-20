@@ -35,6 +35,7 @@ const AddEnsemble = () => {
 
       if (!directorId) {
         setError('You are not signed in. Please create an account first.');
+        setSaving(false);
         navigate('/signup');
         return;
       }
@@ -75,138 +76,38 @@ const AddEnsemble = () => {
           borderRadius: '10px',
           boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
           width: '100%',
-          maxWidth: '600px',
+          maxWidth: '500px',
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-              marginRight: '10px',
-              fontSize: '18px',
-              fontWeight: 700,
-            }}
-            aria-hidden
-          >
-            ♪
-          </div>
-          <h1
-            style={{
-              fontSize: '28px',
-              fontWeight: '800',
-              margin: 0,
-              color: '#333',
-            }}
-          >
-            Opus
-          </h1>
-        </div>
-
-        {/* Progress indicator */}
-        <div
+        <h1
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '24px',
-            color: '#666',
-            fontSize: '14px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '999px',
-                background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '14px',
-              }}
-            >
-              ✓
-            </div>
-            <span>Account</span>
-          </div>
-          <div style={{ height: 1, width: 40, background: '#e5e7eb' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#333' }}>
-            <div
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '999px',
-                background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '14px',
-              }}
-            >
-              2
-            </div>
-            <span style={{ fontWeight: 600 }}>Ensemble</span>
-          </div>
-          <div style={{ height: 1, width: 40, background: '#e5e7eb' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#999' }}>
-            <div
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '999px',
-                background: '#f3f4f6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#9ca3af',
-                fontWeight: 700,
-                fontSize: '14px',
-              }}
-            >
-              3
-            </div>
-            <span>Dashboard</span>
-          </div>
-        </div>
-
-        <h2
-          style={{
-            fontSize: '24px',
-            fontWeight: '800',
-            margin: 0,
+            fontSize: '32px',
+            fontWeight: 'bold',
+            marginBottom: '10px',
             color: '#333',
           }}
         >
-          Create your ensemble
-        </h2>
-        <p style={{ color: '#666', marginTop: '6px', marginBottom: '24px' }}>
-          Tell us about your choir, band, or orchestra
+          Create Ensemble
+        </h1>
+        <p
+          style={{
+            color: '#666',
+            marginBottom: '24px',
+          }}
+        >
+          Tell us about your choir, band, or orchestra. You can add more ensembles later.
         </p>
 
         {error && (
           <div
             style={{
-              background: '#FFF7ED',
-              border: '1px solid #FED7AA',
+              background: '#fee',
+              border: '1px solid #fcc',
               padding: '12px',
-              borderRadius: '6px',
+              borderRadius: '5px',
               marginBottom: '20px',
-              color: '#9A3412',
-              fontWeight: 600,
+              color: '#c33',
             }}
           >
             {error}
@@ -215,14 +116,13 @@ const AddEnsemble = () => {
 
         <form onSubmit={handleSubmit}>
           {/* Ensemble Name */}
-          <div style={{ marginBottom: '18px' }}>
+          <div style={{ marginBottom: '20px' }}>
             <label
               style={{
                 display: 'block',
-                marginBottom: '6px',
-                fontWeight: 600,
+                marginBottom: '5px',
+                fontWeight: '600',
                 color: '#333',
-                fontSize: '14px',
               }}
             >
               Ensemble Name
@@ -233,105 +133,91 @@ const AddEnsemble = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="e.g., Varsity Choir, Concert Band"
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
                 fontSize: '16px',
-                outline: 'none',
               }}
+              placeholder="e.g., Varsity Choir, Wind Ensemble"
             />
           </div>
 
-          {/* Two columns */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '16px',
-              marginBottom: '18px',
-            }}
-          >
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '6px',
-                  fontWeight: 600,
-                  color: '#333',
-                  fontSize: '14px',
-                }}
-              >
-                Ensemble Type
-              </label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  background: 'white',
-                }}
-              >
-                <option value="choir">Choir</option>
-                <option value="band">Band</option>
-                <option value="orchestra">Orchestra</option>
-                <option value="jazz-band">Jazz Band</option>
-                <option value="marching-band">Marching Band</option>
-                <option value="chamber">Chamber Ensemble</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '6px',
-                  fontWeight: 600,
-                  color: '#333',
-                  fontSize: '14px',
-                }}
-              >
-                Level
-              </label>
-              <select
-                name="level"
-                value={formData.level}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  background: 'white',
-                }}
-              >
-                <option value="elementary">Elementary</option>
-                <option value="middle-school">Middle School</option>
-                <option value="high-school">High School</option>
-                <option value="college">College</option>
-                <option value="community">Community</option>
-                <option value="professional">Professional</option>
-              </select>
-            </div>
-          </div>
-
-          {/* School or Organization */}
-          <div style={{ marginBottom: '18px' }}>
+          {/* Ensemble Type */}
+          <div style={{ marginBottom: '20px' }}>
             <label
               style={{
                 display: 'block',
-                marginBottom: '6px',
-                fontWeight: 600,
+                marginBottom: '5px',
+                fontWeight: '600',
                 color: '#333',
-                fontSize: '14px',
+              }}
+            >
+              Ensemble Type
+            </label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                fontSize: '16px',
+              }}
+            >
+              <option value="choir">Choir</option>
+              <option value="band">Band</option>
+              <option value="orchestra">Orchestra</option>
+              <option value="jazz-band">Jazz Band</option>
+              <option value="marching-band">Marching Band</option>
+              <option value="chamber">Chamber Ensemble</option>
+            </select>
+          </div>
+
+          {/* Level */}
+          <div style={{ marginBottom: '20px' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '5px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
+              Level
+            </label>
+            <select
+              name="level"
+              value={formData.level}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                fontSize: '16px',
+              }}
+            >
+              <option value="elementary">Elementary</option>
+              <option value="middle-school">Middle School</option>
+              <option value="high-school">High School</option>
+              <option value="college">College/University</option>
+              <option value="community">Community</option>
+              <option value="professional">Professional</option>
+            </select>
+          </div>
+
+          {/* School or Organization */}
+          <div style={{ marginBottom: '20px' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '5px',
+                fontWeight: '600',
+                color: '#333',
               }}
             >
               School or Organization
@@ -341,27 +227,25 @@ const AddEnsemble = () => {
               name="school"
               value={formData.school}
               onChange={handleChange}
-              placeholder="e.g., Lincoln High School"
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
                 fontSize: '16px',
-                outline: 'none',
               }}
+              placeholder="e.g., Lincoln High School"
             />
           </div>
 
           {/* Size */}
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '30px' }}>
             <label
               style={{
                 display: 'block',
-                marginBottom: '6px',
-                fontWeight: 600,
+                marginBottom: '5px',
+                fontWeight: '600',
                 color: '#333',
-                fontSize: '14px',
               }}
             >
               Approximate Size
@@ -373,10 +257,9 @@ const AddEnsemble = () => {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
                 fontSize: '16px',
-                background: 'white',
               }}
             >
               <option value="">Select size</option>
@@ -388,48 +271,49 @@ const AddEnsemble = () => {
             </select>
           </div>
 
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={() => navigate('/signup')}
-              style={{
-                flex: 1,
-                padding: '12px',
-                background: '#f8fafc',
-                color: '#111827',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                flex: 1,
-                padding: '12px',
-                background: saving
-                  ? '#9ca3af'
-                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: 800,
-                cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 10px 30px rgba(102,126,234,0.35)',
-              }}
-            >
-              {saving ? 'Saving…' : 'Continue'}
-            </button>
-          </div>
+          {/* Primary button */}
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: saving
+                ? '#999'
+                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: saving ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {saving ? 'Saving Ensemble...' : 'Save Ensemble & Continue'}
+          </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '18px', color: '#666' }}>
-          You can add more ensembles later from your dashboard
+        <p
+          style={{
+            textAlign: 'center',
+            marginTop: '20px',
+            color: '#666',
+          }}
+        >
+          Want to change your account details?{' '}
+          <button
+            onClick={() => navigate('/signup')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#667eea',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+            }}
+          >
+            Edit account
+          </button>
         </p>
       </div>
     </div>
