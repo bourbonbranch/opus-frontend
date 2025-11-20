@@ -104,9 +104,17 @@ export default function SeatingCanvas({
 
                     {/* Screen/Stage Representation */}
                     <div className="w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)]">
-                        <span className="text-[10px] uppercase tracking-[0.5em] text-purple-300/50 font-light mb-1">Stage Front</span>
+                        {/* Text removed as requested */}
                     </div>
                 </div>
+            </div>
+
+            {/* Debug Overlay - Temporary */}
+            <div className="absolute top-4 left-4 z-50 bg-black/80 text-green-400 p-4 rounded font-mono text-xs pointer-events-none">
+                Sections: {riserSections.length}<br />
+                Curved: {isCurved ? 'Yes' : 'No'}<br />
+                Global Rows: {globalRows}<br />
+                First Section Pos: {positions[0] ? `x:${Math.round(positions[0].x)}, y:${Math.round(positions[0].y)}` : 'N/A'}
             </div>
 
             <Controls />

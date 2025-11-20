@@ -1,23 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
-import { Settings, Users, Plus } from 'lucide-react';
+import { Settings, Users, Plus, Loader } from 'lucide-react';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
-
-// Mock Data
-const MOCK_STUDENTS = Array.from({ length: 50 }, (_, i) => ({
-    id: i + 1,
-    name: `Student ${i + 1}`,
-    section: ['Soprano', 'Alto', 'Tenor', 'Bass'][Math.floor(Math.random() * 4)],
-}));
+import { getEnsembles, getRoster } from '../lib/opusApi';
 
 export default function SeatingChart() {
-    const [students, setStudents] = useState(MOCK_STUDENTS);
+    const [students, setStudents] = useState([]);
     const [placedStudents, setPlacedStudents] = useState([]);
     const [activeId, setActiveId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isConfigOpen, setIsConfigOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [ensembles, setEnsembles] = useState([]);
+    const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
 
     // Global Riser Settings
     const [globalRows, setGlobalRows] = useState(4);
@@ -31,6 +28,37 @@ export default function SeatingChart() {
         useSensor(MouseSensor, { activationConstraint: { distance: 10 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
     );
+
+    // Fetch Ensembles and Roster
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const ensemblesData = await getEnsembles();
+                setEnsembles(ensemblesData);
+
+                if (ensemblesData.length > 0) {
+                    const firstEnsembleId = ensemblesData[0].id;
+                    setSelectedEnsembleId(firstEnsembleId);
+
+                    const rosterData = await getRoster(firstEnsembleId);
+                    // Map roster to student format (assign random section for now as DB lacks it)
+                    const sections = ['Soprano', 'Alto', 'Tenor', 'Bass'];
+                    const mappedStudents = rosterData.map(r => ({
+                        id: r.id,
+                        name: `${r.first_name} ${r.last_name}`,
+                        section: sections[Math.floor(Math.random() * sections.length)], // Temporary: Random section
+                        originalData: r
+                    }));
+                    setStudents(mappedStudents);
+                }
+            } catch (error) {
+                console.error("Failed to load roster:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadData();
+    }, []);
 
     const handleAddSection = () => {
         const newId = riserSections.length > 0 ? Math.max(...riserSections.map(r => r.id)) + 1 : 1;
