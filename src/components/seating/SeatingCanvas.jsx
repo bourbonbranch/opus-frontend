@@ -109,6 +109,19 @@ export default function SeatingCanvas({
                 </div>
             </div>
 
+            {/* Debug Overlay - EXTENDED */}
+            <div className="absolute top-4 left-4 z-50 bg-black/90 text-green-400 p-4 rounded font-mono text-xs pointer-events-none max-w-md overflow-hidden">
+                <div className="font-bold mb-2">DEBUG INFO</div>
+                Sections: {riserSections.length}<br />
+                Curved: {isCurved ? 'Yes' : 'No'}<br />
+                Global Rows: {globalRows}<br />
+                <div className="my-1 border-t border-white/20"></div>
+                First Section:<br />
+                {riserSections[0] ? JSON.stringify(riserSections[0]).slice(0, 100) + '...' : 'None'}<br />
+                <div className="my-1 border-t border-white/20"></div>
+                Pos[0]: {positions[0] ? `x:${Math.round(positions[0].x)}, y:${Math.round(positions[0].y)}, rot:${Math.round(positions[0].rotation)}` : 'N/A'}
+            </div>
+
             <Controls />
             <TransformComponent
                 wrapperClass="w-full h-full"
@@ -121,85 +134,90 @@ export default function SeatingCanvas({
                         backgroundSize: '40px 40px'
                     }}
                 >
-                    {/* Fixed center point */}
-                    <div className="absolute" style={{ top: '2000px', left: '2000px' }}>
+                    {/* Fixed center point - RED BORDER FOR DEBUG */}
+                    <div className="absolute border-4 border-red-500 w-10 h-10 flex items-center justify-center text-red-500 text-xs" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
+                        CENTER
 
-                        {/* Stage Front marker removed */}
+                        {/* Riser Container relative to center */}
+                        <div className="absolute top-1/2 left-1/2 w-0 h-0 overflow-visible">
 
-                        {/* Riser Sections */}
-                        {riserSections.length > 0 && (
-                            <div className="relative" style={{ width: '1px', height: '1px' }}>
-                                {riserSections.map((section, index) => {
-                                    if (isCurved) {
-                                        const pos = positions[index];
-                                        return (
-                                            <div
-                                                key={section.id}
-                                                className="absolute"
-                                                style={{
-                                                    left: `${pos.x}px`,
-                                                    top: `${pos.y}px`,
-                                                    transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
-                                                    transformOrigin: 'center bottom',
-                                                    zIndex: selectedSectionId === section.id ? 10 : 1
-                                                }}
-                                            >
-                                                <RiserSection
-                                                    section={section}
-                                                    globalRows={globalRows}
-                                                    isSelected={selectedSectionId === section.id}
-                                                    onSelect={() => onSelectSection(section.id)}
-                                                    placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                />
-                                            </div>
-                                        );
-                                    } else {
-                                        // Straight layout - side by side
-                                        const totalWidth = riserSections.reduce((sum, s) => sum + (s.moduleWidth * 40), 0);
-                                        const startX = -totalWidth / 2;
-                                        const xOffset = riserSections.slice(0, index).reduce((sum, s) => sum + (s.moduleWidth * 40), 0);
+                            {/* Stage Front marker removed */}
 
-                                        return (
-                                            <div
-                                                key={section.id}
-                                                className="absolute"
-                                                style={{
-                                                    left: `${startX + xOffset}px`,
-                                                    top: '0px',
-                                                    transform: 'translateY(-100%)',
-                                                    zIndex: selectedSectionId === section.id ? 10 : 1
-                                                }}
-                                            >
-                                                <RiserSection
-                                                    section={section}
-                                                    globalRows={globalRows}
-                                                    isSelected={selectedSectionId === section.id}
-                                                    onSelect={() => onSelectSection(section.id)}
-                                                    placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                />
-                                            </div>
-                                        );
-                                    }
-                                })}
-                            </div>
-                        )}
+                            {/* Riser Sections */}
+                            {riserSections.length > 0 && (
+                                <div className="relative" style={{ width: '1px', height: '1px' }}>
+                                    {riserSections.map((section, index) => {
+                                        if (isCurved) {
+                                            const pos = positions[index];
+                                            return (
+                                                <div
+                                                    key={section.id}
+                                                    className="absolute"
+                                                    style={{
+                                                        left: `${pos.x}px`,
+                                                        top: `${pos.y}px`,
+                                                        transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
+                                                        transformOrigin: 'center bottom',
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                    }}
+                                                >
+                                                    <RiserSection
+                                                        section={section}
+                                                        globalRows={globalRows}
+                                                        isSelected={selectedSectionId === section.id}
+                                                        onSelect={() => onSelectSection(section.id)}
+                                                        placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                    />
+                                                </div>
+                                            );
+                                        } else {
+                                            // Straight layout - side by side
+                                            const totalWidth = riserSections.reduce((sum, s) => sum + (s.moduleWidth * 40), 0);
+                                            const startX = -totalWidth / 2;
+                                            const xOffset = riserSections.slice(0, index).reduce((sum, s) => sum + (s.moduleWidth * 40), 0);
+
+                                            return (
+                                                <div
+                                                    key={section.id}
+                                                    className="absolute"
+                                                    style={{
+                                                        left: `${startX + xOffset}px`,
+                                                        top: '0px',
+                                                        transform: 'translateY(-100%)',
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                    }}
+                                                >
+                                                    <RiserSection
+                                                        section={section}
+                                                        globalRows={globalRows}
+                                                        isSelected={selectedSectionId === section.id}
+                                                        onSelect={() => onSelectSection(section.id)}
+                                                        placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                    })}
+                                </div>
+                            )}
 
 
 
-                        {/* Empty State */}
-                        {riserSections.length === 0 && (
-                            <div className="absolute left-1/2 top-0 -translate-x-1/2 text-center pt-20">
-                                <div className="text-gray-400 text-lg font-medium bg-gray-900/80 px-8 py-6 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
-                                    <p className="mb-4">Start building your seating chart</p>
-                                    <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
-                                        <span>Click</span>
-                                        <span className="px-2 py-1 bg-green-600/20 text-green-400 rounded border border-green-600/30 font-bold">+ Add Section</span>
-                                        <span>to begin</span>
+                            {/* Empty State */}
+                            {riserSections.length === 0 && (
+                                <div className="absolute left-1/2 top-0 -translate-x-1/2 text-center pt-20">
+                                    <div className="text-gray-400 text-lg font-medium bg-gray-900/80 px-8 py-6 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
+                                        <p className="mb-4">Start building your seating chart</p>
+                                        <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
+                                            <span>Click</span>
+                                            <span className="px-2 py-1 bg-green-600/20 text-green-400 rounded border border-green-600/30 font-bold">+ Add Section</span>
+                                            <span>to begin</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
+                        </div>
                     </div>
                 </div>
             </TransformComponent>
