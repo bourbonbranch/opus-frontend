@@ -19,9 +19,17 @@ export default function SeatingChart() {
     // Global Riser Settings
     const [globalRows, setGlobalRows] = useState(4);
 
-    // Riser Sections - Start empty
-    const [riserSections, setRiserSections] = useState([]);
-    const [selectedSectionId, setSelectedSectionId] = useState(null);
+    // Riser Sections - Start with one section for visibility
+    const [riserSections, setRiserSections] = useState([{
+        id: 1,
+        name: '1',
+        moduleWidth: 6,
+        treadDepth: 24,
+        singerSpacing: 22,
+        centerGap: 3,
+        adaRow: null,
+    }]);
+    const [selectedSectionId, setSelectedSectionId] = useState(1);
     const [isCurved, setIsCurved] = useState(true);
 
     const sensors = useSensors(

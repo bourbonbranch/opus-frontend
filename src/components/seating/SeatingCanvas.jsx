@@ -109,14 +109,6 @@ export default function SeatingCanvas({
                 </div>
             </div>
 
-            {/* Debug Overlay - Temporary */}
-            <div className="absolute top-4 left-4 z-50 bg-black/80 text-green-400 p-4 rounded font-mono text-xs pointer-events-none">
-                Sections: {riserSections.length}<br />
-                Curved: {isCurved ? 'Yes' : 'No'}<br />
-                Global Rows: {globalRows}<br />
-                First Section Pos: {positions[0] ? `x:${Math.round(positions[0].x)}, y:${Math.round(positions[0].y)}` : 'N/A'}
-            </div>
-
             <Controls />
             <TransformComponent
                 wrapperClass="w-full h-full"
