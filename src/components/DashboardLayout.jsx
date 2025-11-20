@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import {
     HomeIcon,
@@ -12,6 +12,33 @@ import {
 } from 'lucide-react';
 
 export function DashboardLayout() {
+    const [directorInfo, setDirectorInfo] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'Director',
+    });
+
+    useEffect(() => {
+        // Get director info from localStorage
+        const firstName = localStorage.getItem('directorFirstName') || 'Director';
+        const lastName = localStorage.getItem('directorLastName') || '';
+        const email = localStorage.getItem('directorEmail') || '';
+        const role = localStorage.getItem('directorRole') || 'Director';
+
+        setDirectorInfo({ firstName, lastName, email, role });
+    }, []);
+
+    const getInitials = () => {
+        const first = directorInfo.firstName?.[0] || '';
+        const last = directorInfo.lastName?.[0] || '';
+        return (first + last).toUpperCase() || 'D';
+    };
+
+    const getFullName = () => {
+        return `${directorInfo.firstName} ${directorInfo.lastName}`.trim() || 'Director';
+    };
+
     const navItems = [
         {
             to: '/director/today',
@@ -96,11 +123,11 @@ export function DashboardLayout() {
                 <div className="p-4 border-t border-gray-700">
                     <div className="flex items-center gap-3 px-4 py-3 bg-gray-800 rounded-xl">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
-                            <span className="text-sm font-semibold text-white">JD</span>
+                            <span className="text-sm font-semibold text-white">{getInitials()}</span>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-white">Jane Director</p>
-                            <p className="text-xs text-gray-400">Director</p>
+                            <p className="text-sm font-medium text-white">{getFullName()}</p>
+                            <p className="text-xs text-gray-400 capitalize">{directorInfo.role}</p>
                         </div>
                     </div>
                 </div>

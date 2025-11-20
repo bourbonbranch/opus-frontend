@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem } from '../lib/opusApi';
 
-export function Calendar() {
+export function CalendarView() {
     const [ensembles, setEnsembles] = useState([]);
     const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
     const [events, setEvents] = useState([]);

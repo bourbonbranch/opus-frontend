@@ -22,9 +22,13 @@ export default function SignUp() {
 
     try {
       const result = await signupDirector(formData);
-      // Store director ID in localStorage
+      // Store director info in localStorage
       if (result && result.id) {
         localStorage.setItem('directorId', result.id);
+        localStorage.setItem('directorFirstName', formData.firstName);
+        localStorage.setItem('directorLastName', formData.lastName);
+        localStorage.setItem('directorEmail', formData.email);
+        localStorage.setItem('directorRole', formData.role || 'director');
         // Navigate to add ensemble page
         navigate('/add-ensemble');
       }
