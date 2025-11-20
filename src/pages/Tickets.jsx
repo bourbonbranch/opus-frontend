@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, TicketIcon, DollarSignIcon, UsersIcon, CalendarIcon, TrendingUpIcon } from 'lucide-react';
-import { getEvents } from '../lib/opusApi';
+import { getTicketEvents } from '../lib/opusApi';
 
 export default function Tickets() {
     const [events, setEvents] = useState([]);
@@ -14,7 +14,7 @@ export default function Tickets() {
 
     const loadEvents = async () => {
         try {
-            const data = await getEvents();
+            const data = await getTicketEvents();
             setEvents(data || []);
         } catch (err) {
             console.error('Failed to load events:', err);
@@ -103,8 +103,8 @@ export default function Tickets() {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${filter === f
-                                ? 'bg-purple-600 text-white'
-                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }`}
                     >
                         {f}
@@ -147,8 +147,8 @@ export default function Tickets() {
                                     )}
                                 </div>
                                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${event.status === 'published'
-                                        ? 'bg-green-500/20 text-green-300'
-                                        : 'bg-gray-500/20 text-gray-300'
+                                    ? 'bg-green-500/20 text-green-300'
+                                    : 'bg-gray-500/20 text-gray-300'
                                     }`}>
                                     {event.status}
                                 </span>

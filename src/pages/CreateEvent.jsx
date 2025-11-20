@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, SaveIcon } from 'lucide-react';
-import { createEvent, getEnsembles } from '../lib/opusApi';
+import { createTicketEvent, getEnsembles } from '../lib/opusApi';
 
 export default function CreateEvent() {
     const navigate = useNavigate();
@@ -48,7 +48,7 @@ export default function CreateEvent() {
 
         try {
             const directorId = localStorage.getItem('directorId');
-            const event = await createEvent({
+            const event = await createTicketEvent({
                 ...formData,
                 director_id: directorId,
                 ensemble_id: formData.ensemble_id || null,

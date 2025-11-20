@@ -247,22 +247,22 @@ export async function sendMessage(payload) {
 
 // ─────────────── TICKETS ───────────────
 
-// Events
-export async function getEvents(directorId) {
+// Ticket Events
+export async function getTicketEvents(directorId) {
   const id = directorId ?? localStorage.getItem('directorId');
   if (!id) throw new Error('Director ID required');
 
-  const res = await fetch(`${API_BASE_URL}/events?director_id=${id}`);
+  const res = await fetch(`${API_BASE_URL}/ticket-events?director_id=${id}`);
   return handleResponse(res);
 }
 
-export async function getEvent(eventId) {
-  const res = await fetch(`${API_BASE_URL}/events/${eventId}`);
+export async function getTicketEvent(eventId) {
+  const res = await fetch(`${API_BASE_URL}/ticket-events/${eventId}`);
   return handleResponse(res);
 }
 
-export async function createEvent(eventData) {
-  const res = await fetch(`${API_BASE_URL}/events`, {
+export async function createTicketEvent(eventData) {
+  const res = await fetch(`${API_BASE_URL}/ticket-events`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -272,8 +272,8 @@ export async function createEvent(eventData) {
   return handleResponse(res);
 }
 
-export async function updateEvent(eventId, eventData) {
-  const res = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+export async function updateTicketEvent(eventId, eventData) {
+  const res = await fetch(`${API_BASE_URL}/ticket-events/${eventId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -283,8 +283,8 @@ export async function updateEvent(eventId, eventData) {
   return handleResponse(res);
 }
 
-export async function deleteEvent(eventId) {
-  const res = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+export async function deleteTicketEvent(eventId) {
+  const res = await fetch(`${API_BASE_URL}/ticket-events/${eventId}`, {
     method: 'DELETE',
   });
   return handleResponse(res);
@@ -362,7 +362,7 @@ export async function deleteTicketType(ticketTypeId) {
 
 // Student Sale Links
 export async function generateStudentLinks(eventId) {
-  const res = await fetch(`${API_BASE_URL}/events/${eventId}/generate-student-links`, {
+  const res = await fetch(`${API_BASE_URL}/ticket-events/${eventId}/generate-student-links`, {
     method: 'POST',
   });
   return handleResponse(res);
