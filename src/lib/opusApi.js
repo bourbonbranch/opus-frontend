@@ -379,6 +379,28 @@ export async function getEventByStudentCode(code) {
 }
 
 // Orders
+export async function addRosterMember(memberData) {
+  const res = await fetch(`${API_BASE_URL}/roster`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(memberData),
+  });
+  return handleResponse(res);
+}
+
+export async function importRoster(ensembleId, students) {
+  const res = await fetch(`${API_BASE_URL}/roster/bulk`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ensemble_id: ensembleId, students }),
+  });
+  return handleResponse(res);
+}
+
 export async function createOrder(orderData) {
   const res = await fetch(`${API_BASE_URL}/orders`, {
     method: 'POST',

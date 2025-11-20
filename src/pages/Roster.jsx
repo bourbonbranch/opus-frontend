@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadIcon, UsersIcon, PlusIcon } from 'lucide-react';
-import { getEnsembles, getRoster, addRosterMember } from '../lib/opusApi';
+import { getEnsembles, getRoster, addRosterMember, importRoster } from '../lib/opusApi';
 
 export default function Roster() {
   const navigate = useNavigate();
+  const fileInputRef = React.useRef(null);
   const [ensembles, setEnsembles] = useState([]);
   const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
   const [roster, setRoster] = useState([]);
@@ -50,6 +51,64 @@ export default function Roster() {
     } catch (err) {
       console.error('Failed to load roster', err);
     }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target.result;
+        const lines = text.split('\n');
+        const students = [];
+
+        // Skip header if it exists (heuristic: checks if first line contains "name" or "email")
+        let startIndex = 0;
+        if (lines[0] && (lines[0].toLowerCase().includes('name') || lines[0].toLowerCase().includes('email'))) {
+          startIndex = 1;
+        }
+
+        for (let i = startIndex; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Simple CSV parsing (handles basic commas)
+          // Format: FirstName, LastName, Email, Section
+          const parts = line.split(',').map(p => p.trim());
+
+          if (parts.length >= 2) {
+            students.push({
+              first_name: parts[0],
+              last_name: parts[1],
+              email: parts[2] || '',
+              section: parts[3] || ''
+            });
+          }
+        }
+
+        if (students.length === 0) {
+          alert('No valid students found in CSV. Format should be: First Name, Last Name, Email, Section');
+          return;
+        }
+
+        if (confirm(`Found ${students.length} students. Import them?`)) {
+          await importRoster(selectedEnsembleId, students);
+          alert(`Successfully imported ${students.length} students!`);
+          loadRoster();
+        }
+      } catch (err) {
+        console.error('Error parsing CSV:', err);
+        alert('Failed to parse CSV: ' + err.message);
+      } finally {
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleAddStudent = async (e) => {
@@ -108,7 +167,17 @@ export default function Roster() {
           <p className="text-gray-200">Manage your ensemble members</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".csv"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
+          >
             <UploadIcon className="w-5 h-5" />
             Import CSV
           </button>
