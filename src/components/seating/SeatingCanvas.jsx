@@ -75,11 +75,9 @@ export default function SeatingCanvas({
     return (
         <TransformWrapper
             initialScale={0.6}
-            initialPositionX={0}
-            initialPositionY={0}
             minScale={0.1}
             maxScale={4}
-            centerOnInit
+            centerOnInit={true}
             limitToBounds={false}
             wheel={{ step: 0.1 }}
         >
@@ -128,7 +126,7 @@ export default function SeatingCanvas({
                 contentClass="w-full h-full"
             >
                 <div
-                    className="w-[4000px] h-[4000px] relative"
+                    className="w-[4000px] h-[4000px] relative border-2 border-blue-500/50"
                     style={{
                         backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                         backgroundSize: '40px 40px'
