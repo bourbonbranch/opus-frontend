@@ -203,6 +203,10 @@ export default function SeatingChart() {
                                 setSelectedSectionId(id);
                                 setIsConfigOpen(true);
                             }}
+                            onBackgroundClick={() => {
+                                setSelectedSectionId(null);
+                                setIsConfigOpen(false);
+                            }}
                         />
                     </div>
 

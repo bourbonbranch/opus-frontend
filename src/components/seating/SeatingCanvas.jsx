@@ -26,7 +26,8 @@ export default function SeatingCanvas({
     isCurved,
     placedStudents,
     selectedSectionId,
-    onSelectSection
+    onSelectSection,
+    onBackgroundClick
 }) {
     // Calculate proper arc geometry for curved layout
     const calculateCurvedPositions = () => {
@@ -96,7 +97,7 @@ export default function SeatingCanvas({
             maxScale={3} // Limit zoom to 3x
             centerOnInit={false}
             limitToBounds={false}
-            panning={{ disabled: true }} // Disable panning
+            panning={{ disabled: false }} // Enable panning
             wheel={{ step: 0.1 }}
             initialPositionX={0}
             initialPositionY={0}
@@ -111,12 +112,19 @@ export default function SeatingCanvas({
                     >
                         <div
                             className="relative"
+                            onClick={(e) => {
+                                // Only trigger if clicking directly on the background
+                                if (e.target === e.currentTarget) {
+                                    onBackgroundClick && onBackgroundClick();
+                                }
+                            }}
                             style={{
                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                                 backgroundSize: '40px 40px',
                                 backgroundPosition: 'center',
                                 minWidth: '100%',
-                                minHeight: '100%'
+                                minHeight: '100%',
+                                cursor: 'default'
                             }}
                         >
                         </div>
@@ -128,7 +136,8 @@ export default function SeatingCanvas({
                             {riserSections.length > 0 && (
                                 <div className="relative" style={{
                                     width: isCurved ? '1600px' : 'auto',
-                                    height: isCurved ? '1600px' : 'auto'
+                                    height: isCurved ? '1600px' : 'auto',
+                                    marginBottom: isCurved ? '0' : '100px' // Add margin for straight layout to move it up
                                 }}>
                                     {riserSections.map((section, index) => {
                                         if (isCurved) {
@@ -163,7 +172,8 @@ export default function SeatingCanvas({
                                                     key={section.id}
                                                     style={{
                                                         display: 'inline-block',
-                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1,
+                                                        margin: '0 10px' // Add spacing between straight sections
                                                     }}
                                                 >
                                                     <RiserSection
