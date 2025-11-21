@@ -114,7 +114,10 @@ export default function SeatingCanvas({
                             <div className="relative" style={{ marginBottom: '200px' }}>
                                 {/* Riser Sections */}
                                 {riserSections.length > 0 && (
-                                    <div className="relative flex" style={{ gap: '0px' }}>
+                                    <div className="relative" style={{
+                                        width: isCurved ? '800px' : 'auto',
+                                        height: isCurved ? '800px' : 'auto'
+                                    }}>
                                         {riserSections.map((section, index) => {
                                             if (isCurved) {
                                                 const pos = positions[index];
@@ -123,8 +126,8 @@ export default function SeatingCanvas({
                                                         key={section.id}
                                                         className="absolute"
                                                         style={{
-                                                            left: `${pos.x}px`,
-                                                            top: `${pos.y}px`,
+                                                            left: `${400 + pos.x}px`, // Center at 400px (half of 800px)
+                                                            top: `${800 + pos.y}px`,  // Position from bottom (800px + negative y)
                                                             transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
                                                             transformOrigin: 'center bottom',
                                                             zIndex: selectedSectionId === section.id ? 10 : 1
@@ -148,6 +151,7 @@ export default function SeatingCanvas({
                                                     <div
                                                         key={section.id}
                                                         style={{
+                                                            display: 'inline-block',
                                                             zIndex: selectedSectionId === section.id ? 10 : 1
                                                         }}
                                                     >
