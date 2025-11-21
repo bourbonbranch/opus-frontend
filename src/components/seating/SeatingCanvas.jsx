@@ -102,7 +102,11 @@ export default function SeatingCanvas({
                             }}
                         >
                             {/* Fixed center point */}
-                            <div className="absolute" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
+                            {/* DEBUG: Center Marker */}
+                            <div className="absolute w-10 h-10 bg-yellow-500 z-50" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}></div>
+
+                            {/* Pivot Point (Director Location) - Moved down so risers (at -800y) appear in center */}
+                            <div className="absolute" style={{ top: '2800px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
 
                                 {/* Riser Container relative to center */}
                                 <div className="absolute top-0 left-0 w-0 h-0 overflow-visible">
@@ -149,7 +153,7 @@ export default function SeatingCanvas({
                                                             className="absolute"
                                                             style={{
                                                                 left: `${startX + xOffset}px`,
-                                                                top: '0px',
+                                                                top: '-800px', // Match the curved radius offset
                                                                 transform: 'translateY(-100%)',
                                                                 zIndex: selectedSectionId === section.id ? 10 : 1
                                                             }}
