@@ -95,7 +95,7 @@ export default function SeatingCanvas({
             initialScale={0.5}
             minScale={0.1}
             maxScale={3} // Limit zoom to 3x
-            centerOnInit={false}
+            centerOnInit={true}
             limitToBounds={false}
             panning={{ disabled: false }} // Enable panning
             wheel={{ step: 0.1 }}
@@ -111,7 +111,7 @@ export default function SeatingCanvas({
                         contentClass="w-full h-full flex items-center justify-center"
                     >
                         <div
-                            className="relative flex flex-col items-center justify-end"
+                            className="relative flex flex-col items-center justify-center"
                             onClick={(e) => {
                                 // Only trigger if clicking directly on the background
                                 if (e.target === e.currentTarget) {
@@ -129,14 +129,16 @@ export default function SeatingCanvas({
                                 cursor: 'default'
                             }}
                         >
-                            {/* Fixed Riser Overlay - Positioned relative to the bottom of this container */}
-                            <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex justify-center" style={{ paddingBottom: '100px' }}>
-                                <div className="relative pointer-events-none">
+                            {/* Content Wrapper - Centered by parent */}
+                            <div className="relative flex flex-col items-center pointer-events-none">
+
+                                {/* Riser Container */}
+                                <div className="relative flex justify-center items-end mb-24 pointer-events-none">
                                     {riserSections.length > 0 && (
                                         <div className="relative pointer-events-none" style={{
                                             width: isCurved ? '1600px' : 'auto',
                                             height: isCurved ? '1600px' : 'auto',
-                                            marginBottom: isCurved ? '0' : '100px',
+                                            marginBottom: isCurved ? '0' : '0',
                                             display: isCurved ? 'block' : 'flex',
                                             justifyContent: 'center',
                                             alignItems: 'flex-end',
@@ -192,13 +194,11 @@ export default function SeatingCanvas({
                                         </div>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Director / Stage Overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-40 flex justify-center pb-4">
-                                <div className="relative flex flex-col items-center justify-end">
-                                    {/* Director Bubble - Positioned to overlap stage */}
-                                    <div className="absolute bottom-6 z-20 flex flex-col items-center gap-1">
+                                {/* Director / Stage Container */}
+                                <div className="relative flex flex-col items-center justify-end pointer-events-none z-40">
+                                    {/* Director Bubble */}
+                                    <div className="relative z-20 flex flex-col items-center gap-1 mb-6">
                                         <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help pointer-events-auto">
                                             <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
                                             <User className="w-8 h-8 text-purple-100 relative z-10" />
