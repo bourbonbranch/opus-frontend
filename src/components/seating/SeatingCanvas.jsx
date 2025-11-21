@@ -137,7 +137,7 @@ export default function SeatingCanvas({
                                     {riserSections.length > 0 && (
                                         <div className="relative pointer-events-none" style={{
                                             width: isCurved ? '1600px' : 'auto',
-                                            height: isCurved ? '1600px' : 'auto',
+                                            height: isCurved ? '600px' : 'auto',
                                             marginBottom: isCurved ? '0' : '0',
                                             display: isCurved ? 'block' : 'flex',
                                             justifyContent: 'center',
