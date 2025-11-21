@@ -111,7 +111,7 @@ export default function SeatingCanvas({
                     </TransformComponent>
 
                     {/* Fixed Riser Overlay - 100px above Director */}
-                    <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-30 flex justify-center" style={{ paddingBottom: '100px' }}>
+                    <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-30 flex justify-center" style={{ paddingBottom: '250px' }}>
                         <div className="relative pointer-events-auto">
                             {riserSections.length > 0 && (
                                 <div className="relative" style={{
