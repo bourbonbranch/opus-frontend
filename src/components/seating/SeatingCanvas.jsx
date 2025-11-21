@@ -20,6 +20,17 @@ const Controls = () => {
     );
 };
 
+const CenterOnLoad = () => {
+    const { centerView } = useControls();
+    React.useEffect(() => {
+        // Small timeout to ensure layout is ready
+        setTimeout(() => {
+            centerView({ scale: 0.5, duration: 0 });
+        }, 100);
+    }, []);
+    return null;
+};
+
 export default function SeatingCanvas({
     riserSections,
     globalRows,
@@ -99,11 +110,10 @@ export default function SeatingCanvas({
             limitToBounds={false}
             panning={{ disabled: false }} // Enable panning
             wheel={{ step: 0.1 }}
-            initialPositionX={0}
-            initialPositionY={0}
         >
             {({ centerView }) => (
                 <>
+                    <CenterOnLoad />
                     <Controls />
 
                     <TransformComponent
