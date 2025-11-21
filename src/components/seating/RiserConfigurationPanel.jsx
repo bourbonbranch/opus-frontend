@@ -9,6 +9,7 @@ export default function RiserConfigurationPanel({
     isCurved,
     onToggleCurved,
     onAddSection,
+    onRemoveLastSection,
     onUpdate,
     onRemove,
     onClose
@@ -84,14 +85,32 @@ export default function RiserConfigurationPanel({
                             </div>
                         </div>
 
-                        {/* Add Section */}
-                        <button
-                            onClick={onAddSection}
-                            className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold uppercase tracking-wide transition-colors flex items-center justify-center gap-2"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Add Section ({allSections.length})
-                        </button>
+                        {/* Sections Control */}
+                        <div className="space-y-2">
+                            <label className="text-sm text-gray-300 flex justify-between">
+                                <span>Sections</span>
+                                <span className="text-purple-400 font-mono">{allSections.length}</span>
+                            </label>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={onRemoveLastSection}
+                                    className="p-2 hover:bg-white/10 rounded-md border border-white/10 transition-colors disabled:opacity-50"
+                                    disabled={allSections.length <= 1}
+                                >
+                                    <Minus className="w-3 h-3" />
+                                </button>
+                                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div className="h-full bg-purple-500 transition-all" style={{ width: `${(allSections.length / 8) * 100}%` }} />
+                                </div>
+                                <button
+                                    onClick={onAddSection}
+                                    className="p-2 hover:bg-white/10 rounded-md border border-white/10 transition-colors disabled:opacity-50"
+                                    disabled={allSections.length >= 8}
+                                >
+                                    <Plus className="w-3 h-3" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Section Settings */}

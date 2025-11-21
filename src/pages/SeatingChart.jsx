@@ -216,6 +216,15 @@ export default function SeatingChart() {
                             isCurved={isCurved}
                             onToggleCurved={setIsCurved}
                             onAddSection={handleAddSection}
+                            onRemoveLastSection={() => {
+                                if (riserSections.length > 0) {
+                                    const lastSection = riserSections[riserSections.length - 1];
+                                    setRiserSections(prev => prev.filter(r => r.id !== lastSection.id));
+                                    if (selectedSectionId === lastSection.id) {
+                                        setSelectedSectionId(riserSections.length > 1 ? riserSections[0].id : null);
+                                    }
+                                }
+                            }}
                             onUpdate={(updates) => {
                                 setRiserSections(prev => prev.map(r =>
                                     r.id === selectedSectionId ? { ...r, ...updates } : r

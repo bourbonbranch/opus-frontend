@@ -32,44 +32,56 @@ export default function SeatingCanvas({
     const calculateCurvedPositions = () => {
         if (!isCurved || riserSections.length === 0) return [];
 
-        const radius = 800; // Radius to the FRONT of the first row
+        // Use same scaling as RiserSection (30px per foot)
+        const scale = 30;
+        const radius = 800; // Fixed radius to the FRONT of the first row
 
-        // Calculate total width to center the arrangement
-        let currentAngle = 0;
-        const sectionAngles = riserSections.map(section => {
-            const widthPx = section.moduleWidth * 30; // Use same scaling as RiserSection
-            // Angle subtended by this section: chord = 2 * r * sin(theta/2)
-            // theta = 2 * asin(chord / 2r)
-            const angleRad = 2 * Math.asin(widthPx / (2 * radius));
-            const angleDeg = angleRad * (180 / Math.PI);
-            return { angleDeg, angleRad, widthPx };
+        // 1. Calculate width of each section in pixels
+        // In a curved layout, the "width" is the chord length at the front of the riser.
+        const sectionData = riserSections.map(section => {
+            const widthPx = section.moduleWidth * scale;
+            return { widthPx };
         });
 
-        const totalAngle = sectionAngles.reduce((sum, s) => sum + s.angleDeg, 0);
-        const startAngle = -totalAngle / 2;
+        // 2. Calculate angles for each section
+        // chord = 2 * r * sin(theta/2)
+        // theta = 2 * asin(chord / 2r)
+        const sectionAngles = sectionData.map(s => {
+            const angleRad = 2 * Math.asin(s.widthPx / (2 * radius));
+            const angleDeg = angleRad * (180 / Math.PI);
+            return { angleDeg, angleRad, widthPx: s.widthPx };
+        });
+
+        // 3. Calculate total angle to center the arrangement
+        const totalAngleDeg = sectionAngles.reduce((sum, s) => sum + s.angleDeg, 0);
+        const startAngle = -totalAngleDeg / 2;
 
         return riserSections.map((section, index) => {
             const { angleDeg, angleRad } = sectionAngles[index];
 
-            // Center of this section is at startAngle + (sum of prev angles) + half this angle
+            // Calculate the angle for the CENTER of this section
+            // Start angle + sum of previous angles + half of current angle
             const prevAngles = sectionAngles.slice(0, index).reduce((sum, s) => sum + s.angleDeg, 0);
-            const centerAngle = startAngle + prevAngles + (angleDeg / 2);
+            const centerAngleDeg = startAngle + prevAngles + (angleDeg / 2);
+            const centerAngleRad = centerAngleDeg * (Math.PI / 180);
 
-            const centerAngleRad = (centerAngle * Math.PI) / 180;
+            // Position calculation:
+            // We want the CORNERS of the section to be on the circle of radius R.
+            // Since the riser is a straight chord, its center is closer to the origin than R.
+            // Distance to chord center (apothem) = R * cos(theta/2)
+            const apothem = radius * Math.cos(angleRad / 2);
 
-            // Position on arc
-            // x = sin(angle) * radius
-            // y = -cos(angle) * radius + radius (offset to start at 0)
-            const x = Math.sin(centerAngleRad) * radius;
-            const y = -Math.cos(centerAngleRad) * radius;
+            // Position the center of the chord at the apothem distance
+            const x = Math.sin(centerAngleRad) * apothem;
+            const y = Math.cos(centerAngleRad) * apothem;
 
             return {
                 x,
                 y,
-                rotation: centerAngle, // Rotate to face center
+                rotation: centerAngleDeg,
                 wedgeAngle: angleDeg,
-                radius: radius,
-                angleRad: angleRad // Pass radians for precise width calc
+                radius,
+                angleRad
             };
         });
     };
@@ -81,7 +93,7 @@ export default function SeatingCanvas({
         <TransformWrapper
             initialScale={0.5}
             minScale={0.1}
-            maxScale={4}
+            maxScale={3} // Limit zoom to 3x
             centerOnInit={false}
             limitToBounds={false}
             panning={{ disabled: true }} // Disable panning
@@ -111,12 +123,12 @@ export default function SeatingCanvas({
                     </TransformComponent>
 
                     {/* Fixed Riser Overlay - 100px above Director */}
-                    <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex justify-center" style={{ paddingBottom: '250px' }}>
+                    <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex justify-center" style={{ paddingBottom: '100px' }}>
                         <div className="relative pointer-events-auto">
                             {riserSections.length > 0 && (
                                 <div className="relative" style={{
-                                    width: isCurved ? '800px' : 'auto',
-                                    height: isCurved ? '800px' : 'auto'
+                                    width: isCurved ? '1600px' : 'auto',
+                                    height: isCurved ? '1600px' : 'auto'
                                 }}>
                                     {riserSections.map((section, index) => {
                                         if (isCurved) {
@@ -126,10 +138,10 @@ export default function SeatingCanvas({
                                                     key={section.id}
                                                     className="absolute"
                                                     style={{
-                                                        left: `${400 + pos.x}px`,
-                                                        top: `${800 + pos.y}px`, // Use top positioning for curved layout
-                                                        transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
-                                                        transformOrigin: 'center top',
+                                                        left: `${800 + pos.x}px`,
+                                                        bottom: `${pos.y}px`, // Use calculated y directly as bottom offset
+                                                        transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
+                                                        transformOrigin: 'center bottom',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
                                                     }}
                                                 >
