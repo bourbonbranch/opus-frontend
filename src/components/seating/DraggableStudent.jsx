@@ -63,7 +63,10 @@ export default function DraggableStudent({ student }) {
                 </div>
                 <div>
                     <div className="font-medium text-sm">{student.name}</div>
-                    <div className="text-xs opacity-70">{student.section}</div>
+                    <div className="text-xs opacity-70">
+                        {student.section}
+                        {student.part && <span className="ml-1">• {student.part}</span>}
+                    </div>
                 </div>
             </div>
         </div>

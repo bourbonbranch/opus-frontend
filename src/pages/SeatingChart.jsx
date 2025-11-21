@@ -49,12 +49,13 @@ export default function SeatingChart() {
                     setSelectedEnsembleId(firstEnsembleId);
 
                     const rosterData = await getRoster(firstEnsembleId);
-                    // Map roster to student format (assign random section for now as DB lacks it)
+                    // Map roster to student format
                     const sections = ['Soprano', 'Alto', 'Tenor', 'Bass'];
                     const mappedStudents = rosterData.map(r => ({
                         id: r.id,
                         name: `${r.first_name} ${r.last_name}`,
-                        section: sections[Math.floor(Math.random() * sections.length)], // Temporary: Random section
+                        section: r.section || sections[Math.floor(Math.random() * sections.length)], // Use section from DB or random
+                        part: r.part || '', // Include part from DB
                         originalData: r
                     }));
                     setStudents(mappedStudents);
