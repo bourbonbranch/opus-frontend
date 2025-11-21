@@ -221,16 +221,22 @@ export default function SeatingCanvas({
                     <div className="absolute top-4 left-4 z-50 bg-black/80 text-green-400 p-4 rounded border border-green-500/30 font-mono text-xs pointer-events-none max-w-md overflow-auto max-h-96">
                         <div>isCurved: {String(isCurved)}</div>
                         <div>Sections: {riserSections.length}</div>
+                        <div>GlobalRows: {globalRows}</div>
                         <div>Positions: {positions.length}</div>
-                        {positions.map((p, i) => (
-                            <div key={i} className="mt-2 border-t border-white/10 pt-1">
-                                <div>Idx: {i}</div>
-                                <div>x: {p.x.toFixed(2)}, y: {p.y.toFixed(2)}</div>
-                                <div>angleDeg: {p.wedgeAngle?.toFixed(2)}</div>
-                                <div>angleRad: {p.angleRad?.toFixed(4)}</div>
-                                <div>radius: {p.radius}</div>
-                            </div>
-                        ))}
+                        {positions.map((p, i) => {
+                            const section = riserSections[i];
+                            return (
+                                <div key={i} className="mt-2 border-t border-white/10 pt-1">
+                                    <div>Idx: {i}</div>
+                                    <div>x: {p.x.toFixed(2)}, y: {p.y.toFixed(2)}</div>
+                                    <div>angleDeg: {p.wedgeAngle?.toFixed(2)}</div>
+                                    <div>angleRad: {p.angleRad?.toFixed(4)}</div>
+                                    <div>radius: {p.radius}</div>
+                                    <div>depth: {section?.treadDepth}</div>
+                                    <div>width: {section?.moduleWidth}</div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </>
             )}
