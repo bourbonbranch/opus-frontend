@@ -115,7 +115,8 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
         ${rowNum === 1 ? 'border-b border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : ''}
       `}
             style={{
-                height: depthPx,
+                height: Math.max(depthPx, 40), // Minimum 40px height
+                minHeight: '40px',
                 width: widthPx,
                 ...style
             }}
