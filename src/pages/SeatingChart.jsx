@@ -150,13 +150,14 @@ export default function SeatingChart() {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                {/* Sidebar - Student Bank */}
-                <div className={`transition-all duration-300 border-r border-white/10 bg-gray-800/50 backdrop-blur-xl flex flex-col ${isSidebarOpen ? 'w-80' : 'w-16'}`}>
+                {/* Sidebar - Student Bank (Desktop) */}
+                <div className={`hidden md:flex transition-all duration-300 border-r border-white/10 bg-gray-800/50 backdrop-blur-xl flex-col ${isSidebarOpen ? 'w-80' : 'w-16'}`}>
                     <div className="p-4 border-b border-white/10 flex justify-between items-center">
                         {isSidebarOpen && <h2 className="font-semibold text-lg">Students</h2>}
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            aria-label="Toggle student bank"
                         >
                             <Users className="w-5 h-5" />
                         </button>
@@ -170,24 +171,59 @@ export default function SeatingChart() {
                     )}
                 </div>
 
+                {/* Mobile Student Bank Overlay */}
+                {isSidebarOpen && (
+                    <>
+                        <div
+                            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                            onClick={() => setIsSidebarOpen(false)}
+                        />
+                        <div className="md:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-gray-800/95 backdrop-blur-xl border-r border-white/10 z-50 flex flex-col">
+                            <div className="p-4 border-b border-white/10 flex justify-between items-center">
+                                <h2 className="font-semibold text-lg">Students</h2>
+                                <button
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                    aria-label="Close student bank"
+                                >
+                                    <Users className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <StudentBank
+                                students={students}
+                                placedStudents={placedStudents}
+                            />
+                        </div>
+                    </>
+                )}
+
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col relative min-w-0">
                     {/* Toolbar */}
-                    <div className="h-16 border-b border-white/10 bg-gray-800/50 backdrop-blur-xl flex items-center justify-between px-6 z-10 shrink-0">
-                        <div className="flex items-center gap-4 min-w-0">
-                            <h1 className="font-bold text-xl truncate">Seating Chart</h1>
+                    <div className="h-16 border-b border-white/10 bg-gray-800/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-6 z-10 shrink-0">
+                        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                            {/* Mobile Student Bank Toggle */}
+                            <button
+                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                aria-label="Toggle student bank"
+                            >
+                                <Users className="w-6 h-6" />
+                            </button>
+                            <h1 className="font-bold text-lg md:text-xl truncate">Seating Chart</h1>
                         </div>
 
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-2 md:gap-3 shrink-0">
                             <button
                                 onClick={() => setIsConfigOpen(!isConfigOpen)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${isConfigOpen ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}
+                                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-colors text-sm font-medium min-h-[44px] ${isConfigOpen ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}
                             >
                                 <Settings className="w-4 h-4" />
-                                Configuration
+                                <span className="hidden sm:inline">Configuration</span>
                             </button>
-                            <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium shadow-lg shadow-purple-500/20">
-                                Export
+                            <button className="px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium shadow-lg shadow-purple-500/20 min-h-[44px]">
+                                <span className="hidden sm:inline">Export</span>
+                                <span className="sm:hidden">Save</span>
                             </button>
                         </div>
                     </div>
