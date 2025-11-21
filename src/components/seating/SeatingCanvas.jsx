@@ -46,7 +46,7 @@ export default function SeatingCanvas({
 
         // Use same scaling as RiserSection (30px per foot)
         const scale = 30;
-        const radius = 250; // Reduced radius to fit on screen (approx 12ft)
+        const radius = 600; // Increased radius for gentler arc
 
         // 1. Calculate width of each section in pixels
         // In a curved layout, the "width" is the chord length at the front of the riser.
@@ -101,6 +101,11 @@ export default function SeatingCanvas({
     const positions = isCurved ? calculateCurvedPositions() : [];
     const [initStatus, setInitStatus] = React.useState('Pending');
 
+    // Layout constants for centering
+    const radius = 600;
+    const directorY = 450; // Director position relative to center of curvature
+    const visualCenterOffset = (radius + directorY) / 2; // Center the group (Risers + Director)
+
     return (
         <TransformWrapper
             initialScale={0.5}
@@ -137,7 +142,12 @@ export default function SeatingCanvas({
                             }}
                         >
                             {/* Director Group - ABSOLUTE CENTER */}
-                            <div className="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto">
+                            <div
+                                className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
+                                style={{
+                                    bottom: `calc(50% + ${directorY - visualCenterOffset}px)`
+                                }}
+                            >
                                 <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
                                     <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
                                     <User className="w-8 h-8 text-purple-100 relative z-10" />
@@ -151,7 +161,12 @@ export default function SeatingCanvas({
                             </div>
 
                             {/* Stage Representation - Behind Director */}
-                            <div className="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none">
+                            <div
+                                className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none"
+                                style={{
+                                    bottom: `calc(50% + ${directorY - visualCenterOffset}px)`
+                                }}
+                            >
                             </div>
 
                             {/* Risers */}
@@ -167,7 +182,7 @@ export default function SeatingCanvas({
                                                     className="absolute pointer-events-auto"
                                                     style={{
                                                         left: `calc(50% + ${pos.x}px)`,
-                                                        bottom: `calc(50% + ${pos.y}px)`,
+                                                        bottom: `calc(50% + ${pos.y - visualCenterOffset}px)`,
                                                         transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
                                                         transformOrigin: 'center bottom',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
