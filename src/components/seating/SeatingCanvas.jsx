@@ -46,7 +46,7 @@ export default function SeatingCanvas({
 
         // Use same scaling as RiserSection (30px per foot)
         const scale = 30;
-        const radius = 350; // Reduced radius to fit on screen (approx 12ft)
+        const radius = 250; // Reduced radius to fit on screen (approx 12ft)
 
         // 1. Calculate width of each section in pixels
         // In a curved layout, the "width" is the chord length at the front of the riser.
@@ -140,76 +140,69 @@ export default function SeatingCanvas({
                             }}
                         >
                             {/* Content Wrapper - Centered by parent */}
-                            <div className="relative flex flex-col items-center pointer-events-none">
+                            <div className="relative flex flex-col items-center pointer-events-none w-full">
 
-                                {/* Riser Container */}
-                                <div className="relative flex justify-center items-end mb-24 pointer-events-none">
-                                    {riserSections.length > 0 && (
-                                        <div className="relative pointer-events-none" style={{
-                                            width: isCurved ? '1600px' : 'auto',
-                                            height: isCurved ? '600px' : 'auto',
-                                            marginBottom: isCurved ? '0' : '0',
-                                            display: isCurved ? 'block' : 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'flex-end',
-                                            gap: '0px' // Ensure no gap between straight sections
-                                        }}>
-                                            {riserSections.map((section, index) => {
-                                                if (isCurved) {
-                                                    const pos = positions[index];
-                                                    return (
-                                                        <div
-                                                            key={section.id}
-                                                            className="absolute pointer-events-auto"
-                                                            style={{
-                                                                left: `${800 + pos.x}px`,
-                                                                bottom: `${pos.y}px`, // Use calculated y directly as bottom offset
-                                                                transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
-                                                                transformOrigin: 'center bottom',
-                                                                zIndex: selectedSectionId === section.id ? 10 : 1
-                                                            }}
-                                                        >
-                                                            <RiserSection
-                                                                section={section}
-                                                                globalRows={globalRows}
-                                                                isSelected={selectedSectionId === section.id}
-                                                                onSelect={() => onSelectSection(section.id)}
-                                                                placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                                wedgeAngle={pos.wedgeAngle}
-                                                                radius={pos.radius}
-                                                                angleRad={pos.angleRad}
-                                                            />
-                                                        </div>
-                                                    );
-                                                } else {
-                                                    return (
-                                                        <div
-                                                            key={section.id}
-                                                            className="pointer-events-auto"
-                                                            style={{
-                                                                zIndex: selectedSectionId === section.id ? 10 : 1
-                                                            }}
-                                                        >
-                                                            <RiserSection
-                                                                section={section}
-                                                                globalRows={globalRows}
-                                                                isSelected={selectedSectionId === section.id}
-                                                                onSelect={() => onSelectSection(section.id)}
-                                                                placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                            />
-                                                        </div>
-                                                    );
-                                                }
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
+                                {/* Riser Container - Holds Risers AND Director */}
+                                <div className="relative pointer-events-none" style={{
+                                    width: '100%',
+                                    height: isCurved ? '400px' : 'auto', // Reduced height for tighter layout
+                                    display: isCurved ? 'block' : 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-end',
+                                    gap: '0px' // Ensure no gap between straight sections
+                                }}>
+                                    {/* Risers */}
+                                    {riserSections.length > 0 && riserSections.map((section, index) => {
+                                        if (isCurved) {
+                                            const pos = positions[index];
+                                            return (
+                                                <div
+                                                    key={section.id}
+                                                    className="absolute pointer-events-auto"
+                                                    style={{
+                                                        left: `calc(50% + ${pos.x}px)`, // Dynamic centering
+                                                        bottom: `${pos.y}px`, // Use calculated y directly as bottom offset
+                                                        transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
+                                                        transformOrigin: 'center bottom',
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                    }}
+                                                >
+                                                    <RiserSection
+                                                        section={section}
+                                                        globalRows={globalRows}
+                                                        isSelected={selectedSectionId === section.id}
+                                                        onSelect={() => onSelectSection(section.id)}
+                                                        placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                        wedgeAngle={pos.wedgeAngle}
+                                                        radius={pos.radius}
+                                                        angleRad={pos.angleRad}
+                                                    />
+                                                </div>
+                                            );
+                                        } else {
+                                            return (
+                                                <div
+                                                    key={section.id}
+                                                    className="pointer-events-auto"
+                                                    style={{
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                    }}
+                                                >
+                                                    <RiserSection
+                                                        section={section}
+                                                        globalRows={globalRows}
+                                                        isSelected={selectedSectionId === section.id}
+                                                        onSelect={() => onSelectSection(section.id)}
+                                                        placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                    })}
 
-                                {/* Director / Stage Container */}
-                                <div className="relative flex flex-col items-center justify-end pointer-events-none z-40">
-                                    {/* Director Bubble */}
-                                    <div className="relative z-20 flex flex-col items-center gap-1 mb-6">
-                                        <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help pointer-events-auto">
+                                    {/* Director Bubble - Positioned at geometric origin (bottom center) */}
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto translate-y-1/2">
+                                        <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
                                             <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
                                             <User className="w-8 h-8 text-purple-100 relative z-10" />
 
@@ -223,9 +216,8 @@ export default function SeatingCanvas({
                                         </div>
                                     </div>
 
-                                    {/* Screen/Stage Representation */}
-                                    <div className="w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)]">
-                                        {/* Text removed as requested */}
+                                    {/* Screen/Stage Representation - Behind Director */}
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] translate-y-1/2 pointer-events-none">
                                     </div>
                                 </div>
                             </div>
