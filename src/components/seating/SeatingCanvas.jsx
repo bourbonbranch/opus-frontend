@@ -76,11 +76,11 @@ export default function SeatingCanvas({
     return (
         <TransformWrapper
             initialScale={0.5}
-            initialPositionX={-800} // Approx center for 4000px width at 0.5 scale on 1920px screen
-            initialPositionY={-800}
+            initialPositionX={-600}
+            initialPositionY={-350}
             minScale={0.1}
             maxScale={4}
-            centerOnInit={false} // Disable auto-center as it seems to fail
+            centerOnInit={false}
             limitToBounds={false}
             wheel={{ step: 0.1 }}
         >
@@ -88,26 +88,12 @@ export default function SeatingCanvas({
                 <>
                     <Controls />
 
-                    {/* System Status Bar - Temporary for visibility check */}
-                    <div className="absolute top-0 left-0 right-0 bg-gray-900/90 text-xs font-mono text-purple-300 p-2 z-50 flex justify-center gap-8 border-b border-purple-500/30 items-center">
-                        <span>Sections: {riserSections.length}</span>
-                        <span>Curved: {isCurved ? 'Yes' : 'No'}</span>
-                        <span>Pos[0]: {positions[0] ? `x:${Math.round(positions[0].x)} y:${Math.round(positions[0].y)}` : 'N/A'}</span>
-                        <span>Init: {initStatus}</span>
-                        <button
-                            onClick={() => centerView({ scale: 0.5, duration: 500 })}
-                            className="px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-500"
-                        >
-                            FORCE CENTER
-                        </button>
-                    </div>
-
                     <TransformComponent
                         wrapperClass="w-full h-full"
                         contentClass="w-full h-full"
                     >
                         <div
-                            className="w-[4000px] h-[4000px] relative border-2 border-blue-500/50"
+                            className="w-[4000px] h-[4000px] relative"
                             style={{
                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                                 backgroundSize: '40px 40px'
@@ -115,11 +101,6 @@ export default function SeatingCanvas({
                         >
                             {/* Fixed center point */}
                             <div className="absolute" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
-
-                                {/* TEST BLOCK - If you see this, coordinate system works */}
-                                <div className="absolute -top-20 -left-20 w-40 h-40 bg-red-500/20 border-2 border-red-500 flex items-center justify-center text-red-500 font-bold z-50 pointer-events-none">
-                                    TEST BLOCK
-                                </div>
 
                                 {/* Riser Container relative to center */}
                                 <div className="absolute top-0 left-0 w-0 h-0 overflow-visible">
