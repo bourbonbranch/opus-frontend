@@ -132,9 +132,9 @@ export default function SeatingCanvas({
 
                     {/* Fixed Riser Overlay - 100px above Director */}
                     <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex justify-center" style={{ paddingBottom: '100px' }}>
-                        <div className="relative pointer-events-auto">
+                        <div className="relative pointer-events-none">
                             {riserSections.length > 0 && (
-                                <div className="relative" style={{
+                                <div className="relative pointer-events-none" style={{
                                     width: isCurved ? '1600px' : 'auto',
                                     height: isCurved ? '1600px' : 'auto',
                                     marginBottom: isCurved ? '0' : '100px' // Add margin for straight layout to move it up
@@ -145,7 +145,7 @@ export default function SeatingCanvas({
                                             return (
                                                 <div
                                                     key={section.id}
-                                                    className="absolute"
+                                                    className="absolute pointer-events-auto"
                                                     style={{
                                                         left: `${800 + pos.x}px`,
                                                         bottom: `${pos.y}px`, // Use calculated y directly as bottom offset
@@ -170,10 +170,11 @@ export default function SeatingCanvas({
                                             return (
                                                 <div
                                                     key={section.id}
+                                                    className="pointer-events-auto"
                                                     style={{
                                                         display: 'inline-block',
-                                                        zIndex: selectedSectionId === section.id ? 10 : 1,
-                                                        margin: '0 10px' // Add spacing between straight sections
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                        // Removed margin to make sections touch
                                                     }}
                                                 >
                                                     <RiserSection
