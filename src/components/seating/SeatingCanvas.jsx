@@ -121,47 +121,53 @@ export default function SeatingCanvas({
                         contentClass="w-full h-full flex items-center justify-center"
                     >
                         <div
-                            className="relative flex flex-col items-center justify-center"
+                            style={{
+                                width: '4000px',
+                                height: '4000px',
+                                position: 'relative',
+                                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
+                                backgroundSize: '40px 40px',
+                                backgroundPosition: 'center',
+                                cursor: 'default'
+                            }}
                             onClick={(e) => {
-                                // Only trigger if clicking directly on the background
                                 if (e.target === e.currentTarget) {
                                     onBackgroundClick && onBackgroundClick();
                                 }
                             }}
-                            style={{
-                                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-                                backgroundSize: '40px 40px',
-                                backgroundPosition: 'center',
-                                minWidth: '100%',
-                                minHeight: '100%',
-                                minWidth: '100%',
-                                minHeight: '100%',
-                                cursor: 'default'
-                            }}
                         >
-                            {/* Content Wrapper - Centered by parent */}
-                            <div className="relative flex flex-col items-center pointer-events-none w-full">
+                            {/* Director Group - ABSOLUTE CENTER */}
+                            <div className="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto">
+                                <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
+                                    <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
+                                    <User className="w-8 h-8 text-purple-100 relative z-10" />
+                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-purple-500/30">
+                                        Director Position
+                                    </div>
+                                </div>
+                                <div className="px-3 py-0.5 bg-gray-900/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
+                                    <span className="text-[10px] font-bold text-purple-200 uppercase tracking-wider">Director</span>
+                                </div>
+                            </div>
 
-                                {/* Riser Container - Holds Risers AND Director */}
-                                <div className="relative pointer-events-none" style={{
-                                    width: '100%',
-                                    height: isCurved ? '400px' : 'auto', // Reduced height for tighter layout
-                                    display: isCurved ? 'block' : 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'flex-end',
-                                    gap: '0px' // Ensure no gap between straight sections
-                                }}>
-                                    {/* Risers */}
-                                    {riserSections.length > 0 && riserSections.map((section, index) => {
-                                        if (isCurved) {
+                            {/* Stage Representation - Behind Director */}
+                            <div className="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none">
+                            </div>
+
+                            {/* Risers */}
+                            {riserSections.length > 0 && (
+                                <>
+                                    {isCurved ? (
+                                        // CURVED LAYOUT
+                                        riserSections.map((section, index) => {
                                             const pos = positions[index];
                                             return (
                                                 <div
                                                     key={section.id}
                                                     className="absolute pointer-events-auto"
                                                     style={{
-                                                        left: `calc(50% + ${pos.x}px)`, // Dynamic centering
-                                                        bottom: `${pos.y}px`, // Use calculated y directly as bottom offset
+                                                        left: `calc(50% + ${pos.x}px)`,
+                                                        bottom: `calc(50% + ${pos.y}px)`,
                                                         transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
                                                         transformOrigin: 'center bottom',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
@@ -179,8 +185,18 @@ export default function SeatingCanvas({
                                                     />
                                                 </div>
                                             );
-                                        } else {
-                                            return (
+                                        })
+                                    ) : (
+                                        // STRAIGHT LAYOUT
+                                        <div
+                                            className="absolute left-1/2 bottom-1/2 flex justify-center items-end pointer-events-none"
+                                            style={{
+                                                transform: 'translate(-50%, 0)',
+                                                paddingBottom: '120px', // Distance from Director center
+                                                gap: '0px'
+                                            }}
+                                        >
+                                            {riserSections.map((section) => (
                                                 <div
                                                     key={section.id}
                                                     className="pointer-events-auto"
@@ -196,31 +212,11 @@ export default function SeatingCanvas({
                                                         placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
                                                     />
                                                 </div>
-                                            );
-                                        }
-                                    })}
-
-                                    {/* Director Bubble - Positioned at geometric origin (bottom center) */}
-                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto translate-y-1/2">
-                                        <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
-                                            <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
-                                            <User className="w-8 h-8 text-purple-100 relative z-10" />
-
-                                            {/* Tooltip */}
-                                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-purple-500/30">
-                                                Director Position
-                                            </div>
+                                            ))}
                                         </div>
-                                        <div className="px-3 py-0.5 bg-gray-900/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
-                                            <span className="text-[10px] font-bold text-purple-200 uppercase tracking-wider">Director</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Screen/Stage Representation - Behind Director */}
-                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] translate-y-1/2 pointer-events-none">
-                                    </div>
-                                </div>
-                            </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </TransformComponent>
 
