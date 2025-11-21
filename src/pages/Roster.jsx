@@ -16,6 +16,8 @@ export default function Roster() {
     lastName: '',
     email: '',
     section: '',
+    part: '',
+    pronouns: '',
   });
   const [adding, setAdding] = useState(false);
 
@@ -75,7 +77,7 @@ export default function Roster() {
           if (!line) continue;
 
           // Simple CSV parsing (handles basic commas)
-          // Format: FirstName, LastName, Email, Section
+          // Format: FirstName, LastName, Email, Section, Part, Pronouns
           const parts = line.split(',').map(p => p.trim());
 
           if (parts.length >= 2) {
@@ -83,13 +85,15 @@ export default function Roster() {
               first_name: parts[0],
               last_name: parts[1],
               email: parts[2] || '',
-              section: parts[3] || ''
+              section: parts[3] || '',
+              part: parts[4] || '',
+              pronouns: parts[5] || ''
             });
           }
         }
 
         if (students.length === 0) {
-          alert('No valid students found in CSV. Format should be: First Name, Last Name, Email, Section');
+          alert('No valid students found in CSV. Format should be: First Name, Last Name, Email, Section, Part, Pronouns');
           return;
         }
 
@@ -121,8 +125,10 @@ export default function Roster() {
         last_name: newStudent.lastName,
         email: newStudent.email,
         section: newStudent.section,
+        part: newStudent.part,
+        pronouns: newStudent.pronouns,
       });
-      setNewStudent({ firstName: '', lastName: '', email: '', section: '' });
+      setNewStudent({ firstName: '', lastName: '', email: '', section: '', part: '', pronouns: '' });
       setIsAddModalOpen(false);
       loadRoster();
     } catch (err) {
@@ -246,6 +252,12 @@ export default function Roster() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Section
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Part
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Pronouns
+                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
@@ -276,6 +288,16 @@ export default function Roster() {
                           {student.section}
                         </span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {student.part && (
+                        <span className="px-3 py-1 bg-blue-500/20 text-blue-300 text-sm font-medium rounded-full border border-blue-400/30">
+                          {student.part}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-gray-300 text-sm">
+                      {student.pronouns || '-'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button className="text-purple-300 hover:text-purple-200 font-medium text-sm">
@@ -353,6 +375,34 @@ export default function Roster() {
                     setNewStudent({ ...newStudent, section: e.target.value })
                   }
                   placeholder="e.g., Soprano, Trumpet, Violin"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Part
+                </label>
+                <input
+                  type="text"
+                  value={newStudent.part}
+                  onChange={(e) =>
+                    setNewStudent({ ...newStudent, part: e.target.value })
+                  }
+                  placeholder="e.g., Soprano 1, Alto 2, Tenor 1"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Pronouns
+                </label>
+                <input
+                  type="text"
+                  value={newStudent.pronouns}
+                  onChange={(e) =>
+                    setNewStudent({ ...newStudent, pronouns: e.target.value })
+                  }
+                  placeholder="e.g., he/him, she/her, they/them"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
