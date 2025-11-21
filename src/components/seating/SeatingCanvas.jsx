@@ -38,36 +38,38 @@ export default function SeatingCanvas({
         let currentAngle = 0;
         const sectionAngles = riserSections.map(section => {
             const widthPx = section.moduleWidth * 40;
-            // Angle subtended by this section: s = r * theta => theta = s / r
-            // We use the front width for the angle calculation to ensure they touch at the front
-            const angleDeg = (widthPx / radius) * (180 / Math.PI);
-            return { angleDeg, widthPx };
+            // Angle subtended by this section: chord = 2 * r * sin(theta/2)
+            // theta = 2 * asin(chord / 2r)
+            const angleRad = 2 * Math.asin(widthPx / (2 * radius));
+            const angleDeg = angleRad * (180 / Math.PI);
+            return { angleDeg, angleRad, widthPx };
         });
 
         const totalAngle = sectionAngles.reduce((sum, s) => sum + s.angleDeg, 0);
         const startAngle = -totalAngle / 2;
 
         return riserSections.map((section, index) => {
-            const { angleDeg } = sectionAngles[index];
+            const { angleDeg, angleRad } = sectionAngles[index];
 
             // Center of this section is at startAngle + (sum of prev angles) + half this angle
             const prevAngles = sectionAngles.slice(0, index).reduce((sum, s) => sum + s.angleDeg, 0);
             const centerAngle = startAngle + prevAngles + (angleDeg / 2);
 
-            const angleRad = (centerAngle * Math.PI) / 180;
+            const centerAngleRad = (centerAngle * Math.PI) / 180;
 
             // Position on arc
             // x = sin(angle) * radius
             // y = -cos(angle) * radius + radius (offset to start at 0)
-            const x = Math.sin(angleRad) * radius;
-            const y = -Math.cos(angleRad) * radius + radius;
+            const x = Math.sin(centerAngleRad) * radius;
+            const y = -Math.cos(centerAngleRad) * radius + radius;
 
             return {
                 x,
                 y,
                 rotation: centerAngle, // Rotate to face center
                 wedgeAngle: angleDeg,
-                radius: radius
+                radius: radius,
+                angleRad: angleRad // Pass radians for precise width calc
             };
         });
     };
@@ -78,11 +80,9 @@ export default function SeatingCanvas({
     return (
         <TransformWrapper
             initialScale={0.5}
-            initialPositionX={-600}
-            initialPositionY={-100} // Shifted down to be closer to director
             minScale={0.1}
             maxScale={4}
-            centerOnInit={false}
+            centerOnInit={true}
             limitToBounds={false}
             wheel={{ step: 0.1 }}
         >

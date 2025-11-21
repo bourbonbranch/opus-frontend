@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 
-export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents, wedgeAngle, radius }) {
+export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
     const PIXELS_PER_FOOT = 40;
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
@@ -48,20 +48,17 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
                 let innerWidth = widthPx;
                 let outerWidth = widthPx;
 
-                if (wedgeAngle && radius) {
-                    const angleRad = (wedgeAngle * Math.PI) / 180;
+                if (wedgeAngle && radius && angleRad) {
                     const rowStartRadius = radius + ((rowNum - 1) * depthPx);
                     const rowEndRadius = radius + (rowNum * depthPx);
 
-                    innerWidth = angleRad * rowStartRadius;
-                    outerWidth = angleRad * rowEndRadius;
+                    // Calculate CHORD lengths for the given angle at these radii
+                    // chord = 2 * r * sin(theta/2)
+                    // theta is angleRad
+                    innerWidth = 2 * rowStartRadius * Math.sin(angleRad / 2);
+                    outerWidth = 2 * rowEndRadius * Math.sin(angleRad / 2);
 
                     // Trapezoid clip path: Top is outer (wide), Bottom is inner (narrow)
-                    // But wait, flex-col renders Top-to-Bottom.
-                    // Row N (Back) is at Top. Row 1 (Front) is at Bottom.
-                    // So for any row: Top edge is Back (Outer), Bottom edge is Front (Inner).
-                    // So Top Width = OuterWidth, Bottom Width = InnerWidth.
-
                     const inset = (outerWidth - innerWidth) / 2;
                     const insetPercent = (inset / outerWidth) * 100;
 
