@@ -18,7 +18,7 @@ export default function RiserConfigurationPanel({
     if (!section) return null;
 
     return (
-        <div className={`absolute top-20 right-6 w-80 bg-gray-800/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden transition-all duration-300 z-20 flex flex-col ${isMinimized ? 'h-14' : 'max-h-[calc(100vh-140px)]'}`}>
+        <div className={`absolute top-20 right-6 w-80 bg-gray-800/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden transition-all duration-300 z-50 flex flex-col ${isMinimized ? 'h-14' : 'max-h-[calc(100vh-140px)]'}`}>
             {/* Header */}
             <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between shrink-0 cursor-pointer" onClick={() => setIsMinimized(!isMinimized)}>
                 <div className="flex items-center gap-2">
