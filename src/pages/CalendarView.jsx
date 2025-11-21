@@ -18,6 +18,7 @@ export function CalendarView() {
     const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
     const [events, setEvents] = useState([]);
     const [ticketEvents, setTicketEvents] = useState([]);
+    const [calendarItems, setCalendarItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
     const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
@@ -55,7 +56,21 @@ export function CalendarView() {
         }
     };
 
-    // ... loadCalendarData is already correct from previous step ...
+    const loadCalendarData = async () => {
+        if (!selectedEnsembleId) return;
+        try {
+            const [eventsData, ticketEventsData, calendarItemsData] = await Promise.all([
+                getEvents(selectedEnsembleId),
+                getTicketEvents(),
+                getCalendarItems(selectedEnsembleId)
+            ]);
+            setEvents(eventsData || []);
+            setTicketEvents(ticketEventsData || []);
+            setCalendarItems(calendarItemsData || []);
+        } catch (err) {
+            console.error('Failed to load calendar data', err);
+        }
+    };
 
     const handleAddItem = async (e) => {
         e.preventDefault();
