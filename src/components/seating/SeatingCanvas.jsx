@@ -111,7 +111,7 @@ export default function SeatingCanvas({
                             }}
                         >
                             {/* Riser Container - centered in viewport */}
-                            <div className="relative" style={{ marginBottom: '200px' }}>
+                            <div className="relative" style={{ marginTop: '-400px' }}>
                                 {/* Riser Sections */}
                                 {riserSections.length > 0 && (
                                     <div className="relative" style={{
