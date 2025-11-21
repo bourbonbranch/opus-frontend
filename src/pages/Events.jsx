@@ -312,19 +312,19 @@ export function Events() {
                                     )}
                                     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm">
                                         <div className="flex items-center gap-2 text-gray-200">
-                                            <CalendarIcon className="w-4 h-4 text-purple-300 flex-shrink-0" />
-                                            <span>{formatDateTime(event.start_time)}</span>
+                                            <CalendarIcon className="w-5 h-5 text-purple-300 flex-shrink-0" />
+                                            <span className="text-base">{formatDateTime(event.start_time)}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-gray-200">
-                                            <ClockIcon className="w-4 h-4 text-blue-300 flex-shrink-0" />
-                                            <span>
+                                            <ClockIcon className="w-5 h-5 text-blue-300 flex-shrink-0" />
+                                            <span className="text-base">
                                                 {formatTime(event.start_time)} - {formatTime(event.end_time)}
                                             </span>
                                         </div>
                                         {event.room_name && (
                                             <div className="flex items-center gap-2 text-gray-200">
-                                                <MapPinIcon className="w-4 h-4 text-green-300 flex-shrink-0" />
-                                                <span>{event.room_name}</span>
+                                                <MapPinIcon className="w-5 h-5 text-green-300 flex-shrink-0" />
+                                                <span className="text-base">{event.room_name}</span>
                                             </div>
                                         )}
                                     </div>

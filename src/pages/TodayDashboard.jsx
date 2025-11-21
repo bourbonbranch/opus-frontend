@@ -92,9 +92,9 @@ export function TodayDashboard() {
             </div>
             <span className="text-sm text-gray-300">Today</span>
           </div>
-          <p className="text-sm text-gray-200 mb-1">Attendance</p>
-          <p className="text-3xl font-bold text-white">--/--</p>
-          <p className="text-sm text-gray-300 mt-2">Check rooms for tracking</p>
+          <p className="text-base md:text-lg text-gray-200 mb-1">Attendance</p>
+          <p className="text-4xl md:text-3xl font-bold text-white">--/--</p>
+          <p className="text-base md:text-sm text-gray-300 mt-2">Check rooms for tracking</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
@@ -104,9 +104,9 @@ export function TodayDashboard() {
             </div>
             <TrendingUpIcon className="w-5 h-5 text-green-400" />
           </div>
-          <p className="text-sm text-gray-200 mb-1">Fundraising</p>
-          <p className="text-3xl font-bold text-white">$0</p>
-          <p className="text-sm text-gray-300 mt-2">Coming soon</p>
+          <p className="text-base md:text-lg text-gray-200 mb-1">Fundraising</p>
+          <p className="text-4xl md:text-3xl font-bold text-white">$0</p>
+          <p className="text-base md:text-sm text-gray-300 mt-2">Coming soon</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
@@ -116,9 +116,9 @@ export function TodayDashboard() {
             </div>
             <span className="text-sm text-gray-300">Events</span>
           </div>
-          <p className="text-sm text-gray-200 mb-1">Tickets Sold</p>
-          <p className="text-3xl font-bold text-white">0</p>
-          <p className="text-sm text-gray-300 mt-2">Coming soon</p>
+          <p className="text-base md:text-lg text-gray-200 mb-1">Tickets Sold</p>
+          <p className="text-4xl md:text-3xl font-bold text-white">0</p>
+          <p className="text-base md:text-sm text-gray-300 mt-2">Coming soon</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl">
@@ -130,9 +130,9 @@ export function TodayDashboard() {
               0
             </span>
           </div>
-          <p className="text-sm text-gray-200 mb-1">Messages</p>
-          <p className="text-3xl font-bold text-white">0</p>
-          <p className="text-sm text-gray-300 mt-2">Coming soon</p>
+          <p className="text-base md:text-lg text-gray-200 mb-1">Messages</p>
+          <p className="text-4xl md:text-3xl font-bold text-white">0</p>
+          <p className="text-base md:text-sm text-gray-300 mt-2">Coming soon</p>
         </div>
       </div>
 

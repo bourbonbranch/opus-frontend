@@ -123,10 +123,10 @@ export function DashboardLayout() {
 
             {/* Sidebar */}
             <aside className={`
-                w-64 bg-gray-900/95 backdrop-blur-xl border-r border-gray-700 flex flex-col relative shadow-2xl
-                md:relative md:translate-x-0
-                fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
-                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                w-64 bg-gray-900/95 backdrop-blur-xl border-r border-gray-700 flex flex-col shadow-2xl
+                fixed md:relative inset-y-0 left-0 z-50 
+                transition-transform duration-300 ease-in-out
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 <div className="p-6 border-b border-gray-700">
                     <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
@@ -148,8 +148,8 @@ export function DashboardLayout() {
                                 }`
                             }
                         >
-                            <item.icon className="w-5 h-5 flex-shrink-0" />
-                            <span className="font-medium">{item.label}</span>
+                            <item.icon className="w-6 h-6 flex-shrink-0" />
+                            <span className="font-medium text-base">{item.label}</span>
                         </NavLink>
                     ))}
                 </nav>
@@ -160,8 +160,8 @@ export function DashboardLayout() {
                             <span className="text-sm font-semibold text-white">{getInitials()}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-white truncate">{getFullName()}</p>
-                            <p className="text-xs text-gray-400 capitalize">{directorInfo.role}</p>
+                            <p className="text-base font-medium text-white truncate">{getFullName()}</p>
+                            <p className="text-sm text-gray-400 capitalize">{directorInfo.role}</p>
                         </div>
                     </div>
                 </div>
