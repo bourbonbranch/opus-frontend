@@ -139,3 +139,41 @@
 .fc-scroller::-webkit-scrollbar-thumb:hover {
   background: rgba(139, 92, 246, 0.5);
 }
+
+/* Mobile Responsive Toolbar */
+@media (max-width: 768px) {
+
+  /* Make toolbar wrap on mobile */
+  .fc .fc-toolbar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    align-items: stretch !important;
+  }
+
+  .fc .fc-toolbar-chunk {
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Smaller title on mobile */
+  .fc .fc-toolbar-title {
+    font-size: 1.25rem !important;
+    text-align: center !important;
+  }
+
+  /* Smaller buttons on mobile */
+  .fc .fc-button {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.875rem !important;
+    min-height: 44px !important;
+  }
+
+  /* Button group spacing */
+  .fc .fc-button-group {
+    display: flex !important;
+    gap: 0.25rem !important;
+  }
+}
