@@ -212,6 +212,22 @@ export default function SeatingCanvas({
                             </div>
                         </div>
                     </div>
+
+                    {/* DEBUG OVERLAY */}
+                    <div className="absolute top-4 left-4 z-50 bg-black/80 text-green-400 p-4 rounded border border-green-500/30 font-mono text-xs pointer-events-none max-w-md overflow-auto max-h-96">
+                        <div>isCurved: {String(isCurved)}</div>
+                        <div>Sections: {riserSections.length}</div>
+                        <div>Positions: {positions.length}</div>
+                        {positions.map((p, i) => (
+                            <div key={i} className="mt-2 border-t border-white/10 pt-1">
+                                <div>Idx: {i}</div>
+                                <div>x: {p.x.toFixed(2)}, y: {p.y.toFixed(2)}</div>
+                                <div>angleDeg: {p.wedgeAngle?.toFixed(2)}</div>
+                                <div>angleRad: {p.angleRad?.toFixed(4)}</div>
+                                <div>radius: {p.radius}</div>
+                            </div>
+                        ))}
+                    </div>
                 </>
             )}
         </TransformWrapper>
