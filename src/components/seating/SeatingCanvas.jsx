@@ -4,7 +4,7 @@ import RiserSection from './RiserSection';
 import { User, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 const Controls = () => {
-    const { zoomIn, zoomOut, centerView } = useControls();
+    const { zoomIn, zoomOut, resetTransform } = useControls();
     return (
         <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-gray-800/80 backdrop-blur rounded-lg p-2 border border-white/10 shadow-xl z-50">
             <button onClick={() => zoomIn()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom In">
@@ -13,7 +13,7 @@ const Controls = () => {
             <button onClick={() => zoomOut()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom Out">
                 <ZoomOut className="w-5 h-5 text-white" />
             </button>
-            <button onClick={() => centerView({ scale: 0.5, duration: 500 })} className="p-2 hover:bg-white/10 rounded transition-colors" title="Recenter View">
+            <button onClick={() => resetTransform()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Recenter View">
                 <RotateCcw className="w-5 h-5 text-white" />
             </button>
         </div>
@@ -40,13 +40,34 @@ export default function SeatingCanvas({
     onSelectSection,
     onBackgroundClick
 }) {
+    // Calculate dynamic radius to prevent wrapping
+    const calculateRadius = () => {
+        if (!isCurved || riserSections.length === 0) return 600;
+
+        const scale = 30;
+        const totalWidthPx = riserSections.reduce((sum, section) => sum + (section.moduleWidth * scale), 0);
+
+        // Maximum allowed arc angle in degrees (e.g., 100 degrees)
+        const MAX_ARC_ANGLE = 100;
+        const maxAngleRad = MAX_ARC_ANGLE * (Math.PI / 180);
+
+        // Arc length formula: s = r * theta
+        // We approximate total chord length as arc length for safety
+        // r = s / theta
+        const minRadius = totalWidthPx / maxAngleRad;
+
+        // Return the larger of the base radius (600) or the calculated minimum radius
+        return Math.max(600, minRadius);
+    };
+
+    const radius = calculateRadius();
+
     // Calculate proper arc geometry for curved layout
     const calculateCurvedPositions = () => {
         if (!isCurved || riserSections.length === 0) return [];
 
         // Use same scaling as RiserSection (30px per foot)
         const scale = 30;
-        const radius = 600; // Increased radius for gentler arc
 
         // 1. Calculate width of each section in pixels
         // In a curved layout, the "width" is the chord length at the front of the riser.
@@ -102,7 +123,6 @@ export default function SeatingCanvas({
     const [initStatus, setInitStatus] = React.useState('Pending');
 
     // Layout constants for centering
-    const radius = 600;
     const directorY = 400; // Director position relative to center of curvature (Increased gap)
     const visualCenterOffset = (radius + directorY) / 2; // Center the group (Risers + Director)
 
