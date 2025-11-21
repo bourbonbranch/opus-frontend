@@ -112,6 +112,15 @@ export default function SeatingCanvas({
             </div>
 
             <Controls />
+
+            {/* System Status Bar - Temporary for visibility check */}
+            <div className="absolute top-0 left-0 right-0 bg-gray-900/90 text-xs font-mono text-purple-300 p-2 z-50 flex justify-center gap-8 border-b border-purple-500/30">
+                <span>Sections: {riserSections.length}</span>
+                <span>Curved: {isCurved ? 'Yes' : 'No'}</span>
+                <span>Pos[0]: {positions[0] ? `x:${Math.round(positions[0].x)} y:${Math.round(positions[0].y)}` : 'N/A'}</span>
+                <span>First Riser: {riserSections[0] ? `${riserSections[0].moduleWidth * 40}px x ${(riserSections[0].treadDepth * (40 / 12) * globalRows).toFixed(0)}px` : 'N/A'}</span>
+            </div>
+
             <TransformComponent
                 wrapperClass="w-full h-full"
                 contentClass="w-full h-full"
@@ -125,6 +134,11 @@ export default function SeatingCanvas({
                 >
                     {/* Fixed center point */}
                     <div className="absolute" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
+
+                        {/* TEST BLOCK - If you see this, coordinate system works */}
+                        <div className="absolute -top-20 -left-20 w-40 h-40 bg-red-500/20 border-2 border-red-500 flex items-center justify-center text-red-500 font-bold z-50 pointer-events-none">
+                            TEST BLOCK
+                        </div>
 
                         {/* Riser Container relative to center */}
                         <div className="absolute top-0 left-0 w-0 h-0 overflow-visible">
