@@ -4,7 +4,7 @@ import RiserSection from './RiserSection';
 import { User, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 const Controls = () => {
-    const { zoomIn, zoomOut, resetTransform } = useControls();
+    const { zoomIn, zoomOut, centerView } = useControls();
     return (
         <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-gray-800/80 backdrop-blur rounded-lg p-2 border border-white/10 shadow-xl z-50">
             <button onClick={() => zoomIn()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom In">
@@ -13,7 +13,7 @@ const Controls = () => {
             <button onClick={() => zoomOut()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom Out">
                 <ZoomOut className="w-5 h-5 text-white" />
             </button>
-            <button onClick={() => resetTransform()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Recenter View">
+            <button onClick={() => centerView({ scale: 0.5, duration: 500 })} className="p-2 hover:bg-white/10 rounded transition-colors" title="Recenter View">
                 <RotateCcw className="w-5 h-5 text-white" />
             </button>
         </div>
@@ -109,33 +109,37 @@ export default function SeatingCanvas({
     };
 
     const positions = isCurved ? calculateCurvedPositions() : [];
+    const [initStatus, setInitStatus] = React.useState('Pending');
 
     // Layout constants for centering
-    const directorY = 200; // Director distance from risers
-    const riserY = -radius; // Risers are positioned at -radius from origin
+    const directorY = 400; // Director position relative to center of curvature (Increased gap)
+    const visualCenterOffset = ((radius + directorY) / 2) + 200; // Center the group (Risers + Director) and shift down 200px
 
     return (
         <TransformWrapper
             initialScale={0.5}
             minScale={0.1}
-            maxScale={3}
+            maxScale={3} // Limit zoom to 3x
             limitToBounds={false}
-            panning={{ disabled: false }}
+            panning={{ disabled: false }} // Enable panning
             wheel={{ step: 0.1 }}
-            initialPositionX={0}
-            initialPositionY={0}
+            onInit={(ref) => {
+                ref.centerView({ scale: 0.5, duration: 0 });
+            }}
         >
-            {() => (
+            {({ centerView }) => (
                 <>
                     <Controls />
 
                     <TransformComponent
                         wrapperClass="w-full h-full"
-                        contentClass="w-full h-full"
+                        contentClass="w-full h-full flex items-center justify-center"
                     >
                         <div
-                            className="w-full h-full relative"
                             style={{
+                                width: '1500px',
+                                height: '1500px',
+                                position: 'relative',
                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                                 backgroundSize: '40px 40px',
                                 backgroundPosition: 'center',
@@ -147,131 +151,100 @@ export default function SeatingCanvas({
                                 }
                             }}
                         >
-                            {/* Content wrapper - positioned at viewport center */}
+                            {/* Director Group - ABSOLUTE CENTER */}
                             <div
-                                className="absolute"
+                                className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
                                 style={{
-                                    left: '50%',
-                                    top: '50%',
-                                    transform: 'translate(-50%, -50%)'
+                                    bottom: `calc(50% + ${directorY - visualCenterOffset}px)`
                                 }}
                             >
-                                {/* Director Group */}
-                                <div
-                                    className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
-                                    style={{
-                                        top: `${directorY}px`
-                                    }}
-                                >
-                                    <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
-                                        <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
-                                        <User className="w-8 h-8 text-purple-100 relative z-10" />
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-purple-500/30">
-                                            Director Position
-                                        </div>
-                                    </div>
-                                    <div className="px-3 py-0.5 bg-gray-900/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
-                                        <span className="text-[10px] font-bold text-purple-200 uppercase tracking-wider">Director</span>
+                                <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
+                                    <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
+                                    <User className="w-8 h-8 text-purple-100 relative z-10" />
+                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-purple-500/30">
+                                        Director Position
                                     </div>
                                 </div>
-
-                                {/* Stage Representation - Behind Director */}
-                                <div
-                                    className="absolute left-1/2 -translate-x-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none"
-                                    style={{
-                                        top: `${directorY}px`
-                                    }}
-                                >
+                                <div className="px-3 py-0.5 bg-gray-900/90 rounded-full border border-purple-500/30 backdrop-blur-sm">
+                                    <span className="text-[10px] font-bold text-purple-200 uppercase tracking-wider">Director</span>
                                 </div>
-
-                                {/* Risers */}
-                                {riserSections.length > 0 && (
-                                    <>
-                                        {isCurved ? (
-                                            // CURVED LAYOUT
-                                            riserSections.map((section, index) => {
-                                                const pos = positions[index];
-                                                return (
-                                                    <div
-                                                        key={section.id}
-                                                        className="absolute pointer-events-auto"
-                                                        style={{
-                                                            left: `${pos.x}px`,
-                                                            top: `${riserY + pos.y}px`,
-                                                            transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
-                                                            transformOrigin: 'center bottom',
-                                                            zIndex: selectedSectionId === section.id ? 10 : 1
-                                                        }}
-                                                    >
-                                                        <RiserSection
-                                                            section={section}
-                                                            globalRows={globalRows}
-                                                            isSelected={selectedSectionId === section.id}
-                                                            onSelect={() => onSelectSection(section.id)}
-                                                            placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                            wedgeAngle={pos.wedgeAngle}
-                                                            radius={pos.radius}
-                                                            angleRad={pos.angleRad}
-                                                        />
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            // STRAIGHT LAYOUT
-                                            <div
-                                                className="absolute left-1/2 flex justify-center items-end pointer-events-none"
-                                                style={{
-                                                    transform: 'translate(-50%, 0)',
-                                                    top: `${riserY}px`,
-                                                    gap: '0px'
-                                                }}
-                                            >
-                                                {riserSections.map((section) => (
-                                                    <div
-                                                        key={section.id}
-                                                        className="pointer-events-auto"
-                                                        style={{
-                                                            zIndex: selectedSectionId === section.id ? 10 : 1
-                                                        }}
-                                                    >
-                                                        <RiserSection
-                                                            section={section}
-                                                            globalRows={globalRows}
-                                                            isSelected={selectedSectionId === section.id}
-                                                            onSelect={() => onSelectSection(section.id)}
-                                                            placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
                             </div>
+
+                            {/* Stage Representation - Behind Director */}
+                            <div
+                                className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none"
+                                style={{
+                                    bottom: `calc(50% + ${directorY - visualCenterOffset}px)`
+                                }}
+                            >
+                            </div>
+
+                            {/* Risers */}
+                            {riserSections.length > 0 && (
+                                <>
+                                    {isCurved ? (
+                                        // CURVED LAYOUT
+                                        riserSections.map((section, index) => {
+                                            const pos = positions[index];
+                                            return (
+                                                <div
+                                                    key={section.id}
+                                                    className="absolute pointer-events-auto"
+                                                    style={{
+                                                        left: `calc(50% + ${pos.x}px)`,
+                                                        bottom: `calc(50% + ${pos.y - visualCenterOffset}px)`,
+                                                        transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
+                                                        transformOrigin: 'center bottom',
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                    }}
+                                                >
+                                                    <RiserSection
+                                                        section={section}
+                                                        globalRows={globalRows}
+                                                        isSelected={selectedSectionId === section.id}
+                                                        onSelect={() => onSelectSection(section.id)}
+                                                        placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                        wedgeAngle={pos.wedgeAngle}
+                                                        radius={pos.radius}
+                                                        angleRad={pos.angleRad}
+                                                    />
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        // STRAIGHT LAYOUT
+                                        <div
+                                            className="absolute left-1/2 bottom-1/2 flex justify-center items-end pointer-events-none"
+                                            style={{
+                                                transform: 'translate(-50%, 0)',
+                                                paddingBottom: '120px', // Distance from Director center
+                                                gap: '0px'
+                                            }}
+                                        >
+                                            {riserSections.map((section) => (
+                                                <div
+                                                    key={section.id}
+                                                    className="pointer-events-auto"
+                                                    style={{
+                                                        zIndex: selectedSectionId === section.id ? 10 : 1
+                                                    }}
+                                                >
+                                                    <RiserSection
+                                                        section={section}
+                                                        globalRows={globalRows}
+                                                        isSelected={selectedSectionId === section.id}
+                                                        onSelect={() => onSelectSection(section.id)}
+                                                        placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </TransformComponent>
 
-                    {/* DEBUG OVERLAY */}
-                    <div className="absolute top-4 left-4 z-50 bg-black/80 text-green-400 p-4 rounded border border-green-500/30 font-mono text-xs pointer-events-none max-w-md overflow-auto max-h-96">
-                        <div>isCurved: {String(isCurved)}</div>
-                        <div>Sections: {riserSections.length}</div>
-                        <div>GlobalRows: {globalRows}</div>
-                        <div>Positions: {positions.length}</div>
-                        {positions.map((p, i) => {
-                            const section = riserSections[i];
-                            return (
-                                <div key={i} className="mt-2 border-t border-white/10 pt-1">
-                                    <div>Idx: {i}</div>
-                                    <div>x: {p.x.toFixed(2)}, y: {p.y.toFixed(2)}</div>
-                                    <div>angleDeg: {p.wedgeAngle?.toFixed(2)}</div>
-                                    <div>angleRad: {p.angleRad?.toFixed(4)}</div>
-                                    <div>radius: {p.radius}</div>
-                                    <div>depth: {section?.treadDepth}</div>
-                                    <div>width: {section?.moduleWidth}</div>
-                                </div>
-                            );
-                        })}
-                    </div>
                 </>
             )}
         </TransformWrapper>
