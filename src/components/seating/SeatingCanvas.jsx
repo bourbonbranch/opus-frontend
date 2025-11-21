@@ -82,9 +82,12 @@ export default function SeatingCanvas({
             initialScale={0.5}
             minScale={0.1}
             maxScale={4}
-            centerOnInit={true}
+            centerOnInit={false}
             limitToBounds={false}
+            panning={{ disabled: true }} // Disable panning
             wheel={{ step: 0.1 }}
+            initialPositionX={0}
+            initialPositionY={0}
         >
             {({ centerView }) => (
                 <>
@@ -92,101 +95,89 @@ export default function SeatingCanvas({
 
                     <TransformComponent
                         wrapperClass="w-full h-full"
-                        contentClass="w-full h-full"
+                        contentClass="w-full h-full flex items-center justify-center"
                     >
                         <div
-                            className="w-[4000px] h-[4000px] relative"
+                            className="relative"
                             style={{
                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-                                backgroundSize: '40px 40px'
+                                backgroundSize: '40px 40px',
+                                backgroundPosition: 'center',
+                                minWidth: '100%',
+                                minHeight: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                             }}
                         >
-                            {/* Fixed center point */}
-                            {/* DEBUG: Center Marker */}
-                            <div className="absolute w-10 h-10 bg-yellow-500 z-50" style={{ top: '2000px', left: '2000px', transform: 'translate(-50%, -50%)' }}></div>
+                            {/* Riser Container - centered in viewport */}
+                            <div className="relative" style={{ marginBottom: '200px' }}>
+                                {/* Riser Sections */}
+                                {riserSections.length > 0 && (
+                                    <div className="relative flex" style={{ gap: '0px' }}>
+                                        {riserSections.map((section, index) => {
+                                            if (isCurved) {
+                                                const pos = positions[index];
+                                                return (
+                                                    <div
+                                                        key={section.id}
+                                                        className="absolute"
+                                                        style={{
+                                                            left: `${pos.x}px`,
+                                                            top: `${pos.y}px`,
+                                                            transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
+                                                            transformOrigin: 'center bottom',
+                                                            zIndex: selectedSectionId === section.id ? 10 : 1
+                                                        }}
+                                                    >
+                                                        <RiserSection
+                                                            section={section}
+                                                            globalRows={globalRows}
+                                                            isSelected={selectedSectionId === section.id}
+                                                            onSelect={() => onSelectSection(section.id)}
+                                                            placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                            wedgeAngle={pos.wedgeAngle}
+                                                            radius={pos.radius}
+                                                            angleRad={pos.angleRad}
+                                                        />
+                                                    </div>
+                                                );
+                                            } else {
+                                                // Straight layout - side by side
+                                                return (
+                                                    <div
+                                                        key={section.id}
+                                                        style={{
+                                                            zIndex: selectedSectionId === section.id ? 10 : 1
+                                                        }}
+                                                    >
+                                                        <RiserSection
+                                                            section={section}
+                                                            globalRows={globalRows}
+                                                            isSelected={selectedSectionId === section.id}
+                                                            onSelect={() => onSelectSection(section.id)}
+                                                            placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                        />
+                                                    </div>
+                                                );
+                                            }
+                                        })}
+                                    </div>
+                                )}
 
-                            {/* Pivot Point (Director Location) - Moved down so risers (at -800y) appear in center */}
-                            <div className="absolute" style={{ top: '2800px', left: '2000px', transform: 'translate(-50%, -50%)' }}>
-
-                                {/* Riser Container relative to center */}
-                                <div className="absolute top-0 left-0 w-0 h-0 overflow-visible">
-
-                                    {/* Riser Sections */}
-                                    {riserSections.length > 0 && (
-                                        <div className="relative" style={{ width: '1px', height: '1px' }}>
-                                            {riserSections.map((section, index) => {
-                                                if (isCurved) {
-                                                    const pos = positions[index];
-                                                    return (
-                                                        <div
-                                                            key={section.id}
-                                                            className="absolute"
-                                                            style={{
-                                                                left: `${pos.x}px`,
-                                                                top: `${pos.y}px`,
-                                                                transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
-                                                                transformOrigin: 'center bottom',
-                                                                zIndex: selectedSectionId === section.id ? 10 : 1
-                                                            }}
-                                                        >
-                                                            <RiserSection
-                                                                section={section}
-                                                                globalRows={globalRows}
-                                                                isSelected={selectedSectionId === section.id}
-                                                                onSelect={() => onSelectSection(section.id)}
-                                                                placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                                wedgeAngle={pos.wedgeAngle}
-                                                                radius={pos.radius}
-                                                                angleRad={pos.angleRad}
-                                                            />
-                                                        </div>
-                                                    );
-                                                } else {
-                                                    // Straight layout - side by side
-                                                    const totalWidth = riserSections.reduce((sum, s) => sum + (s.moduleWidth * 40), 0);
-                                                    const startX = -totalWidth / 2;
-                                                    const xOffset = riserSections.slice(0, index).reduce((sum, s) => sum + (s.moduleWidth * 40), 0);
-
-                                                    return (
-                                                        <div
-                                                            key={section.id}
-                                                            className="absolute"
-                                                            style={{
-                                                                left: `${startX + xOffset}px`,
-                                                                top: '-800px', // Match the curved radius offset
-                                                                transform: 'translateY(-100%)',
-                                                                zIndex: selectedSectionId === section.id ? 10 : 1
-                                                            }}
-                                                        >
-                                                            <RiserSection
-                                                                section={section}
-                                                                globalRows={globalRows}
-                                                                isSelected={selectedSectionId === section.id}
-                                                                onSelect={() => onSelectSection(section.id)}
-                                                                placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
-                                                            />
-                                                        </div>
-                                                    );
-                                                }
-                                            })}
-                                        </div>
-                                    )}
-
-                                    {/* Empty State */}
-                                    {riserSections.length === 0 && (
-                                        <div className="absolute left-1/2 top-0 -translate-x-1/2 text-center pt-20">
-                                            <div className="text-gray-400 text-lg font-medium bg-gray-900/80 px-8 py-6 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
-                                                <p className="mb-4">Start building your seating chart</p>
-                                                <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
-                                                    <span>Click</span>
-                                                    <span className="px-2 py-1 bg-green-600/20 text-green-400 rounded border border-green-600/30 font-bold">+ Add Section</span>
-                                                    <span>to begin</span>
-                                                </div>
+                                {/* Empty State */}
+                                {riserSections.length === 0 && (
+                                    <div className="text-center">
+                                        <div className="text-gray-400 text-lg font-medium bg-gray-900/80 px-8 py-6 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
+                                            <p className="mb-4">Start building your seating chart</p>
+                                            <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
+                                                <span>Click</span>
+                                                <span className="px-2 py-1 bg-green-600/20 text-green-400 rounded border border-green-600/30 font-bold">+ Add Section</span>
+                                                <span>to begin</span>
                                             </div>
                                         </div>
-                                    )}
-
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </TransformComponent>
