@@ -37,7 +37,7 @@ export default function SeatingCanvas({
         // Calculate total width to center the arrangement
         let currentAngle = 0;
         const sectionAngles = riserSections.map(section => {
-            const widthPx = section.moduleWidth * 40;
+            const widthPx = section.moduleWidth * 30; // Use same scaling as RiserSection
             // Angle subtended by this section: chord = 2 * r * sin(theta/2)
             // theta = 2 * asin(chord / 2r)
             const angleRad = 2 * Math.asin(widthPx / (2 * radius));
@@ -127,9 +127,9 @@ export default function SeatingCanvas({
                                                     className="absolute"
                                                     style={{
                                                         left: `${400 + pos.x}px`,
-                                                        bottom: `${800 + pos.y}px`, // pos.y is negative (-800), so this becomes 0
-                                                        transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
-                                                        transformOrigin: 'center bottom',
+                                                        top: `${800 + pos.y}px`, // Use top positioning for curved layout
+                                                        transform: `translate(-50%, -100%) rotate(${pos.rotation}deg)`,
+                                                        transformOrigin: 'center top',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
                                                     }}
                                                 >
