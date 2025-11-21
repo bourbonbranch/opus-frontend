@@ -158,15 +158,15 @@ export default function Roster() {
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-white mb-2 drop-shadow-lg">
+          <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 drop-shadow-lg">
             Roster Management
           </h1>
-          <p className="text-gray-200">Manage your ensemble members</p>
+          <p className="text-sm md:text-base text-gray-200">Manage your ensemble members</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <input
             type="file"
             ref={fileInputRef}
@@ -176,17 +176,17 @@ export default function Roster() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
           >
             <UploadIcon className="w-5 h-5" />
-            Import CSV
+            <span>Import CSV</span>
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
+            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
           >
             <PlusIcon className="w-5 h-5" />
-            Add Student
+            <span>Add Student</span>
           </button>
         </div>
       </div>
