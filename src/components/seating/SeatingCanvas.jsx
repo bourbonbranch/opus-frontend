@@ -133,6 +133,7 @@ export default function SeatingCanvas({
                                                                 placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
                                                                 wedgeAngle={pos.wedgeAngle}
                                                                 radius={pos.radius}
+                                                                angleRad={pos.angleRad}
                                                             />
                                                         </div>
                                                     );
