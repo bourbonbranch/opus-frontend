@@ -27,7 +27,7 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
                 e.stopPropagation();
                 onSelect();
             }}
-            className={`relative flex flex-col items-center cursor-pointer transition-all duration-200
+            className={`relative flex flex-col items-center cursor-pointer transition-all duration-200 border-2 border-red-500
         ${isSelected ? 'ring-2 ring-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]' : 'hover:bg-white/5'}
       `}
             style={{

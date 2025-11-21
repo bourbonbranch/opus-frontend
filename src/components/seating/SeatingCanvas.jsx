@@ -61,7 +61,7 @@ export default function SeatingCanvas({
             // x = sin(angle) * radius
             // y = -cos(angle) * radius + radius (offset to start at 0)
             const x = Math.sin(centerAngleRad) * radius;
-            const y = -Math.cos(centerAngleRad) * radius + radius;
+            const y = -Math.cos(centerAngleRad) * radius;
 
             return {
                 x,
