@@ -134,8 +134,8 @@ export default function SeatingCanvas({
                                 backgroundPosition: 'center',
                                 minWidth: '100%',
                                 minHeight: '100%',
-                                width: '2000px', // Give it a fixed large size for panning
-                                height: '2000px',
+                                minWidth: '100%',
+                                minHeight: '100%',
                                 cursor: 'default'
                             }}
                         >
