@@ -116,7 +116,7 @@ export default function SeatingCanvas({
                             {riserSections.length > 0 && (
                                 <div className="relative" style={{
                                     width: isCurved ? '800px' : 'auto',
-                                    height: isCurved ? '400px' : 'auto'
+                                    height: isCurved ? '800px' : 'auto'
                                 }}>
                                     {riserSections.map((section, index) => {
                                         if (isCurved) {
@@ -127,7 +127,7 @@ export default function SeatingCanvas({
                                                     className="absolute"
                                                     style={{
                                                         left: `${400 + pos.x}px`,
-                                                        bottom: `${-pos.y}px`, // Use bottom instead of top
+                                                        bottom: `${800 + pos.y}px`, // pos.y is negative (-800), so this becomes 0
                                                         transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
                                                         transformOrigin: 'center bottom',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
