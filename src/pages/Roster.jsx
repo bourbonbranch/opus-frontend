@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadIcon, UsersIcon, PlusIcon } from 'lucide-react';
-import { getEnsembles, getRoster, addRosterMember, importRoster } from '../lib/opusApi';
+import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts } from '../lib/opusApi';
 
 export default function Roster() {
   const navigate = useNavigate();
@@ -20,6 +20,9 @@ export default function Roster() {
     pronouns: '',
   });
   const [adding, setAdding] = useState(false);
+  const [sections, setSections] = useState([]);
+  const [parts, setParts] = useState([]);
+  const [availableParts, setAvailableParts] = useState([]);
 
   useEffect(() => {
     loadEnsembles();
@@ -28,6 +31,7 @@ export default function Roster() {
   useEffect(() => {
     if (selectedEnsembleId) {
       loadRoster();
+      loadSectionsAndParts();
     }
   }, [selectedEnsembleId]);
 
@@ -54,6 +58,38 @@ export default function Roster() {
       console.error('Failed to load roster', err);
     }
   };
+
+  const loadSectionsAndParts = async () => {
+    if (!selectedEnsembleId) return;
+    try {
+      const sectionsData = await getEnsembleSections(selectedEnsembleId);
+      setSections(sectionsData || []);
+
+      const partsData = await getEnsembleParts({ ensemble_id: selectedEnsembleId });
+      setParts(partsData || []);
+    } catch (err) {
+      console.error('Failed to load sections/parts', err);
+    }
+  };
+
+  // Update available parts when section changes
+  useEffect(() => {
+    if (newStudent.section) {
+      const selectedSection = sections.find(s => s.name === newStudent.section);
+      if (selectedSection) {
+        const sectionParts = parts.filter(p => p.section_id === selectedSection.id);
+        setAvailableParts(sectionParts);
+      } else {
+        setAvailableParts([]);
+      }
+    } else {
+      setAvailableParts([]);
+      // Clear part if section is cleared
+      if (newStudent.part) {
+        setNewStudent(prev => ({ ...prev, part: '' }));
+      }
+    }
+  }, [newStudent.section, sections, parts]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -368,29 +404,55 @@ export default function Roster() {
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Section
                 </label>
-                <input
-                  type="text"
+                <select
                   value={newStudent.section}
                   onChange={(e) =>
                     setNewStudent({ ...newStudent, section: e.target.value })
                   }
-                  placeholder="e.g., Soprano, Trumpet, Violin"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="">Select a section...</option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.name}>
+                      {section.name}
+                    </option>
+                  ))}
+                </select>
+                {sections.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    No sections configured. Add sections in Ensemble Settings.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Part
                 </label>
-                <input
-                  type="text"
+                <select
                   value={newStudent.part}
                   onChange={(e) =>
                     setNewStudent({ ...newStudent, part: e.target.value })
                   }
-                  placeholder="e.g., Soprano 1, Alto 2, Tenor 1"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                  disabled={!newStudent.section}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select a part...</option>
+                  {availableParts.map((part) => (
+                    <option key={part.id} value={part.name}>
+                      {part.name}
+                    </option>
+                  ))}
+                </select>
+                {!newStudent.section && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Select a section first
+                  </p>
+                )}
+                {newStudent.section && availableParts.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    No parts configured for this section
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">

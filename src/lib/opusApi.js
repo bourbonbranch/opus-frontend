@@ -422,3 +422,76 @@ export async function getEventSummary(eventId) {
   const res = await fetch(`${API_BASE_URL}/reports/event-summary?event_id=${eventId}`);
   return handleResponse(res);
 }
+
+// ─────────────── ENSEMBLE SECTIONS & PARTS ───────────────
+
+// Get sections for an ensemble
+export async function getEnsembleSections(ensembleId) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-sections?ensemble_id=${ensembleId}`);
+  return handleResponse(res);
+}
+
+// Create a section
+export async function createEnsembleSection(data) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-sections`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+// Update a section
+export async function updateEnsembleSection(id, data) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-sections/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+// Delete a section
+export async function deleteEnsembleSection(id) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-sections/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// Get parts for a section or ensemble
+export async function getEnsembleParts(params) {
+  const query = params.section_id
+    ? `section_id=${params.section_id}`
+    : `ensemble_id=${params.ensemble_id}`;
+  const res = await fetch(`${API_BASE_URL}/ensemble-parts?${query}`);
+  return handleResponse(res);
+}
+
+// Create a part
+export async function createEnsemblePart(data) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-parts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+// Update a part
+export async function updateEnsemblePart(id, data) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-parts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+// Delete a part
+export async function deleteEnsemblePart(id) {
+  const res = await fetch(`${API_BASE_URL}/ensemble-parts/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
