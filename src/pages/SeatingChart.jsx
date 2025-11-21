@@ -113,20 +113,21 @@ export default function SeatingChart() {
                 const row = parseInt(parts[2]); // Fixed index: 0=id, 1=row, 2=num
 
                 if (!isNaN(sectionId) && !isNaN(row)) {
-                    // Get student data
-                    const student = students.find(s => s.id === active.id);
+                    // Get student data - compare as strings to avoid type mismatch
+                    const student = students.find(s => String(s.id) === String(active.id));
 
                     if (student) {
                         setPlacedStudents(prev => {
                             // Remove student from previous position if already placed
-                            const filtered = prev.filter(s => s.studentId !== active.id);
+                            // Use String comparison for ID check
+                            const filtered = prev.filter(s => String(s.studentId) !== String(active.id));
 
                             // Calculate next available index in this row
                             const studentsInRow = filtered.filter(s => s.sectionId === sectionId && s.row === row);
                             const nextIndex = studentsInRow.length + 1;
 
                             return [...filtered, {
-                                studentId: active.id,
+                                studentId: student.id, // Store original ID type
                                 sectionId,
                                 row,
                                 index: nextIndex,
@@ -139,8 +140,8 @@ export default function SeatingChart() {
         }
     };
 
-    const activeStudent = students.find(s => s.id === activeId) ||
-        placedStudents.find(s => s.studentId === activeId);
+    const activeStudent = students.find(s => String(s.id) === String(activeId)) ||
+        placedStudents.find(s => String(s.studentId) === String(activeId));
 
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
