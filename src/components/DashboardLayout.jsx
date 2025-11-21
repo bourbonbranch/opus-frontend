@@ -103,7 +103,7 @@ export function DashboardLayout() {
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl text-white hover:bg-gray-800 transition-colors"
+                className="md:hidden fixed top-4 right-4 z-[60] p-2 bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl text-white hover:bg-gray-800 transition-colors"
                 aria-label="Toggle menu"
             >
                 {isMobileMenuOpen ? (
