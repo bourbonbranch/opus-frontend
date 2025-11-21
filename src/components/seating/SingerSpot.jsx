@@ -19,7 +19,7 @@ export default function SingerSpot({ id, student }) {
     return (
         <div
             ref={setNodeRef}
-            className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
+            className={`relative w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200
         ${isOver ? 'bg-white/20 scale-125 ring-2 ring-white' : 'bg-white/5 border border-white/10'}
         ${student ? 'border-none' : ''}
       `}
