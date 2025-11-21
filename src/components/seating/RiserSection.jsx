@@ -2,7 +2,7 @@ import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 
 export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
-    const PIXELS_PER_FOOT = 40;
+    const PIXELS_PER_FOOT = 30; // Reduced from 40 for smaller risers
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
     const widthPx = section.moduleWidth * PIXELS_PER_FOOT;
@@ -27,7 +27,7 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
                 e.stopPropagation();
                 onSelect();
             }}
-            className={`relative flex flex-col items-center cursor-pointer transition-all duration-200 border-2 border-red-500
+            className={`relative flex flex-col items-center cursor-pointer transition-all duration-200
         ${isSelected ? 'ring-2 ring-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]' : 'hover:bg-white/5'}
       `}
             style={{
