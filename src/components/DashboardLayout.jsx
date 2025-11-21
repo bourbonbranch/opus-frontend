@@ -11,7 +11,6 @@ import {
     TicketIcon,
     MenuIcon,
     XIcon,
-    Settings,
 } from 'lucide-react';
 
 export function DashboardLayout() {
@@ -88,11 +87,6 @@ export function DashboardLayout() {
             to: '/director/tickets',
             icon: TicketIcon,
             label: 'Tickets',
-        },
-        {
-            to: '/director/settings',
-            icon: Settings,
-            label: 'Settings',
         },
     ];
 

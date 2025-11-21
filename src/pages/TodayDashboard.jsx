@@ -153,7 +153,7 @@ export function TodayDashboard() {
             <div
               key={ensemble.id}
               className="bg-white/10 backdrop-blur-3xl rounded-2xl p-6 border border-white/30 shadow-2xl hover:bg-white/15 transition-all cursor-pointer"
-              onClick={() => navigate(`/director/roster`)}
+              onClick={() => navigate(`/director/ensembles/${ensemble.id}`)}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
