@@ -32,27 +32,27 @@ export default function SeatingCanvas({
     const calculateCurvedPositions = () => {
         if (!isCurved || riserSections.length === 0) return [];
 
-        const radius = 800; // Flatter curve (larger radius) for AMC feel
+        const radius = 800; // Radius to the FRONT of the first row
 
         // Calculate total width to center the arrangement
         let currentAngle = 0;
         const sectionAngles = riserSections.map(section => {
             const widthPx = section.moduleWidth * 40;
             // Angle subtended by this section: s = r * theta => theta = s / r
+            // We use the front width for the angle calculation to ensure they touch at the front
             const angleDeg = (widthPx / radius) * (180 / Math.PI);
-            return angleDeg;
+            return { angleDeg, widthPx };
         });
 
-        const totalAngle = sectionAngles.reduce((sum, a) => sum + a, 0);
+        const totalAngle = sectionAngles.reduce((sum, s) => sum + s.angleDeg, 0);
         const startAngle = -totalAngle / 2;
 
         return riserSections.map((section, index) => {
-            const widthPx = section.moduleWidth * 40;
-            const sectionAngle = sectionAngles[index];
+            const { angleDeg } = sectionAngles[index];
 
             // Center of this section is at startAngle + (sum of prev angles) + half this angle
-            const prevAngles = sectionAngles.slice(0, index).reduce((sum, a) => sum + a, 0);
-            const centerAngle = startAngle + prevAngles + (sectionAngle / 2);
+            const prevAngles = sectionAngles.slice(0, index).reduce((sum, s) => sum + s.angleDeg, 0);
+            const centerAngle = startAngle + prevAngles + (angleDeg / 2);
 
             const angleRad = (centerAngle * Math.PI) / 180;
 
@@ -65,7 +65,9 @@ export default function SeatingCanvas({
             return {
                 x,
                 y,
-                rotation: centerAngle // Rotate to face center
+                rotation: centerAngle, // Rotate to face center
+                wedgeAngle: angleDeg,
+                radius: radius
             };
         });
     };
@@ -77,7 +79,7 @@ export default function SeatingCanvas({
         <TransformWrapper
             initialScale={0.5}
             initialPositionX={-600}
-            initialPositionY={-350}
+            initialPositionY={-100} // Shifted down to be closer to director
             minScale={0.1}
             maxScale={4}
             centerOnInit={false}
@@ -129,6 +131,8 @@ export default function SeatingCanvas({
                                                                 isSelected={selectedSectionId === section.id}
                                                                 onSelect={() => onSelectSection(section.id)}
                                                                 placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
+                                                                wedgeAngle={pos.wedgeAngle}
+                                                                radius={pos.radius}
                                                             />
                                                         </div>
                                                     );

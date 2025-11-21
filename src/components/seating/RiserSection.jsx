@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 
-export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents }) {
+export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents, wedgeAngle, radius }) {
     const PIXELS_PER_FOOT = 40;
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
@@ -31,7 +31,7 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
         ${isSelected ? 'ring-2 ring-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]' : 'hover:bg-white/5'}
       `}
             style={{
-                width: widthPx,
+                width: wedgeAngle ? 'auto' : widthPx, // Auto width for wedge to let rows dictate size
             }}
         >
             {/* Section Label */}
@@ -43,16 +43,46 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
                 // Get students in this row
                 const studentsInRow = placedStudents.filter(s => s.row === rowNum);
 
+                // Calculate wedge geometry if applicable
+                let rowStyle = {};
+                let innerWidth = widthPx;
+                let outerWidth = widthPx;
+
+                if (wedgeAngle && radius) {
+                    const angleRad = (wedgeAngle * Math.PI) / 180;
+                    const rowStartRadius = radius + ((rowNum - 1) * depthPx);
+                    const rowEndRadius = radius + (rowNum * depthPx);
+
+                    innerWidth = angleRad * rowStartRadius;
+                    outerWidth = angleRad * rowEndRadius;
+
+                    // Trapezoid clip path: Top is outer (wide), Bottom is inner (narrow)
+                    // But wait, flex-col renders Top-to-Bottom.
+                    // Row N (Back) is at Top. Row 1 (Front) is at Bottom.
+                    // So for any row: Top edge is Back (Outer), Bottom edge is Front (Inner).
+                    // So Top Width = OuterWidth, Bottom Width = InnerWidth.
+
+                    const inset = (outerWidth - innerWidth) / 2;
+                    const insetPercent = (inset / outerWidth) * 100;
+
+                    rowStyle = {
+                        width: outerWidth,
+                        clipPath: `polygon(0 0, 100% 0, ${100 - insetPercent}% 100%, ${insetPercent}% 100%)`
+                    };
+                }
+
                 return (
                     <RiserRow
                         key={rowNum}
                         section={section}
                         rowNum={rowNum}
                         depthPx={depthPx}
-                        widthPx={widthPx}
+                        widthPx={wedgeAngle ? outerWidth : widthPx} // Use outer width for container
                         globalRows={globalRows}
                         studentsInRow={studentsInRow}
                         getSectionColor={getSectionColor}
+                        style={rowStyle}
+                        isWedge={!!wedgeAngle}
                     />
                 );
             })}
@@ -60,7 +90,7 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
     );
 }
 
-function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow, getSectionColor }) {
+function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow, getSectionColor, style, isWedge }) {
     const { setNodeRef, isOver } = useDroppable({
         id: `${section.id}-row-${rowNum}`,
         data: { sectionId: section.id, row: rowNum }
@@ -83,16 +113,18 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
     return (
         <div
             ref={setNodeRef}
-            className={`w-full border-x border-t border-purple-500/30 relative box-border transition-colors
+            className={`border-x border-t border-purple-500/30 relative box-border transition-colors
         ${isOver ? 'bg-purple-500/40' : 'bg-gradient-to-b from-purple-900/20 to-purple-900/10 hover:from-purple-900/30 hover:to-purple-900/20'}
         ${rowNum === 1 ? 'border-b border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : ''}
       `}
             style={{
                 height: depthPx,
+                width: widthPx,
+                ...style
             }}
         >
             {/* Row Label */}
-            <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-xs text-white/50 font-mono font-bold">
+            <div className={`absolute top-1/2 -translate-y-1/2 text-xs text-white/50 font-mono font-bold ${isWedge ? 'left-2' : '-left-8'}`}>
                 R{rowNum}
             </div>
 
