@@ -138,14 +138,14 @@ export function TodayDashboard() {
 
       {/* Ensembles Section */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-white">Your Ensembles</h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <h2 className="text-xl md:text-2xl font-semibold text-white">Your Ensembles</h2>
           <button
             onClick={() => navigate('/add-ensemble')}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg"
+            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] w-full sm:w-auto bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg"
           >
             <PlusIcon className="w-5 h-5" />
-            Add Ensemble
+            <span>Add Ensemble</span>
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

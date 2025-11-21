@@ -50,20 +50,21 @@ export default function LiveAttendance() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
                     <div>
                         <Link
                             to="/director/rooms"
                             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-2"
                         >
                             <ArrowLeftIcon className="w-4 h-4" />
-                            Back to Rooms
+                            <span>Back to Rooms</span>
                         </Link>
-                        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                            {roomName || 'Room'} <span className="text-purple-400 font-normal text-xl">Live Attendance</span>
+                        <h1 className="text-2xl md:text-3xl font-bold text-white flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                            <span>{roomName || 'Room'}</span>
+                            <span className="text-purple-400 font-normal text-lg md:text-xl">Live Attendance</span>
                         </h1>
                     </div>
                     <div className="flex items-center gap-4">
@@ -75,7 +76,7 @@ export default function LiveAttendance() {
                             <span className="text-green-400 text-sm font-medium">Live</span>
                         </div>
                         <div className="text-right">
-                            <p className="text-3xl font-bold text-white">{attendance.length}</p>
+                            <p className="text-2xl md:text-3xl font-bold text-white">{attendance.length}</p>
                             <p className="text-xs text-gray-400 uppercase tracking-wider">Present</p>
                         </div>
                     </div>
