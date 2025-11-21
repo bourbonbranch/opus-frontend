@@ -34,7 +34,7 @@ export default function SeatingCanvas({
 
         // Use same scaling as RiserSection (30px per foot)
         const scale = 30;
-        const radius = 800; // Fixed radius to the FRONT of the first row
+        const radius = 350; // Reduced radius to fit on screen (approx 12ft)
 
         // 1. Calculate width of each section in pixels
         // In a curved layout, the "width" is the chord length at the front of the riser.
