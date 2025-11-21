@@ -29,7 +29,7 @@ export default function SeatingChart() {
         centerGap: 3,
         adaRow: null,
     }]);
-    const [selectedSectionId, setSelectedSectionId] = useState(1);
+    const [selectedSectionId, setSelectedSectionId] = useState(null);
     const [isCurved, setIsCurved] = useState(true);
 
     const sensors = useSensors(

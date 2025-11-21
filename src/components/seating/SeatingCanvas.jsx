@@ -137,7 +137,11 @@ export default function SeatingCanvas({
                                 <div className="relative pointer-events-none" style={{
                                     width: isCurved ? '1600px' : 'auto',
                                     height: isCurved ? '1600px' : 'auto',
-                                    marginBottom: isCurved ? '0' : '100px' // Add margin for straight layout to move it up
+                                    marginBottom: isCurved ? '0' : '100px',
+                                    display: isCurved ? 'block' : 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-end',
+                                    gap: '0px' // Ensure no gap between straight sections
                                 }}>
                                     {riserSections.map((section, index) => {
                                         if (isCurved) {
@@ -172,9 +176,7 @@ export default function SeatingCanvas({
                                                     key={section.id}
                                                     className="pointer-events-auto"
                                                     style={{
-                                                        display: 'inline-block',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
-                                                        // Removed margin to make sections touch
                                                     }}
                                                 >
                                                     <RiserSection
