@@ -19,7 +19,21 @@ export default function RiserConfigurationPanel({
     if (!section) return null;
 
     return (
-        <div className={`absolute top-20 right-6 w-80 bg-gray-800/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden transition-all duration-300 z-50 flex flex-col ${isMinimized ? 'h-14' : 'max-h-[calc(100vh-140px)]'}`}>
+        <div className={`
+            fixed md:absolute 
+            bottom-0 md:bottom-auto md:top-20 
+            left-0 md:left-auto md:right-6 
+            w-full md:w-80 
+            bg-gray-800/95 md:bg-gray-800/90 backdrop-blur-xl 
+            border-t md:border border-white/10 
+            md:rounded-xl rounded-t-2xl md:rounded-b-xl
+            shadow-2xl 
+            overflow-hidden 
+            transition-all duration-300 
+            z-50 
+            flex flex-col 
+            ${isMinimized ? 'h-14' : 'max-h-[70vh] md:max-h-[calc(100vh-140px)]'}
+        `}>
             {/* Header */}
             <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between shrink-0 cursor-pointer" onClick={() => setIsMinimized(!isMinimized)}>
                 <div className="flex items-center gap-2">
@@ -29,7 +43,8 @@ export default function RiserConfigurationPanel({
                 <div className="flex items-center gap-2">
                     <button
                         onClick={(e) => { e.stopPropagation(); onClose(); }}
-                        className="p-1 hover:bg-white/10 rounded transition-colors"
+                        className="p-1 hover:bg-white/10 rounded transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        aria-label={isMinimized ? "Expand" : "Collapse"}
                     >
                         {isMinimized ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                     </button>
