@@ -76,17 +76,11 @@ export default function SeatingCanvas({
     return (
         <TransformWrapper
             initialScale={0.5}
+            initialPositionX={-800} // Approx center for 4000px width at 0.5 scale on 1920px screen
+            initialPositionY={-800}
             minScale={0.1}
             maxScale={4}
-            centerOnInit={true}
-            onInit={(utils) => {
-                setInitStatus('Running...');
-                // Force center with a longer delay
-                setTimeout(() => {
-                    utils.centerView({ scale: 0.5, duration: 0 });
-                    setInitStatus('Done');
-                }, 500);
-            }}
+            centerOnInit={false} // Disable auto-center as it seems to fail
             limitToBounds={false}
             wheel={{ step: 0.1 }}
         >
@@ -113,7 +107,7 @@ export default function SeatingCanvas({
                         contentClass="w-full h-full"
                     >
                         <div
-                            className="w-[4000px] h-[4000px] relative"
+                            className="w-[4000px] h-[4000px] relative border-2 border-blue-500/50"
                             style={{
                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                                 backgroundSize: '40px 40px'
