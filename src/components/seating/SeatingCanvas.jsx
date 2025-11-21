@@ -103,7 +103,7 @@ export default function SeatingCanvas({
 
     // Layout constants for centering
     const radius = 600;
-    const directorY = 450; // Director position relative to center of curvature
+    const directorY = 400; // Director position relative to center of curvature (Increased gap)
     const visualCenterOffset = (radius + directorY) / 2; // Center the group (Risers + Director)
 
     return (
