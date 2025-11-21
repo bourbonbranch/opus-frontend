@@ -68,12 +68,12 @@ export function TodayDashboard() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-white mb-2 drop-shadow-lg">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 drop-shadow-lg">
           Today's Overview
         </h1>
-        <p className="text-gray-200">
+        <p className="text-sm md:text-base text-gray-200">
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',

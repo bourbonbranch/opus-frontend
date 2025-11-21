@@ -243,20 +243,20 @@ export function Events() {
     }
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
-            <div className="mb-8 flex items-center justify-between">
+        <div className="p-4 md:p-8 max-w-6xl mx-auto">
+            <div className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-semibold text-white mb-2 drop-shadow-lg">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 drop-shadow-lg">
                         Events & Schedule
                     </h1>
-                    <p className="text-gray-200">Manage rehearsals, concerts, and performances</p>
+                    <p className="text-sm md:text-base text-gray-200">Manage rehearsals, concerts, and performances</p>
                 </div>
                 <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
                 >
                     <PlusIcon className="w-5 h-5" />
-                    Add Event
+                    <span>Add Event</span>
                 </button>
             </div>
 
@@ -299,40 +299,41 @@ export function Events() {
                             key={event.id}
                             className="bg-white/10 backdrop-blur-3xl rounded-2xl border border-white/30 shadow-2xl p-6"
                         >
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="text-xl font-semibold text-white">{event.name}</h3>
-                                        <span className={`px-3 py-1 text-sm font-medium rounded-full border ${getEventTypeColor(event.type)}`}>
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                        <h3 className="text-lg sm:text-xl font-semibold text-white">{event.name}</h3>
+                                        <span className={`px-3 py-1 text-xs sm:text-sm font-medium rounded-full border ${getEventTypeColor(event.type)}`}>
                                             {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
                                         </span>
                                     </div>
                                     {event.description && (
                                         <p className="text-gray-300 text-sm mb-3">{event.description}</p>
                                     )}
-                                    <div className="flex flex-wrap gap-4 text-sm">
+                                    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm">
                                         <div className="flex items-center gap-2 text-gray-200">
-                                            <CalendarIcon className="w-4 h-4 text-purple-300" />
+                                            <CalendarIcon className="w-4 h-4 text-purple-300 flex-shrink-0" />
                                             <span>{formatDateTime(event.start_time)}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-gray-200">
-                                            <ClockIcon className="w-4 h-4 text-blue-300" />
+                                            <ClockIcon className="w-4 h-4 text-blue-300 flex-shrink-0" />
                                             <span>
                                                 {formatTime(event.start_time)} - {formatTime(event.end_time)}
                                             </span>
                                         </div>
                                         {event.room_name && (
                                             <div className="flex items-center gap-2 text-gray-200">
-                                                <MapPinIcon className="w-4 h-4 text-green-300" />
+                                                <MapPinIcon className="w-4 h-4 text-green-300 flex-shrink-0" />
                                                 <span>{event.room_name}</span>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 sm:flex-col">
                                     <button
                                         onClick={() => handleDeleteEvent(event.id)}
-                                        className="p-2 bg-red-500/20 border border-red-400/30 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors"
+                                        className="p-2 min-h-[44px] min-w-[44px] bg-red-500/20 border border-red-400/30 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center"
+                                        aria-label="Delete event"
                                     >
                                         <TrashIcon className="w-5 h-5" />
                                     </button>
@@ -473,8 +474,8 @@ export function Events() {
                                                             type="button"
                                                             onClick={() => toggleRecurrenceDay(index)}
                                                             className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${newEvent.recurrence_days.includes(index)
-                                                                    ? 'bg-purple-500 text-white'
-                                                                    : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                                ? 'bg-purple-500 text-white'
+                                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
                                                                 }`}
                                                         >
                                                             {day}
