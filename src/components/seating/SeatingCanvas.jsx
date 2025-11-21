@@ -26,7 +26,7 @@ const CenterOnLoad = () => {
         // Small timeout to ensure layout is ready
         setTimeout(() => {
             centerView({ scale: 0.5, duration: 0 });
-        }, 100);
+        }, 500);
     }, []);
     return null;
 };
@@ -122,8 +122,8 @@ export default function SeatingCanvas({
                     >
                         <div
                             style={{
-                                width: '4000px',
-                                height: '4000px',
+                                width: '1500px',
+                                height: '1500px',
                                 position: 'relative',
                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                                 backgroundSize: '40px 40px',
