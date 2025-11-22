@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadIcon, UsersIcon, PlusIcon } from 'lucide-react';
-import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts } from '../lib/opusApi';
+import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember } from '../lib/opusApi';
 
 export default function Roster() {
   const navigate = useNavigate();
@@ -214,14 +214,14 @@ export default function Roster() {
     setAdding(true);
     try {
       // Map frontend camelCase to backend snake_case
-      await import('../lib/opusApi').then(mod => mod.updateRosterMember(editingStudent.id, {
+      await updateRosterMember(editingStudent.id, {
         first_name: editingStudent.firstName,
         last_name: editingStudent.lastName,
         email: editingStudent.email,
         section: editingStudent.section,
         part: editingStudent.part,
         pronouns: editingStudent.pronouns,
-      }));
+      });
       setEditingStudent(null);
       setIsAddModalOpen(false);
       loadRoster();
@@ -229,6 +229,16 @@ export default function Roster() {
       alert('Failed to update student: ' + err.message);
     } finally {
       setAdding(false);
+    }
+  };
+
+  const handleDeleteStudent = async (studentId) => {
+    if (!confirm('Are you sure you want to remove this student from the roster?')) return;
+    try {
+      await deleteRosterMember(studentId);
+      loadRoster();
+    } catch (err) {
+      alert('Failed to delete student: ' + err.message);
     }
   };
 
@@ -415,9 +425,15 @@ export default function Roster() {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => openEditModal(student)}
-                        className="text-purple-300 hover:text-purple-200 font-medium text-sm"
+                        className="text-purple-300 hover:text-purple-200 font-medium text-sm mr-3"
                       >
                         Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStudent(student.id)}
+                        className="text-red-400 hover:text-red-300 font-medium text-sm"
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>

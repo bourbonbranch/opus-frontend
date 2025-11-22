@@ -117,6 +117,15 @@ export async function updateRosterMember(id, payload) {
   return handleResponse(res);
 }
 
+// Delete a roster member
+export async function deleteRosterMember(id) {
+  const res = await fetch(`${API_BASE_URL}/roster/${id}`, {
+    method: 'DELETE',
+  });
+
+  return handleResponse(res);
+}
+
 // Delete an ensemble
 export async function deleteEnsemble(id) {
   const res = await fetch(`${API_BASE_URL}/ensembles/${id}`, {

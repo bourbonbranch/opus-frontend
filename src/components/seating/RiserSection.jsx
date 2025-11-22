@@ -8,8 +8,8 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
     const widthPx = section.moduleWidth * PIXELS_PER_FOOT;
     const depthPx = (section.treadDepth * PIXELS_PER_INCH);
 
-    // Generate rows using globalRows
-    const rows = Array.from({ length: globalRows }, (_, i) => globalRows - i);
+    // Generate rows using globalRows (including Floor/Row 0)
+    const rows = Array.from({ length: globalRows + 1 }, (_, i) => globalRows - i);
 
     const getSectionColor = (voiceSection) => {
         switch (voiceSection) {
@@ -49,14 +49,33 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
                 let outerWidth = widthPx;
 
                 if (wedgeAngle && radius && angleRad) {
-                    const rowStartRadius = radius + ((rowNum - 1) * depthPx);
-                    const rowEndRadius = radius + (rowNum * depthPx);
+                    // For Floor (row 0), we project outwards from the first riser row
+                    const effectiveRowNum = Math.max(1, rowNum);
+                    const rowStartRadius = radius + ((effectiveRowNum - 1) * depthPx);
+                    const rowEndRadius = radius + (effectiveRowNum * depthPx);
+
+                    // If it's the floor (row 0), we might want it slightly wider or same as row 1
+                    // For now, let's keep the geometry consistent with the riser structure
+                    // But technically floor is "in front" or "below" row 1.
+                    // In this visualization, rows stack vertically. Row 1 is bottom of stack?
+                    // No, rows are rendered top-to-bottom in the map: 4, 3, 2, 1, 0.
+                    // So Row 4 is top, Row 0 is bottom.
+
+                    // Radius logic:
+                    // Row 1 is at radius R.
+                    // Row 2 is at R + depth.
+                    // Row 0 (Floor) should be at R - depth? Or just below Row 1?
+                    // The current logic: radius + ((rowNum - 1) * depthPx)
+                    // Row 1: radius + 0
+                    // Row 2: radius + depth
+                    // Row 0: radius - depth
+
+                    const rStart = radius + ((rowNum - 1) * depthPx);
+                    const rEnd = radius + (rowNum * depthPx);
 
                     // Calculate CHORD lengths for the given angle at these radii
-                    // chord = 2 * r * sin(theta/2)
-                    // theta is angleRad
-                    innerWidth = 2 * rowStartRadius * Math.sin(angleRad / 2);
-                    outerWidth = 2 * rowEndRadius * Math.sin(angleRad / 2);
+                    innerWidth = 2 * rStart * Math.sin(angleRad / 2);
+                    outerWidth = 2 * rEnd * Math.sin(angleRad / 2);
 
                     // Trapezoid clip path: Top is outer (wide), Bottom is inner (narrow)
                     const inset = (outerWidth - innerWidth) / 2;
@@ -111,7 +130,8 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
         <div
             ref={setNodeRef}
             className={`border-x border-t border-purple-500/30 relative box-border transition-colors
-        ${isOver ? 'bg-purple-500/40' : 'bg-gradient-to-b from-purple-900/20 to-purple-900/10 hover:from-purple-900/30 hover:to-purple-900/20'}
+        ${isOver ? 'bg-purple-500/40' : (rowNum === 0 ? 'bg-white/5 hover:bg-white/10' : 'bg-gradient-to-b from-purple-900/20 to-purple-900/10 hover:from-purple-900/30 hover:to-purple-900/20')}
+        ${rowNum === 0 ? 'border-b border-purple-500/30' : ''}
         ${rowNum === 1 ? 'border-b border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : ''}
       `}
             style={{
@@ -123,7 +143,7 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
         >
             {/* Row Label */}
             <div className={`absolute top-1/2 -translate-y-1/2 text-xs text-white/50 font-mono font-bold ${isWedge ? 'left-2' : '-left-8'}`}>
-                R{rowNum}
+                {rowNum === 0 ? 'Floor' : `R${rowNum}`}
             </div>
 
             {/* Only show placed students, not empty spots */}

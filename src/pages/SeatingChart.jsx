@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
+import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor, closestCenter } from '@dnd-kit/core';
 import { Settings, Users, Plus, Loader } from 'lucide-react';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
@@ -148,6 +147,7 @@ export default function SeatingChart() {
         <div className="flex h-full bg-transparent text-white overflow-hidden">
             <DndContext
                 sensors={sensors}
+                collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
@@ -245,6 +245,7 @@ export default function SeatingChart() {
                                 setSelectedSectionId(null);
                                 setIsConfigOpen(false);
                             }}
+                            isDragging={!!activeId}
                         />
                     </div>
 

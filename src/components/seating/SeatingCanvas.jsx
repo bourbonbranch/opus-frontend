@@ -27,7 +27,8 @@ export default function SeatingCanvas({
     placedStudents,
     selectedSectionId,
     onSelectSection,
-    onBackgroundClick
+    onBackgroundClick,
+    isDragging
 }) {
     // Calculate dynamic radius to prevent wrapping
     const calculateRadius = () => {
@@ -121,7 +122,7 @@ export default function SeatingCanvas({
             minScale={0.1}
             maxScale={3} // Limit zoom to 3x
             limitToBounds={false}
-            panning={{ disabled: false }} // Enable panning
+            panning={{ disabled: isDragging }} // Disable panning when dragging
             wheel={{ step: 0.1 }}
             onInit={(ref) => {
                 ref.centerView({ scale: 0.5, duration: 0 });
