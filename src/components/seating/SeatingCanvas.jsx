@@ -128,8 +128,8 @@ export default function SeatingCanvas({
     const [initStatus, setInitStatus] = React.useState('Pending');
 
     // Layout constants for centering
-    const directorY = 400; // Director position relative to center of curvature (Increased gap)
-    const visualCenterOffset = ((radius + directorY) / 2) - 100; // Center the group (Risers + Director) with slight downward adjustment
+    const directorY = 400; // Director position relative to center of curvature
+    const visualCenterOffset = 0; // Center the group (Risers + Director) around canvas midpoint
 
     return (
         <TransformWrapper
