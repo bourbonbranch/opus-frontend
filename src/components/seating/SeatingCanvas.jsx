@@ -202,13 +202,21 @@ export default function SeatingCanvas({
                                         // CURVED LAYOUT
                                         riserSections.map((section, index) => {
                                             const pos = positions[index];
+                                            // Calculate depth offset for Row 0
+                                            // RiserSection renders Row 0 at the bottom, but our radius calculation is for Row 1 (Front of Riser)
+                                            // Row 1 is depthPx above Row 0.
+                                            // So we need to shift the whole component down (inwards) by depthPx so that Row 1 aligns with the arc.
+                                            const scale = 30;
+                                            const PIXELS_PER_INCH = scale / 12;
+                                            const depthPx = (section.treadDepth * PIXELS_PER_INCH);
+
                                             return (
                                                 <div
                                                     key={section.id}
                                                     className="absolute pointer-events-auto"
                                                     style={{
                                                         left: `calc(50% + ${pos.x}px)`,
-                                                        bottom: `calc(50% + ${pos.y - visualCenterOffset}px)`,
+                                                        bottom: `calc(50% + ${pos.y - visualCenterOffset - depthPx}px)`,
                                                         transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
                                                         transformOrigin: 'center bottom',
                                                         zIndex: selectedSectionId === section.id ? 10 : 1

@@ -288,7 +288,7 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000}>
+                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000} dropAnimation={null}>
                     {activeId && studentData ? (
                         isPlaced ? (
                             // Render as Circle (Placed Student)
