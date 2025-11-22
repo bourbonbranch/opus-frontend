@@ -105,6 +105,26 @@ export default function EnsembleDetail() {
         }
     };
 
+    const handleDeleteEnsemble = async () => {
+        if (!confirm('Are you sure you want to delete this ensemble? This action cannot be undone.')) return;
+
+        // Double confirmation for safety
+        const ensembleName = ensemble?.name || 'this ensemble';
+        const confirmation = prompt(`To confirm deletion, please type "${ensembleName}" below:`);
+
+        if (confirmation !== ensembleName) {
+            alert('Ensemble name did not match. Deletion cancelled.');
+            return;
+        }
+
+        try {
+            await import('../lib/opusApi').then(mod => mod.deleteEnsemble(ensembleId));
+            navigate('/director/today');
+        } catch (err) {
+            alert('Failed to delete ensemble: ' + err.message);
+        }
+    };
+
     if (loading) {
         return (
             <div className="p-8 max-w-6xl mx-auto">
@@ -338,6 +358,28 @@ export default function EnsembleDetail() {
                     </div>
                 </div>
             )}
+
+            {/* Danger Zone */}
+            <div className="mt-8 bg-red-500/10 backdrop-blur-3xl rounded-2xl border border-red-500/30 shadow-2xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-red-500/20 flex items-center gap-2 bg-red-500/5">
+                    <Trash2 className="w-5 h-5 text-red-400" />
+                    <h2 className="text-lg font-semibold text-red-100">Danger Zone</h2>
+                </div>
+                <div className="p-6 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-white font-medium mb-1">Delete Ensemble</h3>
+                        <p className="text-sm text-red-200/70">
+                            Permanently delete this ensemble and all its data (roster, events, etc). This action cannot be undone.
+                        </p>
+                    </div>
+                    <button
+                        onClick={handleDeleteEnsemble}
+                        className="px-4 py-2 bg-red-500/20 border border-red-500/30 text-red-300 rounded-xl font-medium hover:bg-red-500/30 hover:text-red-200 transition-all"
+                    >
+                        Delete Ensemble
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

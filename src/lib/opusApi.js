@@ -104,6 +104,28 @@ export async function addRosterMember(payload) {
   return handleResponse(res);
 }
 
+// Update a roster member
+export async function updateRosterMember(id, payload) {
+  const res = await fetch(`${API_BASE_URL}/roster/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(res);
+}
+
+// Delete an ensemble
+export async function deleteEnsemble(id) {
+  const res = await fetch(`${API_BASE_URL}/ensembles/${id}`, {
+    method: 'DELETE',
+  });
+
+  return handleResponse(res);
+}
+
 // ─────────────── ROOMS & ATTENDANCE ───────────────
 
 export async function getRooms(directorId) {
