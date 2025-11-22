@@ -27,7 +27,7 @@ export default function SeatingChart() {
         moduleWidth: 6,
         treadDepth: 24,
         singerSpacing: 22,
-        centerGap: 3,
+        centerGap: 0,
         adaRow: null,
     }]);
     const [selectedSectionId, setSelectedSectionId] = useState(null);
@@ -78,7 +78,7 @@ export default function SeatingChart() {
             moduleWidth: 6,
             treadDepth: 24,
             singerSpacing: 22,
-            centerGap: 3,
+            centerGap: 0,
             adaRow: null,
         };
 
@@ -288,7 +288,7 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay modifiers={[snapCenterToCursor]}>
+                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000}>
                     {activeId && studentData ? (
                         isPlaced ? (
                             // Render as Circle (Placed Student)
