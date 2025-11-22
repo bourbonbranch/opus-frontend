@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor, closestCenter } from '@dnd-kit/core';
 import { Settings, Users, Plus, Loader } from 'lucide-react';
 import StudentBank from '../components/seating/StudentBank';
