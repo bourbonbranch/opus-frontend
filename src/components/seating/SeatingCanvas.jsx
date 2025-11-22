@@ -58,33 +58,48 @@ export default function SeatingCanvas({
 
         // Use same scaling as RiserSection (30px per foot)
         const scale = 30;
+        const PIXELS_PER_INCH = scale / 12;
 
         // 1. Calculate width of each section in pixels
         // In a curved layout, the "width" is the chord length at the front of the riser.
         const sectionData = riserSections.map(section => {
             const widthPx = section.moduleWidth * scale;
-            return { widthPx };
+            const gapPx = (section.centerGap || 0) * PIXELS_PER_INCH;
+            return { widthPx, gapPx };
         });
 
-        // 2. Calculate angles for each section
+        // 2. Calculate angles for each section and gap
         // chord = 2 * r * sin(theta/2)
         // theta = 2 * asin(chord / 2r)
         const sectionAngles = sectionData.map(s => {
             const angleRad = 2 * Math.asin(s.widthPx / (2 * radius));
             const angleDeg = angleRad * (180 / Math.PI);
-            return { angleDeg, angleRad, widthPx: s.widthPx };
+
+            // Calculate gap angle
+            // We treat gap as a chord on the same radius
+            const gapAngleRad = 2 * Math.asin(s.gapPx / (2 * radius));
+            const gapAngleDeg = gapAngleRad * (180 / Math.PI);
+
+            return { angleDeg, angleRad, widthPx: s.widthPx, gapAngleDeg, gapAngleRad };
         });
 
         // 3. Calculate total angle to center the arrangement
-        const totalAngleDeg = sectionAngles.reduce((sum, s) => sum + s.angleDeg, 0);
+        // Total angle includes gaps between sections (n-1 gaps)
+        // We assume the gap is AFTER the section, except for the last one
+        const totalAngleDeg = sectionAngles.reduce((sum, s, i) => {
+            const isLast = i === sectionAngles.length - 1;
+            return sum + s.angleDeg + (isLast ? 0 : s.gapAngleDeg);
+        }, 0);
+
         const startAngle = -totalAngleDeg / 2;
 
         return riserSections.map((section, index) => {
-            const { angleDeg, angleRad } = sectionAngles[index];
+            const { angleDeg, angleRad, gapAngleDeg } = sectionAngles[index];
 
             // Calculate the angle for the CENTER of this section
-            // Start angle + sum of previous angles + half of current angle
-            const prevAngles = sectionAngles.slice(0, index).reduce((sum, s) => sum + s.angleDeg, 0);
+            // Start angle + sum of previous (angles + gaps) + half of current angle
+            const prevAngles = sectionAngles.slice(0, index).reduce((sum, s) => sum + s.angleDeg + s.gapAngleDeg, 0);
+
             const centerAngleDeg = startAngle + prevAngles + (angleDeg / 2);
             const centerAngleRad = centerAngleDeg * (Math.PI / 180);
 

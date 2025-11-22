@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor, closestCenter } from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { Settings, Users, Plus, Loader } from 'lucide-react';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
@@ -144,6 +145,10 @@ export default function SeatingChart() {
     const activeStudent = students.find(s => String(s.id) === String(activeId)) ||
         placedStudents.find(s => String(s.studentId) === String(activeId));
 
+    // Determine if the active student is being dragged from the bank or from a riser
+    const isPlaced = activeStudent && activeStudent.student; // Placed students have a nested 'student' object
+    const studentData = isPlaced ? activeStudent.student : activeStudent;
+
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
             <DndContext
@@ -283,17 +288,31 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay>
-                    {activeId ? (
-                        <div className="opacity-80 pointer-events-none">
-                            <div className={`px-3 py-2 rounded-lg shadow-xl border border-white/20 text-sm font-medium text-white w-40
-                 ${activeStudent?.section === 'Soprano' ? 'bg-pink-500' :
-                                    activeStudent?.section === 'Alto' ? 'bg-purple-500' :
-                                        activeStudent?.section === 'Tenor' ? 'bg-blue-500' : 'bg-green-500'}`}
+                <DragOverlay modifiers={[snapCenterToCursor]}>
+                    {activeId && studentData ? (
+                        isPlaced ? (
+                            // Render as Circle (Placed Student)
+                            <div className={`w-12 h-12 rounded-full bg-gray-900 border-2 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)]
+                                ${studentData.section === 'Soprano' ? 'border-pink-500' :
+                                    studentData.section === 'Alto' ? 'border-purple-500' :
+                                        studentData.section === 'Tenor' ? 'border-blue-500' : 'border-green-500'}`}
                             >
-                                {activeStudent?.name}
+                                <span className="text-sm font-bold text-white">
+                                    {studentData.name.split(' ').map(n => n[0]).join('')}
+                                </span>
                             </div>
-                        </div>
+                        ) : (
+                            // Render as Card (Bank Student)
+                            <div className="opacity-80 pointer-events-none">
+                                <div className={`px-3 py-2 rounded-lg shadow-xl border border-white/20 text-sm font-medium text-white w-40
+                                    ${studentData.section === 'Soprano' ? 'bg-pink-500' :
+                                        studentData.section === 'Alto' ? 'bg-purple-500' :
+                                            studentData.section === 'Tenor' ? 'bg-blue-500' : 'bg-green-500'}`}
+                                >
+                                    {studentData.name}
+                                </div>
+                            </div>
+                        )
                     ) : null}
                 </DragOverlay>
             </DndContext>

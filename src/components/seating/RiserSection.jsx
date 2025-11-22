@@ -1,5 +1,6 @@
 import React from 'react';
-import { useDroppable } from '@dnd-kit/core';
+import { useDroppable, useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
     const PIXELS_PER_FOOT = 30; // Reduced from 40 for smaller risers
@@ -148,27 +149,13 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
 
             {/* Only show placed students, not empty spots */}
             <div className="w-full h-full flex items-center justify-center px-4 gap-1">
-                {studentsInRow.map(student => {
-                    const studentData = student.student || { name: `Student ${student.studentId}`, section: 'Unknown' };
-                    const sectionColor = getSectionColor(studentData.section).replace('bg-', 'border-');
-
-                    return (
-                        <div
-                            key={student.studentId}
-                            className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] relative group z-10`}
-                            title={studentData.name}
-                        >
-                            {/* Hover Name Tag */}
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20 pointer-events-none z-50">
-                                {studentData.name}
-                            </div>
-
-                            <span className="text-sm font-bold text-white">
-                                {studentData.name.split(' ').map(n => n[0]).join('')}
-                            </span>
-                        </div>
-                    );
-                })}
+                {studentsInRow.map(student => (
+                    <PlacedStudent
+                        key={student.studentId}
+                        student={student}
+                        getSectionColor={getSectionColor}
+                    />
+                ))}
 
                 {/* Show capacity hint when hovering */}
                 {isOver && studentsInRow.length < capacity && (
@@ -180,3 +167,53 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
         </div>
     );
 }
+
+function PlacedStudent({ student, getSectionColor }) {
+    const studentData = student.student || { name: `Student ${student.studentId}`, section: 'Unknown' };
+    const sectionColor = getSectionColor(studentData.section).replace('bg-', 'border-');
+
+    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+        id: student.studentId,
+        data: student.student
+    });
+
+    const style = transform ? {
+        transform: CSS.Translate.toString(transform),
+    } : undefined;
+
+    if (isDragging) {
+        return (
+            <div
+                ref={setNodeRef}
+                style={style}
+                className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center opacity-30`}
+            >
+                <span className="text-sm font-bold text-white">
+                    {studentData.name.split(' ').map(n => n[0]).join('')}
+                </span>
+            </div>
+        );
+    }
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...listeners}
+            {...attributes}
+            className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] relative group z-10 cursor-grab active:cursor-grabbing hover:scale-110 transition-transform`}
+            title={studentData.name}
+        >
+            {/* Hover Name Tag */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20 pointer-events-none z-50">
+                {studentData.name}
+            </div>
+
+            <span className="text-sm font-bold text-white">
+                {studentData.name.split(' ').map(n => n[0]).join('')}
+            </span>
+        </div>
+    );
+}
+
+
