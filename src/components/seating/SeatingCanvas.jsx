@@ -132,7 +132,7 @@ export default function SeatingCanvas({
     const visualCenterOffset = ((radius + directorY) / 2) + 100; // Center the group (Risers + Director) with slight downward shift
 
     // Final global offsets to center the entire layout in the 1500×1500 canvas
-    const offsetX = 60; // Horizontal offset to shift layout right
+    const offsetX = 120; // Horizontal offset to shift layout right
     const offsetY = -200; // Vertical offset to move entire layout down for better centering
 
     return (
@@ -175,6 +175,7 @@ export default function SeatingCanvas({
                             <div
                                 className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
                                 style={{
+                                    left: `calc(50% + ${offsetX}px)`,
                                     bottom: `calc(50% + ${directorY - visualCenterOffset + offsetY}px)`
                                 }}
                             >
@@ -194,6 +195,7 @@ export default function SeatingCanvas({
                             <div
                                 className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none"
                                 style={{
+                                    left: `calc(50% + ${offsetX}px)`,
                                     bottom: `calc(50% + ${directorY - visualCenterOffset + offsetY}px)`
                                 }}
                             >
