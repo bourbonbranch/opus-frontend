@@ -137,7 +137,7 @@ export default function SeatingCanvas({
             minScale={0.1}
             maxScale={3} // Limit zoom to 3x
             limitToBounds={false}
-            panning={{ disabled: isDragging }} // Disable panning when dragging
+            panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }} // Disable panning when dragging
             wheel={{ step: 0.1 }}
             onInit={(ref) => {
                 ref.centerView({ scale: 0.5, duration: 0 });

@@ -55,7 +55,7 @@ export default function DraggableStudent({ student }) {
             style={style}
             {...listeners}
             {...attributes}
-            className={`p-3 rounded-xl border hover:bg-white/5 transition-colors cursor-grab active:cursor-grabbing ${getSectionColor(student.section)}`}
+            className={`p-3 rounded-xl border hover:bg-white/5 transition-colors cursor-grab active:cursor-grabbing dnd-draggable ${getSectionColor(student.section)}`}
         >
             <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${getAvatarColor(student.section)}`}>
