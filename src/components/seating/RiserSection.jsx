@@ -152,7 +152,7 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleW
             </div>
 
             {/* Only show placed students, not empty spots */}
-            <div className="w-full h-full flex items-center justify-center px-4 gap-1">
+            <div className="w-full h-full flex items-center justify-center px-4 gap-1 pointer-events-auto">
                 {studentsInRow.map(student => (
                     <PlacedStudent
                         key={student.studentId}
