@@ -129,7 +129,7 @@ export default function SeatingCanvas({
 
     // Layout constants for centering
     const directorY = 400; // Director position relative to center of curvature (Increased gap)
-    const visualCenterOffset = ((radius + directorY) / 2) + 200; // Center the group (Risers + Director) and shift down 200px
+    const visualCenterOffset = ((radius + directorY) / 2) + 100; // Center the group (Risers + Director) with slight downward shift
 
     return (
         <TransformWrapper
