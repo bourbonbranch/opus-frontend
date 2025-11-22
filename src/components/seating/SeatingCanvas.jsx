@@ -46,8 +46,8 @@ export default function SeatingCanvas({
         // r = s / theta
         const minRadius = totalWidthPx / maxAngleRad;
 
-        // Return the larger of the base radius (600) or the calculated minimum radius
-        return Math.max(600, minRadius);
+        // Return the larger of the base radius (900) or the calculated minimum radius
+        return Math.max(900, minRadius);
     };
 
     const radius = calculateRadius();
@@ -218,7 +218,7 @@ export default function SeatingCanvas({
                                                         left: `calc(50% + ${pos.x}px)`,
                                                         bottom: `calc(50% + ${pos.y - visualCenterOffset - depthPx}px)`,
                                                         transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
-                                                        transformOrigin: 'center bottom',
+                                                        transformOrigin: `center calc(100% - ${depthPx}px)`, // Pivot around Row 1 (Front of Riser)
                                                         zIndex: selectedSectionId === section.id ? 10 : 1
                                                     }}
                                                 >

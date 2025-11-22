@@ -53,13 +53,8 @@ export default function DraggableStudent({ student }) {
         <div
             ref={setNodeRef}
             style={style}
+            {...listeners}
             {...attributes}
-            onPointerDown={(e) => {
-                e.stopPropagation();
-                listeners.onPointerDown(e);
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
             className={`p-3 rounded-xl border hover:bg-white/5 transition-colors cursor-grab active:cursor-grabbing dnd-draggable ${getSectionColor(student.section)}`}
         >
             <div className="flex items-center gap-3">

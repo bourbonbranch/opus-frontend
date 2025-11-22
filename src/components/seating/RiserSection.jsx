@@ -200,12 +200,7 @@ function PlacedStudent({ student, getSectionColor }) {
             ref={setNodeRef}
             style={style}
             {...attributes}
-            onPointerDown={(e) => {
-                e.stopPropagation();
-                listeners.onPointerDown(e);
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
+            {...attributes}
             className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] relative group z-10 cursor-grab active:cursor-grabbing hover:scale-110 transition-transform dnd-draggable`}
             title={studentData.name}
         >
