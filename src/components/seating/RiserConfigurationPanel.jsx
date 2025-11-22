@@ -6,6 +6,10 @@ export default function RiserConfigurationPanel({
     allSections,
     globalRows,
     onGlobalRowsChange,
+    globalModuleWidth,
+    onGlobalModuleWidthChange,
+    globalTreadDepth,
+    onGlobalTreadDepthChange,
     isCurved,
     onToggleCurved,
     onAddSection,
@@ -137,17 +141,17 @@ export default function RiserConfigurationPanel({
 
                         {/* Presets */}
                         <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Presets</label>
+                            <label className="text-sm text-gray-300">Presets (All Sections)</label>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
-                                    onClick={() => onUpdate({ moduleWidth: 6, treadDepth: 18 })}
+                                    onClick={() => { onGlobalModuleWidthChange(6); onGlobalTreadDepthChange(18); }}
                                     className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
                                 >
                                     <div className="font-medium text-white">Wenger Std</div>
                                     <div className="text-[10px] text-gray-400">6' x 18"</div>
                                 </button>
                                 <button
-                                    onClick={() => onUpdate({ moduleWidth: 4, treadDepth: 18 })}
+                                    onClick={() => { onGlobalModuleWidthChange(4); onGlobalTreadDepthChange(18); }}
                                     className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-left transition-colors"
                                 >
                                     <div className="font-medium text-white">Wenger Short</div>
@@ -156,16 +160,16 @@ export default function RiserConfigurationPanel({
                             </div>
                         </div>
 
-                        {/* Module Width */}
+                        {/* Module Width (Global) */}
                         <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Module Width</label>
+                            <label className="text-sm text-gray-300">Module Width (All Sections)</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {[4, 6, 8].map(width => (
                                     <button
                                         key={width}
-                                        onClick={() => onUpdate({ moduleWidth: width })}
+                                        onClick={() => onGlobalModuleWidthChange(width)}
                                         className={`py-2 rounded-lg text-xs font-medium border transition-all
-                          ${section.moduleWidth === width
+                          ${globalModuleWidth === width
                                                 ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20'
                                                 : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                                     >
@@ -175,16 +179,16 @@ export default function RiserConfigurationPanel({
                             </div>
                         </div>
 
-                        {/* Tread Depth */}
+                        {/* Tread Depth (Global) */}
                         <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Tread Depth</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {[18, 24].map(depth => (
+                            <label className="text-sm text-gray-300">Tread Depth (All Sections)</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[18, 24, 30].map(depth => (
                                     <button
                                         key={depth}
-                                        onClick={() => onUpdate({ treadDepth: depth })}
+                                        onClick={() => onGlobalTreadDepthChange(depth)}
                                         className={`py-2 rounded-lg text-xs font-medium border transition-all
-                          ${section.treadDepth === depth
+                          ${globalTreadDepth === depth
                                                 ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20'
                                                 : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                                     >
@@ -194,39 +198,6 @@ export default function RiserConfigurationPanel({
                             </div>
                         </div>
 
-                        {/* Singer Spacing */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <label className="text-sm text-gray-300">Singer Spacing</label>
-                                <span className="text-xs text-gray-400">{section.singerSpacing}"</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="18"
-                                max="36"
-                                step="1"
-                                value={section.singerSpacing}
-                                onChange={(e) => onUpdate({ singerSpacing: parseInt(e.target.value) })}
-                                className="w-full accent-purple-500 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                            />
-                        </div>
-
-                        {/* Center Gap */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <label className="text-sm text-gray-300">Center Gap</label>
-                                <span className="text-xs text-gray-400">{section.centerGap}"</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="0"
-                                max="12"
-                                step="1"
-                                value={section.centerGap}
-                                onChange={(e) => onUpdate({ centerGap: parseInt(e.target.value) })}
-                                className="w-full accent-purple-500 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                            />
-                        </div>
 
                         {/* ADA Row */}
                         <div className="space-y-2">

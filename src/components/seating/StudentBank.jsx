@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
+import { useDroppable } from '@dnd-kit/core';
 import DraggableStudent from './DraggableStudent';
 
 export default function StudentBank({ students, placedStudents }) {
     const [search, setSearch] = useState('');
     const [filterSection, setFilterSection] = useState('All');
+
+    const { setNodeRef, isOver } = useDroppable({
+        id: 'student-bank',
+    });
 
     const placedIds = new Set(placedStudents.map(s => s.studentId));
 
@@ -54,15 +59,19 @@ export default function StudentBank({ students, placedStudents }) {
                 </div>
             </div>
 
-            {/* Student List */}
-            <div className="flex-1 overflow-y-auto p-4 pt-0 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            {/* Student List - Droppable Zone */}
+            <div
+                ref={setNodeRef}
+                className={`flex-1 overflow-y-auto p-4 pt-0 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent transition-colors ${isOver ? 'bg-purple-500/10 border-2 border-purple-500/50 border-dashed rounded-lg' : ''
+                    }`}
+            >
                 {filteredStudents.map(student => (
                     <DraggableStudent key={student.id} student={student} />
                 ))}
 
                 {filteredStudents.length === 0 && (
                     <div className="text-center py-8 text-gray-500 text-sm">
-                        No students found
+                        {isOver ? 'Drop here to remove from riser' : 'No students found'}
                     </div>
                 )}
             </div>

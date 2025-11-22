@@ -19,15 +19,13 @@ export default function SeatingChart() {
 
     // Global Riser Settings
     const [globalRows, setGlobalRows] = useState(4);
+    const [globalModuleWidth, setGlobalModuleWidth] = useState(6); // Global module width in feet
+    const [globalTreadDepth, setGlobalTreadDepth] = useState(24); // Global tread depth in inches
 
-    // Riser Sections - Start with one section for visibility
+    // Riser Sections - Only store section-specific data (name, adaRow)
     const [riserSections, setRiserSections] = useState([{
         id: 1,
         name: '1',
-        moduleWidth: 6,
-        treadDepth: 24,
-        singerSpacing: 22,
-        centerGap: 0,
         adaRow: null,
     }]);
     const [selectedSectionId, setSelectedSectionId] = useState(null);
@@ -75,10 +73,6 @@ export default function SeatingChart() {
         let newSection = {
             id: newId,
             name: String(newId),
-            moduleWidth: 6,
-            treadDepth: 24,
-            singerSpacing: 22,
-            centerGap: 0,
             adaRow: null,
         };
 
@@ -108,6 +102,12 @@ export default function SeatingChart() {
         if (over) {
             const dropId = over.id;
 
+            // Check if dropped on student bank (to remove from riser)
+            if (dropId === 'student-bank') {
+                setPlacedStudents(prev => prev.filter(s => String(s.studentId) !== String(active.id)));
+                return;
+            }
+
             // Check if dropped on a row (format: sectionId-row-rowNum)
             if (typeof dropId === 'string' && dropId.includes('-row-')) {
                 const parts = dropId.split('-');
@@ -115,18 +115,28 @@ export default function SeatingChart() {
                 const row = parseInt(parts[2]); // Fixed index: 0=id, 1=row, 2=num
 
                 if (!isNaN(sectionId) && !isNaN(row)) {
-                    // Get student data - compare as strings to avoid type mismatch
-                    const student = students.find(s => String(s.id) === String(active.id));
+                    // Get student data - check both students array and placedStudents
+                    let student = students.find(s => String(s.id) === String(active.id));
+
+                    // If not in students array, it's a placed student being moved
+                    if (!student) {
+                        const placedStudent = placedStudents.find(s => String(s.studentId) === String(active.id));
+                        if (placedStudent) {
+                            student = placedStudent.student;
+                        }
+                    }
 
                     if (student) {
                         setPlacedStudents(prev => {
                             // Remove student from previous position if already placed
-                            // Use String comparison for ID check
                             const filtered = prev.filter(s => String(s.studentId) !== String(active.id));
 
-                            // Calculate next available index in this row
+                            // Find the maximum index in the target row to append at the end
                             const studentsInRow = filtered.filter(s => s.sectionId === sectionId && s.row === row);
-                            const nextIndex = studentsInRow.length + 1;
+                            const maxIndex = studentsInRow.length > 0
+                                ? Math.max(...studentsInRow.map(s => s.index))
+                                : 0;
+                            const nextIndex = maxIndex + 1;
 
                             return [...filtered, {
                                 studentId: student.id, // Store original ID type
@@ -240,6 +250,8 @@ export default function SeatingChart() {
                         <SeatingCanvas
                             riserSections={riserSections}
                             globalRows={globalRows}
+                            globalModuleWidth={globalModuleWidth}
+                            globalTreadDepth={globalTreadDepth}
                             isCurved={isCurved}
                             placedStudents={placedStudents}
                             selectedSectionId={selectedSectionId}
@@ -262,6 +274,10 @@ export default function SeatingChart() {
                             allSections={riserSections}
                             globalRows={globalRows}
                             onGlobalRowsChange={setGlobalRows}
+                            globalModuleWidth={globalModuleWidth}
+                            onGlobalModuleWidthChange={setGlobalModuleWidth}
+                            globalTreadDepth={globalTreadDepth}
+                            onGlobalTreadDepthChange={setGlobalTreadDepth}
                             isCurved={isCurved}
                             onToggleCurved={setIsCurved}
                             onAddSection={handleAddSection}

@@ -2,12 +2,12 @@ import React from 'react';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
-export default function RiserSection({ section, globalRows, isSelected, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
+export default function RiserSection({ section, globalRows, globalModuleWidth, globalTreadDepth, isSelected, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
     const PIXELS_PER_FOOT = 30; // Reduced from 40 for smaller risers
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
-    const widthPx = section.moduleWidth * PIXELS_PER_FOOT;
-    const depthPx = (section.treadDepth * PIXELS_PER_INCH);
+    const widthPx = globalModuleWidth * PIXELS_PER_FOOT;
+    const depthPx = (globalTreadDepth * PIXELS_PER_INCH);
 
     // Generate rows using globalRows (including Floor/Row 0)
     const rows = Array.from({ length: globalRows + 1 }, (_, i) => globalRows - i);
@@ -96,6 +96,7 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
                         depthPx={depthPx}
                         widthPx={wedgeAngle ? outerWidth : widthPx} // Use outer width for container
                         globalRows={globalRows}
+                        globalModuleWidth={globalModuleWidth}
                         studentsInRow={studentsInRow}
                         getSectionColor={getSectionColor}
                         style={rowStyle}
@@ -107,7 +108,7 @@ export default function RiserSection({ section, globalRows, isSelected, onSelect
     );
 }
 
-function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow, getSectionColor, style, isWedge }) {
+function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleWidth, studentsInRow, getSectionColor, style, isWedge }) {
     const { setNodeRef, isOver } = useDroppable({
         id: `${section.id}-row-${rowNum}`,
         data: { sectionId: section.id, row: rowNum }
@@ -117,10 +118,13 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, studentsInRow
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
     const marginInches = 6;
-    const usableWidthInches = (section.moduleWidth * 12) - (marginInches * 2);
+    const usableWidthInches = (globalModuleWidth * 12) - (marginInches * 2);
+
+    // Fixed singer spacing (removed from UI)
+    const singerSpacing = 22;
 
     // Calculate capacity
-    let capacity = Math.floor(usableWidthInches / section.singerSpacing);
+    let capacity = Math.floor(usableWidthInches / singerSpacing);
 
     // ADA adjustment
     if (section.adaRow === rowNum) {

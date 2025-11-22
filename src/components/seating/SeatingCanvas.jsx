@@ -23,6 +23,8 @@ const Controls = () => {
 export default function SeatingCanvas({
     riserSections,
     globalRows,
+    globalModuleWidth,
+    globalTreadDepth,
     isCurved,
     placedStudents,
     selectedSectionId,
@@ -35,7 +37,7 @@ export default function SeatingCanvas({
         if (!isCurved || riserSections.length === 0) return 600;
 
         const scale = 30;
-        const totalWidthPx = riserSections.reduce((sum, section) => sum + (section.moduleWidth * scale), 0);
+        const totalWidthPx = riserSections.reduce((sum, section) => sum + (globalModuleWidth * scale), 0);
 
         // Maximum allowed arc angle in degrees (e.g., 100 degrees)
         const MAX_ARC_ANGLE = 100;
@@ -43,11 +45,10 @@ export default function SeatingCanvas({
 
         // Arc length formula: s = r * theta
         // We approximate total chord length as arc length for safety
-        // r = s / theta
         const minRadius = totalWidthPx / maxAngleRad;
 
-        // Return the larger of the base radius (900) or the calculated minimum radius
-        return Math.max(900, minRadius);
+        // Add buffer for safety
+        return Math.max(900, minRadius * 1.2);
     };
 
     const radius = calculateRadius();
@@ -56,36 +57,33 @@ export default function SeatingCanvas({
     const calculateCurvedPositions = () => {
         if (!isCurved || riserSections.length === 0) return [];
 
-        // Use same scaling as RiserSection (30px per foot)
         const scale = 30;
-        const PIXELS_PER_INCH = scale / 12;
 
-        // 1. Calculate width of each section in pixels
-        // In a curved layout, the "width" is the chord length at the front of the riser.
-        const sectionData = riserSections.map(section => {
-            const widthPx = section.moduleWidth * scale;
-            const gapPx = (section.centerGap || 0) * PIXELS_PER_INCH;
-            return { widthPx, gapPx };
-        });
+        return riserSections.map((section, index) => {
+            const widthPx = globalModuleWidth * scale;
 
-        // 2. Calculate angles for each section and gap
-        // chord = 2 * r * sin(theta/2)
-        // theta = 2 * asin(chord / 2r)
-        const sectionAngles = sectionData.map(s => {
-            const angleRad = 2 * Math.asin(s.widthPx / (2 * radius));
+            // Chord length = width of this section
+            const chord = widthPx;
+
+            // Calculate the angle subtended by this chord
+            // Using formula: theta = 2 * arcsin(chord / (2 * radius))
+            const angleRad = 2 * Math.asin(chord / (2 * radius));
             const angleDeg = angleRad * (180 / Math.PI);
 
-            // Calculate gap angle
-            // We treat gap as a chord on the same radius
-            const gapAngleRad = 2 * Math.asin(s.gapPx / (2 * radius));
-            const gapAngleDeg = gapAngleRad * (180 / Math.PI);
+            // centerGap is always 0 now (removed from UI)
+            const gapAngleRad = 0;
+            const gapAngleDeg = 0;
 
-            return { angleDeg, angleRad, widthPx: s.widthPx, gapAngleDeg, gapAngleRad };
+            return { angleDeg, angleRad, widthPx, gapAngleDeg, gapAngleRad };
         });
+    };
 
-        // 3. Calculate total angle to center the arrangement
-        // Total angle includes gaps between sections (n-1 gaps)
-        // We assume the gap is AFTER the section, except for the last one
+    const positions = (() => {
+        if (!isCurved || riserSections.length === 0) return [];
+
+        const sectionAngles = calculateCurvedPositions();
+
+        // Calculate total angle to center the arrangement
         const totalAngleDeg = sectionAngles.reduce((sum, s, i) => {
             const isLast = i === sectionAngles.length - 1;
             return sum + s.angleDeg + (isLast ? 0 : s.gapAngleDeg);
@@ -97,34 +95,27 @@ export default function SeatingCanvas({
             const { angleDeg, angleRad, gapAngleDeg } = sectionAngles[index];
 
             // Calculate the angle for the CENTER of this section
-            // Start angle + sum of previous (angles + gaps) + half of current angle
             const prevAngles = sectionAngles.slice(0, index).reduce((sum, s) => sum + s.angleDeg + s.gapAngleDeg, 0);
+            const centerAngle = startAngle + prevAngles + angleDeg / 2;
 
-            const centerAngleDeg = startAngle + prevAngles + (angleDeg / 2);
-            const centerAngleRad = centerAngleDeg * (Math.PI / 180);
-
-            // Position calculation:
-            // We want the CORNERS of the section to be on the circle of radius R.
-            // Since the riser is a straight chord, its center is closer to the origin than R.
-            // Distance to chord center (apothem) = R * cos(theta/2)
+            // Calculate apothem (perpendicular distance from center to chord midpoint)
             const apothem = radius * Math.cos(angleRad / 2);
 
-            // Position the center of the chord at the apothem distance
+            // Convert polar to Cartesian
+            const centerAngleRad = centerAngle * (Math.PI / 180);
             const x = Math.sin(centerAngleRad) * apothem;
             const y = Math.cos(centerAngleRad) * apothem;
 
             return {
                 x,
                 y,
-                rotation: centerAngleDeg,
+                rotation: centerAngle,
                 wedgeAngle: angleDeg,
                 radius,
                 angleRad
             };
         });
-    };
-
-    const positions = isCurved ? calculateCurvedPositions() : [];
+    })();
     const [initStatus, setInitStatus] = React.useState('Pending');
 
     // Layout constants for centering
@@ -214,7 +205,7 @@ export default function SeatingCanvas({
                                             // So we need to shift the whole component down (inwards) by depthPx so that Row 1 aligns with the arc.
                                             const scale = 30;
                                             const PIXELS_PER_INCH = scale / 12;
-                                            const depthPx = (section.treadDepth * PIXELS_PER_INCH);
+                                            const depthPx = (globalTreadDepth * PIXELS_PER_INCH);
 
                                             return (
                                                 <div
@@ -231,6 +222,8 @@ export default function SeatingCanvas({
                                                     <RiserSection
                                                         section={section}
                                                         globalRows={globalRows}
+                                                        globalModuleWidth={globalModuleWidth}
+                                                        globalTreadDepth={globalTreadDepth}
                                                         isSelected={selectedSectionId === section.id}
                                                         onSelect={() => onSelectSection(section.id)}
                                                         placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
