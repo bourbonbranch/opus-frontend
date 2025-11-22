@@ -116,20 +116,28 @@ export default function SeatingChart() {
 
                 if (!isNaN(sectionId) && !isNaN(row)) {
                     // Get student data - check both students array and placedStudents
-                    let student = students.find(s => String(s.id) === String(active.id));
+                    let studentData = null;
+                    let studentId = active.id;
 
-                    // If not in students array, it's a placed student being moved
-                    if (!student) {
+                    // First check if it's from the unplaced students list
+                    const unplacedStudent = students.find(s => String(s.id) === String(active.id));
+
+                    if (unplacedStudent) {
+                        studentData = unplacedStudent;
+                        studentId = unplacedStudent.id;
+                    } else {
+                        // It's a placed student being moved
                         const placedStudent = placedStudents.find(s => String(s.studentId) === String(active.id));
-                        if (placedStudent) {
-                            student = placedStudent.student;
+                        if (placedStudent && placedStudent.student) {
+                            studentData = placedStudent.student;
+                            studentId = placedStudent.studentId;
                         }
                     }
 
-                    if (student) {
+                    if (studentData) {
                         setPlacedStudents(prev => {
                             // Remove student from previous position if already placed
-                            const filtered = prev.filter(s => String(s.studentId) !== String(active.id));
+                            const filtered = prev.filter(s => String(s.studentId) !== String(studentId));
 
                             // Find the maximum index in the target row to append at the end
                             const studentsInRow = filtered.filter(s => s.sectionId === sectionId && s.row === row);
@@ -139,11 +147,11 @@ export default function SeatingChart() {
                             const nextIndex = maxIndex + 1;
 
                             return [...filtered, {
-                                studentId: student.id, // Store original ID type
+                                studentId: studentId,
                                 sectionId,
                                 row,
                                 index: nextIndex,
-                                student: student // Include full student data
+                                student: studentData
                             }];
                         });
                     }
