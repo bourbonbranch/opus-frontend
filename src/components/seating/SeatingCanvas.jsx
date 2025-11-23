@@ -127,25 +127,35 @@ export default function SeatingCanvas({
     const offsetY = 0; // Centered vertically
 
     return (
-        <div className="relative w-full h-full bg-yellow-500/20">
+        <div className="relative w-full h-full bg-gray-900">
             <TransformWrapper
-                initialScale={1}
+                initialScale={0.5}
                 minScale={0.1}
                 maxScale={4}
+                centerOnInit={true}
                 limitToBounds={false}
                 panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }}
                 wheel={{ step: 0.1 }}
             >
-                {({ centerView, zoomIn, zoomOut, resetTransform }) => (
+                {({ centerView, zoomIn, zoomOut, resetTransform, zoomToElement }) => (
                     <>
                         {/* Debug Overlay */}
                         <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded shadow-lg text-xs font-mono">
-                            <p>Debug: Canvas Mounted (v2.3)</p>
+                            <p>Debug: Canvas Mounted (v2.4)</p>
                             <p>Risers: {riserSections.length}</p>
                             <p>Radius: {Math.round(radius)}</p>
                             <p>Offset: {Math.round(visualCenterOffset)}</p>
                             <p>DirectorY: {directorY}</p>
                             <p>Curved: {isCurved ? 'Yes' : 'No'}</p>
+                            <button
+                                onClick={() => {
+                                    console.log('Force Centering...');
+                                    zoomToElement('center-target', 0.5, 500);
+                                }}
+                                className="mt-2 bg-white text-red-500 px-2 py-1 rounded font-bold uppercase text-[10px] w-full"
+                            >
+                                Force Center
+                            </button>
                         </div>
 
                         <div className="absolute top-20 right-6 z-[100]">
@@ -153,8 +163,8 @@ export default function SeatingCanvas({
                         </div>
 
                         <TransformComponent
-                            wrapperClass="w-full h-full bg-gray-900 border-4 border-green-500"
-                            contentClass="flex items-center justify-center bg-blue-900/20"
+                            wrapperClass="w-full h-full"
+                            contentClass=""
                         >
                             <div
                                 style={{
