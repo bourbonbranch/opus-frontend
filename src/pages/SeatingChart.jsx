@@ -253,8 +253,8 @@ export default function SeatingChart() {
     const snapCenterToCursor = ({ transform }) => {
         return {
             ...transform,
-            x: transform.x - 24, // Offset by NEGATIVE half the bubble width (48px / 2)
-            y: transform.y - 24, // Offset by NEGATIVE half the bubble height (48px / 2)
+            x: transform.x + 48, // Move bubble to the right (was too far left)
+            y: transform.y + 24, // Center vertically
         };
     };
 
