@@ -340,7 +340,7 @@ export default function SeatingChart() {
                             >
                                 <Users className="w-6 h-6" />
                             </button>
-                            <h1 className="font-bold text-lg md:text-xl truncate">Seating Chart</h1>
+                            <h1 className="font-bold text-lg md:text-xl truncate">Seating Chart <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full ml-2">v2.0</span></h1>
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-3 shrink-0">
