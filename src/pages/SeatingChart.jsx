@@ -18,12 +18,18 @@ import { getEnsembles, getRoster } from '../lib/opusApi';
 
 // Custom collision detection algorithm
 const customCollisionDetection = (args) => {
-    // First, check if we are over the student bank (using pointerWithin for precision on the sidebar)
+    // Use pointerWithin for accurate detection on rotated/transformed elements
+    // This checks if the pointer is actually within the element's visual bounds
     const pointerCollisions = pointerWithin(args);
+
+    // Prioritize student bank if found
     const bankCollision = pointerCollisions.find(c => c.id === 'student-bank');
     if (bankCollision) return [bankCollision];
 
-    // Otherwise use closestCenter for sortable items which feels smoother
+    // Return all pointer collisions for risers
+    if (pointerCollisions.length > 0) return pointerCollisions;
+
+    // Fallback to closestCenter if no pointer collisions
     return closestCenter(args);
 };
 
