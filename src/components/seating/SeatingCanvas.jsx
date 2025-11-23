@@ -226,8 +226,7 @@ export default function SeatingCanvas({
                             <div
                                 className="absolute flex justify-center items-end pointer-events-none"
                                 style={{
-                                    left: '0px',
-                                    top: `${directorY - 200}px`, // Position risers ABOVE the director
+                                    ...getPositionStyle(0, directorY + 300), // Position 300px above director in math coordinates
                                     transform: `translate(-50%, -100%)`,
                                     gap: '0px'
                                 }}
