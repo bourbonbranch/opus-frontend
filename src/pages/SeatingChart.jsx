@@ -250,28 +250,13 @@ export default function SeatingChart() {
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
     // Custom modifier to snap the center of the dragged item to the cursor
-    const snapCenterToCursor = ({ transform, activatorEvent, draggingNodeRect }) => {
-        if (draggingNodeRect && activatorEvent) {
-            const activatorCoordinates = {
-                x: activatorEvent.clientX,
-                y: activatorEvent.clientY,
-            };
-
-            // Hardcode center adjustment for standard bubble size (w-12 h-12 = 48px)
-            // This avoids issues where draggingNodeRect is scaled (e.g. 0.5x) but DragOverlay is 1x
-            const centerAdjustment = {
-                x: 24,
-                y: 24,
-            };
-
-            return {
-                ...transform,
-                x: transform.x + activatorCoordinates.x - draggingNodeRect.left - centerAdjustment.x,
-                y: transform.y + activatorCoordinates.y - draggingNodeRect.top - centerAdjustment.y,
-            };
-        }
-
-        return transform;
+    const snapCenterToCursor = ({ transform }) => {
+        // Offset by half the bubble size (w-12 h-12 = 48px, so radius = 24px)
+        return {
+            ...transform,
+            x: transform.x - 24,
+            y: transform.y - 24,
+        };
     };
 
     return (
