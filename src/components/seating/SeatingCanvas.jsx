@@ -136,7 +136,18 @@ export default function SeatingCanvas({
                 panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }} // Disable panning when dragging
                 wheel={{ step: 0.1 }}
                 onInit={(ref) => {
-                    setTimeout(() => ref.zoomToElement('center-target', 0.5, 0), 100);
+                    if (ref && ref.zoomToElement) {
+                        setTimeout(() => {
+                            try {
+                                const element = document.getElementById('center-target');
+                                if (element) {
+                                    ref.zoomToElement('center-target', 0.5, 0);
+                                }
+                            } catch (e) {
+                                console.error('Zoom init error:', e);
+                            }
+                        }, 100);
+                    }
                 }}
             >
                 {({ centerView }) => (
