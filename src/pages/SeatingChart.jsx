@@ -249,6 +249,17 @@ export default function SeatingChart() {
     const isPlaced = activeStudent && activeStudent.student; // Placed students have a nested 'student' object
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
+    // CRITICAL: Modifier to center dragged element under cursor
+    // This uses CSS transform to offset the element by half its size
+    const snapCenterToCursor = ({ transform }) => {
+        return {
+            ...transform,
+            // No offset needed - we'll use CSS transform instead
+            scaleX: 1,
+            scaleY: 1,
+        };
+    };
+
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
             <DndContext
@@ -395,22 +406,31 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay zIndex={1000} dropAnimation={null}>
+                <DragOverlay
+                    zIndex={1000}
+                    dropAnimation={null}
+                    style={{
+                        cursor: 'grabbing',
+                    }}
+                    modifiers={[snapCenterToCursor]}
+                >
                     {activeId && studentData ? (
-                        isPlaced ? (
-                            <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
-                        ) : (
-                            // Render as Card (Bank Student)
-                            <div className="opacity-80 pointer-events-none">
-                                <div className={`px-3 py-2 rounded-lg shadow-xl border border-white/20 text-sm font-medium text-white w-40
-                                    ${studentData.section === 'Soprano' ? 'bg-pink-500' :
-                                        studentData.section === 'Alto' ? 'bg-purple-500' :
-                                            studentData.section === 'Tenor' ? 'bg-blue-500' : 'bg-green-500'}`}
-                                >
-                                    {studentData.name}
+                        <div style={{ transform: 'translate(-50%, -50%)' }}>
+                            {isPlaced ? (
+                                <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
+                            ) : (
+                                // Render as Card (Bank Student)
+                                <div className="opacity-80 pointer-events-none">
+                                    <div className={`px-3 py-2 rounded-lg shadow-xl border border-white/20 text-sm font-medium text-white w-40
+                                        ${studentData.section === 'Soprano' ? 'bg-pink-500' :
+                                            studentData.section === 'Alto' ? 'bg-purple-500' :
+                                                studentData.section === 'Tenor' ? 'bg-blue-500' : 'bg-green-500'}`}
+                                    >
+                                        {studentData.name}
+                                    </div>
                                 </div>
-                            </div>
-                        )
+                            )}
+                        </div>
                     ) : null}
                 </DragOverlay>
             </DndContext >
