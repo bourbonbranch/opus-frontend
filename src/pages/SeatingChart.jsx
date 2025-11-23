@@ -249,21 +249,6 @@ export default function SeatingChart() {
     const isPlaced = activeStudent && activeStudent.student; // Placed students have a nested 'student' object
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
-    // Custom modifier to snap the center of the dragged item to the cursor
-    const snapCenterToCursor = ({ transform, draggingNodeRect }) => {
-        if (draggingNodeRect) {
-            // Center the bubble by offsetting by half its width and height
-            const offsetX = draggingNodeRect.width / 2;
-            const offsetY = draggingNodeRect.height / 2;
-
-            return {
-                ...transform,
-                x: transform.x - offsetX,
-                y: transform.y - offsetY,
-            };
-        }
-        return transform;
-    };
 
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
@@ -411,7 +396,7 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000} dropAnimation={null}>
+                <DragOverlay zIndex={1000} dropAnimation={null}>
                     {activeId && studentData ? (
                         isPlaced ? (
                             <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
