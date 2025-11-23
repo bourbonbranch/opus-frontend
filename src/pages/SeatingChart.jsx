@@ -37,6 +37,7 @@ export default function SeatingChart() {
     const [isConfigOpen, setIsConfigOpen] = useState(false);
     const [selectedSectionId, setSelectedSectionId] = useState(null);
     const [activeId, setActiveId] = useState(null);
+    const [overSectionId, setOverSectionId] = useState(null); // Track which section is being dragged over
 
     // Global Settings State
     const [globalRows, setGlobalRows] = useState(3);
@@ -124,30 +125,28 @@ export default function SeatingChart() {
 
     const handleDragOver = (event) => {
         const { active, over } = event;
-        if (!over) return;
+
+        if (!over) {
+            setOverSectionId(null);
+            return;
+        }
 
         console.log('Drag Over:', { active: active.id, over: over.id });
 
-        const activeId = active.id;
-        const overId = over.id;
+        // Extract section ID from the over target
+        const overId = String(over.id);
 
-        // Find the containers (rows)
-        const findContainer = (id) => {
-            const student = placedStudents.find(s => String(s.studentId) === String(id));
-            if (student) return `${student.sectionId}-row-${student.row}`;
-            if (String(id).includes('-row-')) return id;
-            return null;
-        };
-
-        const activeContainer = findContainer(activeId);
-        const overContainer = findContainer(overId);
-
-        if (!activeContainer || !overContainer || activeContainer === overContainer) {
-            return;
+        // Check if hovering over a row (format: sectionId-row-rowNum)
+        if (overId.includes('-row-')) {
+            const sectionId = overId.split('-row-')[0];
+            setOverSectionId(sectionId);
+        } else {
+            setOverSectionId(null);
         }
     };
 
     const handleDragEnd = (event) => {
+        setOverSectionId(null); // Clear hover state
         const { active, over } = event;
         console.log('Drag End:', { active: active.id, over: over?.id });
         setActiveId(null);
@@ -348,6 +347,7 @@ export default function SeatingChart() {
                             isCurved={isCurved}
                             placedStudents={placedStudents}
                             selectedSectionId={selectedSectionId}
+                            overSectionId={overSectionId}
                             onSelectSection={(id) => {
                                 setSelectedSectionId(id);
                                 setIsConfigOpen(true);

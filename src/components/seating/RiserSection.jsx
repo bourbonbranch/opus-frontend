@@ -2,7 +2,7 @@ import React from 'react';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
-export default function RiserSection({ section, globalRows, globalModuleWidth, globalTreadDepth, isSelected, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
+export default function RiserSection({ section, globalRows, globalModuleWidth, globalTreadDepth, isSelected, isOver, onSelect, placedStudents, wedgeAngle, radius, angleRad }) {
     const PIXELS_PER_FOOT = 30; // Reduced from 40 for smaller risers
     const PIXELS_PER_INCH = PIXELS_PER_FOOT / 12;
 
@@ -29,7 +29,9 @@ export default function RiserSection({ section, globalRows, globalModuleWidth, g
                 onSelect();
             }}
             className={`relative flex flex-col items-center cursor-pointer transition-all duration-200
-        ${isSelected ? 'ring-2 ring-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]' : 'hover:bg-white/5'}
+        ${isSelected ? 'ring-2 ring-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]' :
+                    isOver ? 'ring-2 ring-green-400 shadow-[0_0_30px_rgba(74,222,128,0.4)]' :
+                        'hover:bg-white/5'}
       `}
             style={{
                 width: wedgeAngle ? 'auto' : widthPx, // Auto width for wedge to let rows dictate size

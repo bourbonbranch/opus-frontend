@@ -28,6 +28,7 @@ export default function SeatingCanvas({
     isCurved,
     placedStudents,
     selectedSectionId,
+    overSectionId,
     onSelectSection,
     onBackgroundClick,
     isDragging
@@ -212,6 +213,7 @@ export default function SeatingCanvas({
                                             globalModuleWidth={globalModuleWidth}
                                             globalTreadDepth={globalTreadDepth}
                                             isSelected={selectedSectionId === section.id}
+                                            isOver={overSectionId === section.id}
                                             onSelect={() => onSelectSection(section.id)}
                                             placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
                                             wedgeAngle={pos.wedgeAngle}
@@ -245,6 +247,7 @@ export default function SeatingCanvas({
                                             globalModuleWidth={globalModuleWidth}
                                             globalTreadDepth={globalTreadDepth}
                                             isSelected={selectedSectionId === section.id}
+                                            isOver={overSectionId === section.id}
                                             onSelect={() => onSelectSection(section.id)}
                                             placedStudents={placedStudents.filter(s => s.sectionId === section.id)}
                                         />
