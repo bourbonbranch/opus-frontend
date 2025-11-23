@@ -400,15 +400,17 @@ export default function SeatingChart() {
                 <DragOverlay
                     zIndex={1000}
                     dropAnimation={null}
+                    adjustTranslate={({ transform }) => ({
+                        x: transform.x - 24,
+                        y: transform.y - 24,
+                        scaleX: 1,
+                        scaleY: 1
+                    })}
                 >
                     {activeId && studentData ? (
                         /* Always render as bubble - CSS transform centers under cursor */
                         <div
-                            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30"
-                            style={{
-                                transform: 'translate(-50%, -50%)',
-                                pointerEvents: 'none'
-                            }}
+                            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30 pointer-events-none"
                         >
                             {studentData.name.split(' ').map(n => n[0]).join('')}
                         </div>
