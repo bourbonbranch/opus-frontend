@@ -4,7 +4,7 @@ import RiserSection from './RiserSection';
 import { User, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 const Controls = () => {
-    const { zoomIn, zoomOut, centerView } = useControls();
+    const { zoomIn, zoomOut, zoomToElement } = useControls();
     return (
         <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-gray-800/80 backdrop-blur rounded-lg p-2 border border-white/10 shadow-xl z-50">
             <button onClick={() => zoomIn()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom In">
@@ -13,7 +13,7 @@ const Controls = () => {
             <button onClick={() => zoomOut()} className="p-2 hover:bg-white/10 rounded transition-colors" title="Zoom Out">
                 <ZoomOut className="w-5 h-5 text-white" />
             </button>
-            <button onClick={() => centerView({ scale: 0.5, duration: 500 })} className="p-2 hover:bg-white/10 rounded transition-colors" title="Recenter View">
+            <button onClick={() => zoomToElement('center-target', 0.5, 500)} className="p-2 hover:bg-white/10 rounded transition-colors" title="Recenter View">
                 <RotateCcw className="w-5 h-5 text-white" />
             </button>
         </div>
@@ -135,7 +135,7 @@ export default function SeatingCanvas({
             panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }} // Disable panning when dragging
             wheel={{ step: 0.1 }}
             onInit={(ref) => {
-                ref.centerView({ scale: 0.5, duration: 0 });
+                setTimeout(() => ref.zoomToElement('center-target', 0.5, 0), 100);
             }}
         >
             {({ centerView }) => (
@@ -164,6 +164,7 @@ export default function SeatingCanvas({
                         >
                             {/* Director Group - ABSOLUTE CENTER */}
                             <div
+                                id="center-target"
                                 className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
                                 style={{
                                     left: `calc(50% + ${offsetX}px)`,

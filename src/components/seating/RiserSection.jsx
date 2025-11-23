@@ -108,6 +108,10 @@ export default function RiserSection({ section, globalRows, globalModuleWidth, g
     );
 }
 
+import { SortableContext, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+
+// ... (RiserSection component remains mostly the same, just imports changed)
+
 function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleWidth, studentsInRow, getSectionColor, style, isWedge }) {
     const { setNodeRef, isOver } = useDroppable({
         id: `${section.id}-row-${rowNum}`,
@@ -153,13 +157,18 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleW
 
             {/* Only show placed students, not empty spots */}
             <div className="w-full h-full flex items-center justify-center px-4 gap-1 pointer-events-auto">
-                {studentsInRow.map(student => (
-                    <PlacedStudent
-                        key={student.studentId}
-                        student={student}
-                        getSectionColor={getSectionColor}
-                    />
-                ))}
+                <SortableContext
+                    items={studentsInRow.map(s => String(s.studentId))}
+                    strategy={horizontalListSortingStrategy}
+                >
+                    {studentsInRow.map(student => (
+                        <PlacedStudent
+                            key={student.studentId}
+                            student={student}
+                            getSectionColor={getSectionColor}
+                        />
+                    ))}
+                </SortableContext>
 
                 {/* Show capacity hint when hovering */}
                 {isOver && studentsInRow.length < capacity && (
@@ -176,14 +185,26 @@ function PlacedStudent({ student, getSectionColor }) {
     const studentData = student.student || { name: `Student ${student.studentId}`, section: 'Unknown' };
     const sectionColor = getSectionColor(studentData.section).replace('bg-', 'border-');
 
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-        id: student.studentId,
-        data: student.student
+    React.useEffect(() => {
+        console.log('PlacedStudent mounted:', student.studentId);
+    }, []);
+
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({
+        id: String(student.studentId),
+        data: student
     });
 
-    const style = transform ? {
+    const style = {
         transform: CSS.Translate.toString(transform),
-    } : undefined;
+        transition
+    };
 
     if (isDragging) {
         return (
@@ -211,6 +232,7 @@ function PlacedStudent({ student, getSectionColor }) {
             {/* Hover Name Tag */}
             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20 pointer-events-none z-50">
                 {studentData.name}
+                {studentData.part && <span className="ml-1">• {studentData.part}</span>}
             </div>
 
             <span className="text-sm font-bold text-white">

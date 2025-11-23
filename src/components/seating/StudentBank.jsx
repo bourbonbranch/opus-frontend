@@ -23,7 +23,10 @@ export default function StudentBank({ students, placedStudents }) {
     const sections = ['All', 'Soprano', 'Alto', 'Tenor', 'Bass'];
 
     return (
-        <div className="flex flex-col h-full">
+        <div
+            ref={setNodeRef}
+            className={`flex flex-col h-full transition-colors ${isOver ? 'bg-purple-500/10' : ''}`}
+        >
             <div className="p-4 space-y-4">
                 {/* Search */}
                 <div className="relative">
@@ -61,8 +64,7 @@ export default function StudentBank({ students, placedStudents }) {
 
             {/* Student List - Droppable Zone */}
             <div
-                ref={setNodeRef}
-                className={`flex-1 overflow-y-auto p-4 pt-0 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent transition-colors ${isOver ? 'bg-purple-500/10 border-2 border-purple-500/50 border-dashed rounded-lg' : ''
+                className={`flex-1 overflow-y-auto p-4 pt-0 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent transition-colors ${isOver ? 'border-2 border-purple-500/50 border-dashed rounded-lg m-2' : ''
                     }`}
             >
                 {filteredStudents.map(student => (
