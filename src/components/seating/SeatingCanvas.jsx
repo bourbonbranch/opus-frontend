@@ -70,9 +70,9 @@ export default function SeatingCanvas({
             const angleRad = 2 * Math.asin(chord / (2 * radius));
             const angleDeg = angleRad * (180 / Math.PI);
 
-            // Small gap between sections to prevent overlap
-            const gapAngleRad = (2 * Math.PI) / 180; // 2 degrees in radians
-            const gapAngleDeg = 2;
+            // No gap between sections - they should connect edge-to-edge
+            const gapAngleRad = 0;
+            const gapAngleDeg = 0;
 
             return { angleDeg, angleRad, widthPx, gapAngleDeg, gapAngleRad };
         });
@@ -243,6 +243,8 @@ export default function SeatingCanvas({
                                         <RiserSection
                                             section={section}
                                             globalRows={globalRows}
+                                            globalModuleWidth={globalModuleWidth}
+                                            globalTreadDepth={globalTreadDepth}
                                             isSelected={selectedSectionId === section.id}
                                             onSelect={() => onSelectSection(section.id)}
                                             placedStudents={placedStudents.filter(s => s.sectionId === section.id)}

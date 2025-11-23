@@ -250,13 +250,19 @@ export default function SeatingChart() {
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
     // Custom modifier to snap the center of the dragged item to the cursor
-    const snapCenterToCursor = ({ transform }) => {
-        // Offset by half the bubble size (w-12 h-12 = 48px, so radius = 24px)
-        return {
-            ...transform,
-            x: transform.x - 24,
-            y: transform.y - 24,
-        };
+    const snapCenterToCursor = ({ transform, draggingNodeRect }) => {
+        if (draggingNodeRect) {
+            // Center the bubble by offsetting by half its width and height
+            const offsetX = draggingNodeRect.width / 2;
+            const offsetY = draggingNodeRect.height / 2;
+
+            return {
+                ...transform,
+                x: transform.x - offsetX,
+                y: transform.y - offsetY,
+            };
+        }
+        return transform;
     };
 
     return (
