@@ -250,13 +250,12 @@ export default function SeatingChart() {
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
     // CRITICAL: Modifier to center dragged element under cursor
-    // This uses CSS transform to offset the element by half its size
+    // Subtract half the bubble size (24px) from both x and y
     const snapCenterToCursor = ({ transform }) => {
         return {
             ...transform,
-            // No offset needed - we'll use CSS transform instead
-            scaleX: 1,
-            scaleY: 1,
+            x: transform.x - 24,
+            y: transform.y - 24,
         };
     };
 
@@ -415,13 +414,9 @@ export default function SeatingChart() {
                     modifiers={[snapCenterToCursor]}
                 >
                     {activeId && studentData ? (
-                        /* Always render as bubble for drag overlay - transform centers it under cursor */
+                        /* Always render as bubble for drag overlay */
                         <div
                             className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30 pointer-events-none"
-                            style={{
-                                transform: 'translate(-50%, -50%)',
-                                position: 'relative'
-                            }}
                         >
                             {studentData.name.split(' ').map(n => n[0]).join('')}
                         </div>
