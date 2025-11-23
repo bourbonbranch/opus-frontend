@@ -9,6 +9,7 @@ import {
     pointerWithin,
     rectIntersection
 } from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { Users, Settings, ChevronRight, ChevronLeft } from 'lucide-react';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
 import StudentBank from '../components/seating/StudentBank';
@@ -400,12 +401,7 @@ export default function SeatingChart() {
                 <DragOverlay
                     zIndex={1000}
                     dropAnimation={null}
-                    adjustTranslate={({ transform }) => ({
-                        x: transform.x - 24,
-                        y: transform.y - 24,
-                        scaleX: 1,
-                        scaleY: 1
-                    })}
+                    modifiers={[snapCenterToCursor]}
                 >
                     {activeId && studentData ? (
                         /* Always render as bubble - CSS transform centers under cursor */
