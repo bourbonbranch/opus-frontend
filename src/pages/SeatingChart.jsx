@@ -249,15 +249,7 @@ export default function SeatingChart() {
     const isPlaced = activeStudent && activeStudent.student; // Placed students have a nested 'student' object
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
-    // CRITICAL: Modifier to center dragged element under cursor
-    // Bubble is appearing too far up and left, so adding large positive offset
-    const snapCenterToCursor = ({ transform }) => {
-        return {
-            ...transform,
-            x: transform.x + 100, // Move bubble RIGHT
-            y: transform.y + 100, // Move bubble DOWN
-        };
-    };
+
 
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
@@ -408,15 +400,15 @@ export default function SeatingChart() {
                 <DragOverlay
                     zIndex={1000}
                     dropAnimation={null}
-                    style={{
-                        cursor: 'grabbing',
-                    }}
-                    modifiers={[snapCenterToCursor]}
                 >
                     {activeId && studentData ? (
-                        /* Always render as bubble for drag overlay */
+                        /* Always render as bubble - CSS transform centers under cursor */
                         <div
-                            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30 pointer-events-none"
+                            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30"
+                            style={{
+                                transform: 'translate(-50%, -50%)',
+                                pointerEvents: 'none'
+                            }}
                         >
                             {studentData.name.split(' ').map(n => n[0]).join('')}
                         </div>
