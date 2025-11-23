@@ -254,5 +254,4 @@ function PlacedStudent({ student, getSectionColor }) {
             </span>
         </div>
     );
-
-
+}
