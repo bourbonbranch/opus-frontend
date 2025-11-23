@@ -118,18 +118,26 @@ export default function SeatingCanvas({
     })();
     const [initStatus, setInitStatus] = React.useState('Pending');
 
-    // Layout constants for centering
-    const directorY = 500; // Director position relative to center of curvature
-    const visualCenterOffset = ((radius + directorY) / 2) + 100; // Center the group (Risers + Director) with slight downward shift
+    // Calculate offsets for CSS positioning (Top/Left relative to center)
+    // Positive Y in our math is "Up", so it becomes Negative Top in CSS.
+    // We shift everything so that 'visualCenterOffset' is at (0,0).
 
-    // Final global offsets to center the entire layout in the 1500×1500 canvas
-    const offsetX = 0; // Centered horizontally
-    const offsetY = 0; // Centered vertically
+    const getPositionStyle = (x, y_math) => {
+        // y_math is distance from center of curvature (0,0)
+        // We want to shift so visualCenterOffset is at screen center
+        // y_screen = y_math - visualCenterOffset
+        // css_top = -y_screen
+        const y_screen = y_math - visualCenterOffset;
+        return {
+            left: `${x}px`,
+            top: `${-y_screen}px`
+        };
+    };
 
     return (
         <div className="relative w-full h-full bg-gray-900">
             <TransformWrapper
-                initialScale={0.5}
+                initialScale={0.75}
                 minScale={0.1}
                 maxScale={4}
                 centerOnInit={true}
@@ -140,22 +148,11 @@ export default function SeatingCanvas({
                 {({ centerView, zoomIn, zoomOut, resetTransform, zoomToElement }) => (
                     <>
                         {/* Debug Overlay */}
-                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded shadow-lg text-xs font-mono">
-                            <p>Debug: Canvas Mounted (v2.4)</p>
+                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded shadow-lg text-xs font-mono pointer-events-none select-none opacity-50 hover:opacity-100 transition-opacity">
+                            <p>Debug: Zero-Center (v3.0)</p>
                             <p>Risers: {riserSections.length}</p>
                             <p>Radius: {Math.round(radius)}</p>
                             <p>Offset: {Math.round(visualCenterOffset)}</p>
-                            <p>DirectorY: {directorY}</p>
-                            <p>Curved: {isCurved ? 'Yes' : 'No'}</p>
-                            <button
-                                onClick={() => {
-                                    console.log('Force Centering...');
-                                    zoomToElement('center-target', 0.5, 500);
-                                }}
-                                className="mt-2 bg-white text-red-500 px-2 py-1 rounded font-bold uppercase text-[10px] w-full"
-                            >
-                                Force Center
-                            </button>
                         </div>
 
                         <div className="absolute top-20 right-6 z-[100]">
@@ -164,34 +161,19 @@ export default function SeatingCanvas({
 
                         <TransformComponent
                             wrapperClass="w-full h-full"
-                            contentClass=""
+                            contentClass="w-full h-full flex items-center justify-center"
                         >
-                            <div
-                                style={{
-                                    width: '3000px',
-                                    height: '3000px',
-                                    position: 'relative',
-                                    backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-                                    backgroundSize: '40px 40px',
-                                    backgroundPosition: 'center',
-                                    cursor: 'default'
-                                }}
-                                onClick={(e) => {
-                                    if (e.target === e.currentTarget) {
-                                        onBackgroundClick && onBackgroundClick();
-                                    }
-                                }}
-                            >
-                                {/* CENTER MARKER - FOR DEBUGGING */}
-                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 z-50 rounded-full border-2 border-white"></div>
-                                {/* Director Group - ABSOLUTE CENTER */}
+                            {/* Zero-size container at the exact center of the viewport */}
+                            <div className="relative w-0 h-0">
+
+                                {/* Center Marker */}
+                                <div className="absolute left-0 top-0 w-2 h-2 -translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full z-50 pointer-events-none" />
+
+                                {/* Director Group */}
                                 <div
                                     id="center-target"
-                                    className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
-                                    style={{
-                                        left: `calc(50% + ${offsetX}px)`,
-                                        bottom: `calc(50% + ${directorY - visualCenterOffset + offsetY}px)`
-                                    }}
+                                    className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-auto"
+                                    style={getPositionStyle(0, directorY)}
                                 >
                                     <div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] relative group cursor-help">
                                         <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-pulse"></div>
@@ -205,13 +187,10 @@ export default function SeatingCanvas({
                                     </div>
                                 </div>
 
-                                {/* Stage Representation - Behind Director */}
+                                {/* Stage Representation */}
                                 <div
-                                    className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none"
-                                    style={{
-                                        left: `calc(50% + ${offsetX}px)`,
-                                        bottom: `calc(50% + ${directorY - visualCenterOffset + offsetY}px)`
-                                    }}
+                                    className="absolute -translate-x-1/2 -translate-y-1/2 w-[600px] h-16 bg-gradient-to-t from-purple-900/40 to-transparent rounded-b-[100%] border-b-4 border-purple-500/50 flex items-end justify-center pb-2 shadow-[0_10px_40px_rgba(168,85,247,0.2)] pointer-events-none"
+                                    style={getPositionStyle(0, directorY)}
                                 >
                                 </div>
 
@@ -222,23 +201,29 @@ export default function SeatingCanvas({
                                             // CURVED LAYOUT
                                             riserSections.map((section, index) => {
                                                 const pos = positions[index];
-                                                // Calculate depth offset for Row 0
-                                                // RiserSection renders Row 0 at the bottom, but our radius calculation is for Row 1 (Front of Riser)
-                                                // Row 1 is depthPx above Row 0.
-                                                // So we need to shift the whole component down (inwards) by depthPx so that Row 1 aligns with the arc.
                                                 const scale = 30;
                                                 const PIXELS_PER_INCH = scale / 12;
                                                 const depthPx = (globalTreadDepth * PIXELS_PER_INCH);
+
+                                                // pos.y is the apothem (distance to front of riser)
+                                                // We need to position the component such that its pivot point (bottom center) is at (pos.x, pos.y)
+                                                // The component's transformOrigin is `center calc(100% - ${depthPx}px)`
+                                                // This means the pivot is at Row 1.
+                                                // So we position the DIV at (pos.x, pos.y).
+
+                                                const style = getPositionStyle(pos.x, pos.y);
 
                                                 return (
                                                     <div
                                                         key={section.id}
                                                         className="absolute pointer-events-auto"
                                                         style={{
-                                                            left: `calc(50% + ${pos.x + offsetX}px)`,
-                                                            bottom: `calc(50% + ${pos.y - visualCenterOffset - depthPx + offsetY}px)`,
-                                                            transform: `translate(-50%, 0) rotate(${pos.rotation}deg)`,
-                                                            transformOrigin: `center calc(100% - ${depthPx}px)`, // Pivot around Row 1 (Front of Riser)
+                                                            left: style.left,
+                                                            top: style.top,
+                                                            transform: `translate(-50%, -100%) rotate(${pos.rotation}deg) translateY(${depthPx}px)`,
+                                                            // translate(-50%, -100%) moves the div so its bottom-center is at the target point.
+                                                            // translateY(depthPx) shifts it down so that Row 1 (which is depthPx up from bottom) is at the target point.
+                                                            transformOrigin: `center calc(100% - ${depthPx}px)`,
                                                             zIndex: selectedSectionId === section.id ? 10 : 1
                                                         }}
                                                     >
@@ -260,10 +245,16 @@ export default function SeatingCanvas({
                                         ) : (
                                             // STRAIGHT LAYOUT
                                             <div
-                                                className="absolute left-1/2 bottom-1/2 flex justify-center items-end pointer-events-none"
+                                                className="absolute flex justify-center items-end pointer-events-none"
                                                 style={{
-                                                    transform: 'translate(-50%, 0)',
-                                                    paddingBottom: '120px', // Distance from Director center
+                                                    left: '0px',
+                                                    top: `${-(120 - visualCenterOffset)}px`, // 120px above director? No, let's fix this.
+                                                    // In straight layout, we just want them above the director.
+                                                    // Let's say Director is at (0, -300) relative to center.
+                                                    // Risers should be at (0, -100).
+                                                    // So top should be smaller.
+                                                    // Let's just hardcode relative to Director for straight layout.
+                                                    transform: `translate(-50%, -100%) translateY(${getPositionStyle(0, directorY).top}) translateY(-120px)`,
                                                     gap: '0px'
                                                 }}
                                             >
@@ -290,7 +281,6 @@ export default function SeatingCanvas({
                                 )}
                             </div>
                         </TransformComponent>
-
                     </>
                 )}
             </TransformWrapper>
