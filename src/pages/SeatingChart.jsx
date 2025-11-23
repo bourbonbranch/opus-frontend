@@ -250,12 +250,12 @@ export default function SeatingChart() {
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
     // CRITICAL: Modifier to center dragged element under cursor
-    // Subtract half the bubble size (24px) from both x and y
+    // Bubble is appearing too far up and left, so adding large positive offset
     const snapCenterToCursor = ({ transform }) => {
         return {
             ...transform,
-            x: transform.x - 24,
-            y: transform.y - 24,
+            x: transform.x + 100, // Move bubble RIGHT
+            y: transform.y + 100, // Move bubble DOWN
         };
     };
 
