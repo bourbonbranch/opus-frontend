@@ -186,6 +186,17 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleW
 function PlacedStudent({ student, getSectionColor }) {
     const studentData = student.student || { name: `Student ${student.studentId}`, section: 'Unknown' };
 
+    // Get color based on voice section
+    const getAvatarColor = (section) => {
+        switch (section) {
+            case 'Soprano': return 'bg-pink-500';
+            case 'Alto': return 'bg-purple-500';
+            case 'Tenor': return 'bg-blue-500';
+            case 'Bass': return 'bg-green-500';
+            default: return 'bg-gray-500';
+        }
+    };
+
     React.useEffect(() => {
         console.log('PlacedStudent mounted:', student.studentId);
     }, []);
@@ -207,12 +218,14 @@ function PlacedStudent({ student, getSectionColor }) {
         transition
     };
 
+    const bubbleColor = getAvatarColor(studentData.section);
+
     if (isDragging) {
         return (
             <div
                 ref={setNodeRef}
                 style={style}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center opacity-30"
+                className={`w-12 h-12 rounded-full ${bubbleColor} flex items-center justify-center opacity-30`}
             >
                 <span className="text-sm font-bold text-white">
                     {studentData.name.split(' ').map(n => n[0]).join('')}
@@ -227,11 +240,11 @@ function PlacedStudent({ student, getSectionColor }) {
             style={style}
             {...listeners}
             {...attributes}
-            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg border-2 border-white/20 hover:scale-110 transition-transform relative group z-10"
+            className={`w-12 h-12 rounded-full ${bubbleColor} flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg border-2 border-white/20 hover:scale-110 transition-transform relative group z-10`}
             title={studentData.name}
         >
             {/* Hover Name Tag */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20 pointer-events-none z-50">
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
                 {studentData.name}
                 {studentData.part && <span className="ml-1">• {studentData.part}</span>}
             </div>
@@ -241,6 +254,5 @@ function PlacedStudent({ student, getSectionColor }) {
             </span>
         </div>
     );
-}
 
 
