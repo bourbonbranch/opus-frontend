@@ -380,7 +380,7 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000} dropAnimation={null}>
+                <DragOverlay zIndex={1000} dropAnimation={null}>
                     {activeId && studentData ? (
                         isPlaced ? (
                             <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
