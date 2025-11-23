@@ -127,7 +127,6 @@ export default function SeatingCanvas({
     const offsetY = 0; // Centered vertically
 
     return (
-    return (
         <div className="relative w-full h-full">
             <TransformWrapper
                 initialScale={0.5}
