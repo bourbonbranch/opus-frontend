@@ -185,7 +185,6 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleW
 
 function PlacedStudent({ student, getSectionColor }) {
     const studentData = student.student || { name: `Student ${student.studentId}`, section: 'Unknown' };
-    const sectionColor = getSectionColor(studentData.section).replace('bg-', 'border-');
 
     React.useEffect(() => {
         console.log('PlacedStudent mounted:', student.studentId);
@@ -213,7 +212,7 @@ function PlacedStudent({ student, getSectionColor }) {
             <div
                 ref={setNodeRef}
                 style={style}
-                className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center opacity-30`}
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center opacity-30"
             >
                 <span className="text-sm font-bold text-white">
                     {studentData.name.split(' ').map(n => n[0]).join('')}
@@ -228,7 +227,7 @@ function PlacedStudent({ student, getSectionColor }) {
             style={style}
             {...listeners}
             {...attributes}
-            className={`w-12 h-12 rounded-full bg-gray-900 border-2 ${sectionColor} flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] relative group z-10 cursor-grab active:cursor-grabbing hover:scale-110 transition-transform dnd-draggable`}
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg border-2 border-white/20 hover:scale-110 transition-transform relative group z-10"
             title={studentData.name}
         >
             {/* Hover Name Tag */}
