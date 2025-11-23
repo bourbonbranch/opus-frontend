@@ -129,32 +129,19 @@ export default function SeatingCanvas({
     return (
         <div className="relative w-full h-full">
             <TransformWrapper
-                initialScale={0.5}
+                initialScale={1}
                 minScale={0.1}
-                maxScale={3} // Limit zoom to 3x
+                maxScale={4}
+                centerOnInit={true}
                 limitToBounds={false}
-                panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }} // Disable panning when dragging
+                panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }}
                 wheel={{ step: 0.1 }}
-                onInit={(ref) => {
-                    if (ref && ref.zoomToElement) {
-                        setTimeout(() => {
-                            try {
-                                const element = document.getElementById('center-target');
-                                if (element) {
-                                    ref.zoomToElement('center-target', 0.5, 0);
-                                }
-                            } catch (e) {
-                                console.error('Zoom init error:', e);
-                            }
-                        }, 100);
-                    }
-                }}
             >
-                {({ centerView }) => (
+                {({ centerView, zoomIn, zoomOut, resetTransform }) => (
                     <>
                         {/* Debug Overlay */}
-                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded">
-                            Debug: Canvas Mounted
+                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded shadow-lg">
+                            Debug: Canvas Mounted (v2.1)
                         </div>
 
                         <div className="absolute bottom-6 right-6 z-[100]">
@@ -162,8 +149,8 @@ export default function SeatingCanvas({
                         </div>
 
                         <TransformComponent
-                            wrapperClass="w-full h-full"
-                            contentClass="w-full h-full flex items-center justify-center"
+                            wrapperClass="w-full h-full bg-gray-900"
+                            contentClass="flex items-center justify-center"
                         >
                             <div
                                 style={{
