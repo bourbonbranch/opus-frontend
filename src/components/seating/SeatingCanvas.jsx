@@ -123,8 +123,8 @@ export default function SeatingCanvas({
     const visualCenterOffset = ((radius + directorY) / 2) + 100; // Center the group (Risers + Director) with slight downward shift
 
     // Final global offsets to center the entire layout in the 1500×1500 canvas
-    const offsetX = 360; // Horizontal offset to shift layout right
-    const offsetY = -200; // Vertical offset to move entire layout down for better centering
+    const offsetX = 0; // Centered horizontally
+    const offsetY = 0; // Centered vertically
 
     return (
     return (
