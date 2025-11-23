@@ -138,6 +138,13 @@ export default function SeatingCanvas({
         };
     };
 
+    // Calculate initial position to center the content
+    // The zero-size container needs to be at the center of the viewport
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
+    const initialX = 0; // Center horizontally
+    const initialY = 0; // Center vertically
+
     return (
         <div className="relative w-full h-full bg-gray-900">
             <TransformWrapper
@@ -163,7 +170,7 @@ export default function SeatingCanvas({
 
                         <TransformComponent
                             wrapperClass="w-full h-full"
-                            contentClass="w-full h-full flex items-center justify-center"
+                            contentClass="w-full h-full"
                         >
                             {/* Background click handler */}
                             <div
@@ -171,7 +178,7 @@ export default function SeatingCanvas({
                                 onClick={onBackgroundClick}
                             />
                             {/* Zero-size container at the exact center of the viewport */}
-                            <div className="relative w-0 h-0">
+                            <div className="absolute left-1/2 top-1/2 w-0 h-0">
 
                                 {/* Director Group */}
                                 <div
