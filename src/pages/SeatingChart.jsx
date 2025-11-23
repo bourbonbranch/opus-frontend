@@ -38,7 +38,7 @@ export default function SeatingChart() {
     const [activeId, setActiveId] = useState(null);
 
     // Global Settings State
-    const [globalRows, setGlobalRows] = useState(4);
+    const [globalRows, setGlobalRows] = useState(3);
     const [globalModuleWidth, setGlobalModuleWidth] = useState(4); // feet
     const [globalTreadDepth, setGlobalTreadDepth] = useState(24); // inches
     const [isCurved, setIsCurved] = useState(true);
@@ -67,9 +67,6 @@ export default function SeatingChart() {
             // Initial Riser Setup
             setRiserSections([
                 { id: 1, name: 'Section 1', adaRow: null },
-                { id: 2, name: 'Section 2', adaRow: null },
-                { id: 3, name: 'Section 3', adaRow: null },
-                { id: 4, name: 'Section 4', adaRow: null },
             ]);
         } catch (err) {
             console.error('Failed to load data:', err);
