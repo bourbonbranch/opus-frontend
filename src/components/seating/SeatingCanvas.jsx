@@ -70,9 +70,9 @@ export default function SeatingCanvas({
             const angleRad = 2 * Math.asin(chord / (2 * radius));
             const angleDeg = angleRad * (180 / Math.PI);
 
-            // No gap between sections - they should connect edge-to-edge
-            const gapAngleRad = 0;
-            const gapAngleDeg = 0;
+            // Tiny gap to prevent visual overlap (0.5 degrees)
+            const gapAngleRad = (0.5 * Math.PI) / 180;
+            const gapAngleDeg = 0.5;
 
             return { angleDeg, angleRad, widthPx, gapAngleDeg, gapAngleRad };
         });
