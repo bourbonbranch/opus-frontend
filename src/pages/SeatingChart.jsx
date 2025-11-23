@@ -252,6 +252,29 @@ export default function SeatingChart() {
     const isPlaced = activeStudent && activeStudent.student; // Placed students have a nested 'student' object
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
+    // Custom modifier to snap the center of the dragged item to the cursor
+    const snapCenterToCursor = ({ transform, activatorEvent, draggingNodeRect }) => {
+        if (draggingNodeRect && activatorEvent) {
+            const activatorCoordinates = {
+                x: activatorEvent.clientX,
+                y: activatorEvent.clientY,
+            };
+
+            const centerAdjustment = {
+                x: draggingNodeRect.width / 2,
+                y: draggingNodeRect.height / 2,
+            };
+
+            return {
+                ...transform,
+                x: transform.x + activatorCoordinates.x - draggingNodeRect.left - centerAdjustment.x,
+                y: transform.y + activatorCoordinates.y - draggingNodeRect.top - centerAdjustment.y,
+            };
+        }
+
+        return transform;
+    };
+
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
             <DndContext
@@ -397,7 +420,7 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay zIndex={1000} dropAnimation={null}>
+                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000} dropAnimation={null}>
                     {activeId && studentData ? (
                         isPlaced ? (
                             <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
