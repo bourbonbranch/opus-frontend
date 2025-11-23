@@ -102,6 +102,23 @@ export default function SeatingChart() {
         setIsConfigOpen(!!newId);
     };
 
+    const handleAddSection = () => {
+        setRiserSections(prev => {
+            const newId = Math.max(...prev.map(s => s.id), 0) + 1;
+            return [...prev, { id: newId, name: `Section ${newId}`, adaRow: null }];
+        });
+    };
+
+    const getSectionColor = (voiceSection) => {
+        switch (voiceSection) {
+            case 'Soprano': return 'bg-pink-500';
+            case 'Alto': return 'bg-purple-500';
+            case 'Tenor': return 'bg-blue-500';
+            case 'Bass': return 'bg-green-500';
+            default: return 'bg-gray-500';
+        }
+    };
+
     const handleDragStart = (event) => {
         console.log('Drag Start:', event.active.id);
         setActiveId(event.active.id);
