@@ -152,6 +152,11 @@ export default function SeatingCanvas({
             >
                 {({ centerView }) => (
                     <>
+                        {/* Debug Overlay */}
+                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded">
+                            Debug: Canvas Mounted
+                        </div>
+
                         <div className="absolute bottom-6 right-6 z-[100]">
                             <Controls />
                         </div>
