@@ -118,6 +118,10 @@ export default function SeatingCanvas({
     })();
     const [initStatus, setInitStatus] = React.useState('Pending');
 
+    // Layout constants for centering
+    const directorY = 500; // Director position relative to center of curvature
+    const visualCenterOffset = ((radius + directorY) / 2) + 100; // Center the group (Risers + Director) with slight downward shift
+
     // Calculate offsets for CSS positioning (Top/Left relative to center)
     // Positive Y in our math is "Up", so it becomes Negative Top in CSS.
     // We shift everything so that 'visualCenterOffset' is at (0,0).
