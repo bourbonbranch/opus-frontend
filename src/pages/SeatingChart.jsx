@@ -361,7 +361,7 @@ export default function SeatingChart() {
                     </div>
 
                     {/* Canvas Area */}
-                    <div className="flex-1 relative bg-gray-950 overflow-hidden">
+                    <div className="flex-1 relative bg-gray-950 overflow-hidden flex flex-col">
                         <SeatingCanvas
                             riserSections={riserSections}
                             globalRows={globalRows}
