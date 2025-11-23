@@ -257,9 +257,11 @@ export default function SeatingChart() {
                 y: activatorEvent.clientY,
             };
 
+            // Hardcode center adjustment for standard bubble size (w-12 h-12 = 48px)
+            // This avoids issues where draggingNodeRect is scaled (e.g. 0.5x) but DragOverlay is 1x
             const centerAdjustment = {
-                x: draggingNodeRect.width / 2,
-                y: draggingNodeRect.height / 2,
+                x: 24,
+                y: 24,
             };
 
             return {

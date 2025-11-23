@@ -141,7 +141,9 @@ export default function SeatingCanvas({
             >
                 {({ centerView }) => (
                     <>
-                        <Controls />
+                        <div className="absolute bottom-6 right-6 z-[100]">
+                            <Controls />
+                        </div>
 
                         <TransformComponent
                             wrapperClass="w-full h-full"
@@ -149,8 +151,8 @@ export default function SeatingCanvas({
                         >
                             <div
                                 style={{
-                                    width: '1500px',
-                                    height: '1500px',
+                                    width: '3000px',
+                                    height: '3000px',
                                     position: 'relative',
                                     backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
                                     backgroundSize: '40px 40px',
