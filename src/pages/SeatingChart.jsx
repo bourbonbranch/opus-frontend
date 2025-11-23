@@ -249,15 +249,6 @@ export default function SeatingChart() {
     const isPlaced = activeStudent && activeStudent.student; // Placed students have a nested 'student' object
     const studentData = isPlaced ? activeStudent.student : activeStudent;
 
-    // Modifier to center the dragged bubble under the cursor
-    const snapCenterToCursor = ({ transform }) => {
-        return {
-            ...transform,
-            x: transform.x + 48, // Move bubble to the right (was too far left)
-            y: transform.y + 24, // Center vertically
-        };
-    };
-
     return (
         <div className="flex h-full bg-transparent text-white overflow-hidden">
             <DndContext
@@ -404,7 +395,7 @@ export default function SeatingChart() {
                     )}
                 </div>
 
-                <DragOverlay modifiers={[snapCenterToCursor]} zIndex={1000} dropAnimation={null}>
+                <DragOverlay zIndex={1000} dropAnimation={null}>
                     {activeId && studentData ? (
                         isPlaced ? (
                             <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
