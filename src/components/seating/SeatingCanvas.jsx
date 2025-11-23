@@ -141,10 +141,10 @@ export default function SeatingCanvas({
     return (
         <div className="relative w-full h-full bg-gray-900">
             <TransformWrapper
-                initialScale={0.75}
+                initialScale={1}
                 minScale={0.1}
                 maxScale={4}
-                centerOnInit={true}
+                centerOnInit={false}
                 limitToBounds={false}
                 panning={{ disabled: isDragging, excluded: ['dnd-draggable'] }}
                 wheel={{ step: 0.1 }}
