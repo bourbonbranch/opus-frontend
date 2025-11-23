@@ -151,6 +151,11 @@ export default function SeatingCanvas({
             >
                 {({ centerView, zoomIn, zoomOut, resetTransform, zoomToElement }) => (
                     <>
+                        {/* DEBUG MARKER */}
+                        <div className="absolute top-4 left-4 z-[200] bg-yellow-500 text-black p-4 font-bold border-4 border-red-500">
+                            CANVAS IS RENDERING (v3.4)
+                        </div>
+
                         {/* Controls */}
                         <div className="absolute top-4 right-6 z-[100]">
                             <Controls />
