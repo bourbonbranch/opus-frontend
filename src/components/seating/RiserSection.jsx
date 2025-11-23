@@ -125,7 +125,7 @@ function RiserRow({ section, rowNum, depthPx, widthPx, globalRows, globalModuleW
     const usableWidthInches = (globalModuleWidth * 12) - (marginInches * 2);
 
     // Fixed singer spacing (removed from UI)
-    const singerSpacing = 22;
+    const singerSpacing = 18; // Reduced from 22 to allow more students per row
 
     // Calculate capacity
     let capacity = Math.floor(usableWidthInches / singerSpacing);
