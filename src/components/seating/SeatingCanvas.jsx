@@ -70,9 +70,9 @@ export default function SeatingCanvas({
             const angleRad = 2 * Math.asin(chord / (2 * radius));
             const angleDeg = angleRad * (180 / Math.PI);
 
-            // centerGap is always 0 now (removed from UI)
-            const gapAngleRad = 0;
-            const gapAngleDeg = 0;
+            // Small gap between sections to prevent overlap
+            const gapAngleRad = (2 * Math.PI) / 180; // 2 degrees in radians
+            const gapAngleDeg = 2;
 
             return { angleDeg, angleRad, widthPx, gapAngleDeg, gapAngleRad };
         });
