@@ -149,9 +149,9 @@ export default function SeatingCanvas({
             </div>
 
             {/* Controls (Disabled visually but present) */}
-            <div className="absolute top-20 right-6 z-[100] opacity-50 pointer-events-none">
+            {/* <div className="absolute top-20 right-6 z-[100] opacity-50 pointer-events-none">
                 <Controls />
-            </div>
+            </div> */}
 
             {/* Zero-size container at the exact center of the viewport */}
             <div className="relative w-0 h-0">
