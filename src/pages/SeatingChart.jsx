@@ -380,6 +380,7 @@ export default function SeatingChart() {
                             }}
                             isDragging={!!activeId}
                         />
+                        {console.log('SeatingChart Render:', { riserSections, globalModuleWidth, globalRows })}
                     </div>
 
                     {/* Configuration Panel */}

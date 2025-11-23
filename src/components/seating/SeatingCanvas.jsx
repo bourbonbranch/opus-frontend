@@ -140,11 +140,16 @@ export default function SeatingCanvas({
                 {({ centerView, zoomIn, zoomOut, resetTransform }) => (
                     <>
                         {/* Debug Overlay */}
-                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded shadow-lg">
-                            Debug: Canvas Mounted (v2.1)
+                        <div className="absolute top-4 left-4 z-[200] bg-red-500 text-white p-2 rounded shadow-lg text-xs font-mono">
+                            <p>Debug: Canvas Mounted (v2.2)</p>
+                            <p>Risers: {riserSections.length}</p>
+                            <p>Radius: {Math.round(radius)}</p>
+                            <p>Offset: {Math.round(visualCenterOffset)}</p>
+                            <p>DirectorY: {directorY}</p>
+                            <p>Curved: {isCurved ? 'Yes' : 'No'}</p>
                         </div>
 
-                        <div className="absolute bottom-6 right-6 z-[100]">
+                        <div className="absolute top-20 right-6 z-[100]">
                             <Controls />
                         </div>
 
@@ -168,6 +173,8 @@ export default function SeatingCanvas({
                                     }
                                 }}
                             >
+                                {/* CENTER MARKER - FOR DEBUGGING */}
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 z-50 rounded-full border-2 border-white"></div>
                                 {/* Director Group - ABSOLUTE CENTER */}
                                 <div
                                     id="center-target"
