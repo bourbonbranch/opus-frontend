@@ -416,20 +416,10 @@ export default function SeatingChart() {
                 >
                     {activeId && studentData ? (
                         <div style={{ transform: 'translate(-50%, -50%)' }}>
-                            {isPlaced ? (
-                                <PlacedStudent student={activeStudent} getSectionColor={getSectionColor} />
-                            ) : (
-                                // Render as Card (Bank Student)
-                                <div className="opacity-80 pointer-events-none">
-                                    <div className={`px-3 py-2 rounded-lg shadow-xl border border-white/20 text-sm font-medium text-white w-40
-                                        ${studentData.section === 'Soprano' ? 'bg-pink-500' :
-                                            studentData.section === 'Alto' ? 'bg-purple-500' :
-                                                studentData.section === 'Tenor' ? 'bg-blue-500' : 'bg-green-500'}`}
-                                    >
-                                        {studentData.name}
-                                    </div>
-                                </div>
-                            )}
+                            {/* Always render as bubble for drag overlay */}
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30 pointer-events-none">
+                                {studentData.name.split(' ').map(n => n[0]).join('')}
+                            </div>
                         </div>
                     ) : null}
                 </DragOverlay>
