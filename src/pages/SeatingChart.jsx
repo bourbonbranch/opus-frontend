@@ -415,11 +415,15 @@ export default function SeatingChart() {
                     modifiers={[snapCenterToCursor]}
                 >
                     {activeId && studentData ? (
-                        <div style={{ transform: 'translate(-50%, -50%)' }}>
-                            {/* Always render as bubble for drag overlay */}
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30 pointer-events-none">
-                                {studentData.name.split(' ').map(n => n[0]).join('')}
-                            </div>
+                        /* Always render as bubble for drag overlay - transform centers it under cursor */
+                        <div
+                            className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-2xl border-2 border-white/30 pointer-events-none"
+                            style={{
+                                transform: 'translate(-50%, -50%)',
+                                position: 'relative'
+                            }}
+                        >
+                            {studentData.name.split(' ').map(n => n[0]).join('')}
                         </div>
                     ) : null}
                 </DragOverlay>
