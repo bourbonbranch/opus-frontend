@@ -106,6 +106,7 @@ export default function RecruitingPipeline() {
     const [activeId, setActiveId] = useState(null);
 
     const directorId = localStorage.getItem('directorId');
+    const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -123,7 +124,7 @@ export default function RecruitingPipeline() {
         try {
             setLoading(true);
             const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/recruiting/pipeline?director_id=${directorId}`
+                `${API_URL}/api/recruiting/pipeline?director_id=${directorId}`
             );
             const data = await response.json();
             setPipeline(data);
@@ -154,7 +155,7 @@ export default function RecruitingPipeline() {
         // Update prospect stage
         try {
             await fetch(
-                `${import.meta.env.VITE_API_URL}/api/recruiting/prospects/${active.id}/stage`,
+                `${API_URL}/api/recruiting/prospects/${active.id}/stage`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
