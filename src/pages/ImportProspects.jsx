@@ -17,6 +17,9 @@ export default function ImportProspects() {
         localStorage.setItem('directorId', '1');
     }
 
+    // Fallback API URL if environment variable is not set
+    const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile && selectedFile.type === 'text/csv') {
@@ -87,9 +90,9 @@ export default function ImportProspects() {
             const prospects = parseCSV(text);
             console.log('Parsed prospects:', prospects);
             console.log('Director ID:', directorId);
-            console.log('API URL:', import.meta.env.VITE_API_URL);
+            console.log('API URL:', API_URL);
 
-            const url = `${import.meta.env.VITE_API_URL}/api/recruiting/prospects/bulk-import`;
+            const url = `${API_URL}/api/recruiting/prospects/bulk-import`;
             console.log('Fetching:', url);
 
             const response = await fetch(url, {
