@@ -39,7 +39,8 @@ export default function Recruiting() {
                 params.append('search', searchTerm);
             }
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects?${params}`);
+            const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+            const response = await fetch(`${API_URL}/api/recruiting/prospects?${params}`);
             const data = await response.json();
             setProspects(data.prospects || []);
         } catch (err) {
