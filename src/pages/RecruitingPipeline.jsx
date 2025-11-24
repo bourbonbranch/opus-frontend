@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, GripVertical } from 'lucide-react';
-import { DndContext, DragOverlay, closestCenter, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -69,7 +69,7 @@ function ProspectCard({ prospect, isDragging }) {
 }
 
 function PipelineStage({ stage, prospects }) {
-    const { setNodeRef } = useDroppable({
+    const { setNodeRef, isOver } = useDroppable({
         id: `stage-${stage.id}`,
     });
 
@@ -79,10 +79,11 @@ function PipelineStage({ stage, prospects }) {
         <div className="flex-1 min-w-[280px]">
             <div
                 ref={setNodeRef}
-                className="rounded-lg border-2 p-4 h-full"
+                className={`rounded-lg border-2 p-4 h-full transition-colors ${isOver ? 'bg-white/10 border-purple-500' : ''
+                    }`}
                 style={{
-                    borderColor: stage.color,
-                    backgroundColor: `${stage.color}10`
+                    borderColor: isOver ? undefined : stage.color,
+                    backgroundColor: isOver ? undefined : `${stage.color}10`
                 }}
             >
                 <div className="flex items-center justify-between mb-4">
@@ -225,7 +226,7 @@ export default function RecruitingPipeline() {
                 {/* Pipeline Board */}
                 <DndContext
                     sensors={sensors}
-                    collisionDetection={closestCenter}
+                    collisionDetection={closestCorners}
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
                 >
