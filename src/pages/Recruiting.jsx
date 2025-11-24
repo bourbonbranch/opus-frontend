@@ -14,7 +14,14 @@ export default function Recruiting() {
         graduation_year: ''
     });
 
-    const directorId = localStorage.getItem('directorId');
+    let directorId = localStorage.getItem('directorId');
+
+    // Fallback: if no directorId, use ID 64 (jacobclaudecochran@gmail.com)
+    if (!directorId || directorId === 'null' || directorId === 'undefined' || directorId === '1') {
+        console.warn('Invalid directorId found in localStorage, correcting to ID 64');
+        directorId = '64';
+        localStorage.setItem('directorId', '64');
+    }
 
     useEffect(() => {
         loadProspects();
