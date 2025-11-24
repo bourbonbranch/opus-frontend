@@ -24,20 +24,45 @@ export default function ImportProspects() {
         const lines = text.split('\n').filter(line => line.trim());
         if (lines.length < 2) return [];
 
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z_]/g, '_'));
+        // Parse CSV line handling quoted values
+        const parseLine = (line) => {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim());
+            return values;
+        };
+
+        const headers = parseLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z_]/g, '_'));
         const prospects = [];
 
         for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(v => v.trim());
+            const values = parseLine(lines[i]);
             const prospect = {};
 
             headers.forEach((header, index) => {
-                if (values[index]) {
-                    prospect[header] = values[index];
+                if (values[index] && values[index].trim()) {
+                    prospect[header] = values[index].replace(/^"|"$/g, ''); // Remove surrounding quotes
                 }
             });
 
-            prospects.push(prospect);
+            // Only add if has required fields
+            if (prospect.first_name && prospect.last_name && prospect.email) {
+                prospects.push(prospect);
+            }
         }
 
         return prospects;
