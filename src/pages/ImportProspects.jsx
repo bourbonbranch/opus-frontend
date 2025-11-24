@@ -75,30 +75,43 @@ export default function ImportProspects() {
 
         try {
             const text = await file.text();
-            const prospects = parseCSV(text);
+            console.log('CSV text:', text.substring(0, 200)); // First 200 chars
 
+            const prospects = parseCSV(text);
             console.log('Parsed prospects:', prospects);
             console.log('Director ID:', directorId);
+            console.log('API URL:', import.meta.env.VITE_API_URL);
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects/bulk-import`, {
+            const url = `${import.meta.env.VITE_API_URL}/api/recruiting/prospects/bulk-import`;
+            console.log('Fetching:', url);
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    director_id: directorId,
+                    director_id: parseInt(directorId),
                     prospects
                 })
             });
 
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('Error response:', errorData);
                 throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('Success data:', data);
             setResults(data);
         } catch (err) {
-            console.error('Error importing CSV:', err);
-            alert(`Failed to import CSV: ${err.message}`);
+            console.error('Full error:', err);
+            console.error('Error name:', err.name);
+            console.error('Error message:', err.message);
+            console.error('Error stack:', err.stack);
+            alert(`Failed to import CSV: ${err.message}\n\nCheck browser console (F12) for details.`);
         } finally {
             setImporting(false);
         }
