@@ -112,6 +112,8 @@ export default function RecruitingPipeline() {
     const [loading, setLoading] = useState(true);
     const [activeId, setActiveId] = useState(null);
 
+    const [error, setError] = useState(null);
+
     const directorId = localStorage.getItem('directorId');
     const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
 
@@ -124,19 +126,33 @@ export default function RecruitingPipeline() {
     );
 
     useEffect(() => {
+        if (!directorId) {
+            setError('No Director ID found. Please return to the dashboard.');
+            return;
+        }
         loadPipeline();
-    }, []);
+    }, [directorId]);
 
     const loadPipeline = async () => {
         try {
             setLoading(true);
+            setError(null);
             const response = await fetch(
-                `${API_URL} /api/recruiting / pipeline ? director_id = ${directorId} `
+                `${API_URL}/api/recruiting/pipeline?director_id=${directorId}`
             );
+
+            if (!response.ok) {
+                throw new Error(`Failed to load pipeline: ${response.status} ${response.statusText}`);
+            }
+
             const data = await response.json();
+            if (!data.stages) {
+                throw new Error('Invalid data format received from server');
+            }
             setPipeline(data);
         } catch (err) {
             console.error('Error loading pipeline:', err);
+            setError(err.message);
         } finally {
             setLoading(false);
         }
@@ -154,34 +170,33 @@ export default function RecruitingPipeline() {
         const overId = over.id;
 
         // Find source and destination containers
-        const activeStage = pipeline.stages.find(s => s.prospects.some(p => `prospect - ${p.id} ` === activeId));
+        const activeStage = pipeline.stages.find(s => s.prospects.some(p => `prospect-${p.id}` === activeId));
 
         let overStage;
         if (overId.startsWith('stage-')) {
             const stageId = parseInt(overId.replace('stage-', ''));
             overStage = pipeline.stages.find(s => s.id === stageId);
         } else {
-            overStage = pipeline.stages.find(s => s.prospects.some(p => `prospect - ${p.id} ` === overId));
+            overStage = pipeline.stages.find(s => s.prospects.some(p => `prospect-${p.id}` === overId));
         }
 
         if (!activeStage || !overStage || activeStage.id === overStage.id) return;
 
         // Move item to new stage in state
         setPipeline(prev => {
-            const newStages = [...prev.stages];
-            const sourceStageIndex = newStages.findIndex(s => s.id === activeStage.id);
-            const destStageIndex = newStages.findIndex(s => s.id === overStage.id);
+            const newStages = prev.stages.map(stage => ({
+                ...stage,
+                prospects: [...stage.prospects] // Deep copy prospects array
+            }));
 
-            const sourceStage = { ...newStages[sourceStageIndex] };
-            const destStage = { ...newStages[destStageIndex] };
+            const sourceStage = newStages.find(s => s.id === activeStage.id);
+            const destStage = newStages.find(s => s.id === overStage.id);
 
-            const prospectIndex = sourceStage.prospects.findIndex(p => `prospect - ${p.id} ` === activeId);
-            const [prospect] = sourceStage.prospects.splice(prospectIndex, 1);
-
-            destStage.prospects.push(prospect);
-
-            newStages[sourceStageIndex] = sourceStage;
-            newStages[destStageIndex] = destStage;
+            const prospectIndex = sourceStage.prospects.findIndex(p => `prospect-${p.id}` === activeId);
+            if (prospectIndex !== -1) {
+                const [prospect] = sourceStage.prospects.splice(prospectIndex, 1);
+                destStage.prospects.push(prospect);
+            }
 
             return { ...prev, stages: newStages };
         });
@@ -201,7 +216,7 @@ export default function RecruitingPipeline() {
         if (finalStage) {
             try {
                 await fetch(
-                    `${API_URL} /api/recruiting / prospects / ${activeProspectId}/stage`,
+                    `${API_URL}/api/recruiting/prospects/${activeProspectId}/stage`,
                     {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -210,6 +225,7 @@ export default function RecruitingPipeline() {
                 );
             } catch (err) {
                 console.error('Error updating stage:', err);
+                setError('Failed to save changes. Please refresh.');
                 loadPipeline(); // Revert on error
             }
         }
@@ -223,6 +239,27 @@ export default function RecruitingPipeline() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6 flex items-center justify-center">
                 <div className="text-white text-xl">Loading pipeline...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6 flex items-center justify-center">
+                <div className="bg-red-500/10 border border-red-500 p-6 rounded-xl max-w-md text-center">
+                    <h3 className="text-red-400 text-xl font-bold mb-2">Error Loading Pipeline</h3>
+                    <p className="text-white/80 mb-4">{error}</p>
+                    <button
+                        onClick={loadPipeline}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
+                    >
+                        Retry
+                    </button>
+                    <div className="mt-4 text-left text-xs text-white/40 font-mono">
+                        <div>Director ID: {directorId}</div>
+                        <div>API URL: {API_URL}</div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -253,7 +290,7 @@ export default function RecruitingPipeline() {
                     onDragEnd={handleDragEnd}
                 >
                     <div className="flex gap-4 overflow-x-auto pb-4">
-                        {pipeline.stages.map((stage) => (
+                        {pipeline.stages?.map((stage) => (
                             <PipelineStage
                                 key={stage.id}
                                 stage={stage}
@@ -273,6 +310,11 @@ export default function RecruitingPipeline() {
                         ) : null}
                     </DragOverlay>
                 </DndContext>
+
+                {/* Debug Info (Hidden in production usually, but helpful now) */}
+                <div className="fixed bottom-2 right-2 text-xs text-white/20 font-mono pointer-events-none">
+                    Stages: {pipeline.stages?.length || 0} | Dir: {directorId}
+                </div>
             </div>
         </div>
     );
