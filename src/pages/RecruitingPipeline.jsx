@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, GripVertical } from 'lucide-react';
-import { DndContext, DragOverlay, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCenter, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -12,7 +12,7 @@ function ProspectCard({ prospect, isDragging }) {
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: prospect.id });
+    } = useSortable({ id: `prospect-${prospect.id}` });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -69,11 +69,16 @@ function ProspectCard({ prospect, isDragging }) {
 }
 
 function PipelineStage({ stage, prospects }) {
-    const prospectIds = prospects.map(p => p.id);
+    const { setNodeRef } = useDroppable({
+        id: `stage-${stage.id}`,
+    });
+
+    const prospectIds = prospects.map(p => `prospect-${p.id}`);
 
     return (
         <div className="flex-1 min-w-[280px]">
             <div
+                ref={setNodeRef}
                 className="rounded-lg border-2 p-4 h-full"
                 style={{
                     borderColor: stage.color,
@@ -145,33 +150,51 @@ export default function RecruitingPipeline() {
 
         if (!over) return;
 
-        // Find which stage the prospect was dropped on
-        const targetStage = pipeline.stages.find(stage =>
-            stage.prospects.some(p => p.id === over.id) || stage.id === over.id
-        );
+        // Parse IDs
+        const activeProspectId = parseInt(active.id.replace('prospect-', ''));
 
-        if (!targetStage) return;
+        let targetStageId;
+        if (over.id.startsWith('stage-')) {
+            targetStageId = parseInt(over.id.replace('stage-', ''));
+        } else if (over.id.startsWith('prospect-')) {
+            // Dropped on another prospect, find their stage
+            const overProspectId = parseInt(over.id.replace('prospect-', ''));
+            const stage = pipeline.stages.find(s => s.prospects.some(p => p.id === overProspectId));
+            if (stage) targetStageId = stage.id;
+        }
 
-        // Update prospect stage
-        try {
-            await fetch(
-                `${API_URL}/api/recruiting/prospects/${active.id}/stage`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stage_id: targetStage.id })
-                }
-            );
+        if (!targetStageId) return;
 
-            // Reload pipeline
-            loadPipeline();
-        } catch (err) {
-            console.error('Error updating stage:', err);
+        // Optimistic update
+        const newPipeline = { ...pipeline };
+        const sourceStage = newPipeline.stages.find(s => s.prospects.some(p => p.id === activeProspectId));
+        const destStage = newPipeline.stages.find(s => s.id === targetStageId);
+
+        if (sourceStage && destStage && sourceStage.id !== destStage.id) {
+            const prospect = sourceStage.prospects.find(p => p.id === activeProspectId);
+            sourceStage.prospects = sourceStage.prospects.filter(p => p.id !== activeProspectId);
+            destStage.prospects.push(prospect);
+            setPipeline(newPipeline);
+
+            // API Update
+            try {
+                await fetch(
+                    `${API_URL}/api/recruiting/prospects/${activeProspectId}/stage`,
+                    {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ stage_id: targetStageId })
+                    }
+                );
+            } catch (err) {
+                console.error('Error updating stage:', err);
+                loadPipeline(); // Revert on error
+            }
         }
     };
 
     const activeProspect = activeId
-        ? pipeline.stages.flatMap(s => s.prospects).find(p => p.id === activeId)
+        ? pipeline.stages.flatMap(s => s.prospects).find(p => `prospect-${p.id}` === activeId)
         : null;
 
     if (loading) {
