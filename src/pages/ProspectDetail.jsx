@@ -15,6 +15,8 @@ export default function ProspectDetail() {
 
     const directorId = localStorage.getItem('directorId');
 
+    const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+
     useEffect(() => {
         loadProspect();
     }, [id]);
@@ -22,7 +24,7 @@ export default function ProspectDetail() {
     const loadProspect = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects/${id}`);
+            const response = await fetch(`${API_URL}/api/recruiting/prospects/${id}`);
             const data = await response.json();
             setProspect(data.prospect);
             setCommunications(data.communications || []);
@@ -36,7 +38,7 @@ export default function ProspectDetail() {
 
     const handleSave = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects/${id}`, {
+            const response = await fetch(`${API_URL}/api/recruiting/prospects/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -55,7 +57,7 @@ export default function ProspectDetail() {
         if (!newNote.trim()) return;
 
         try {
-            await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/send-email`, {
+            await fetch(`${API_URL}/api/recruiting/send-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -65,7 +67,7 @@ export default function ProspectDetail() {
             });
 
             // Add note to communications
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects/${id}`);
+            const response = await fetch(`${API_URL}/api/recruiting/prospects/${id}`);
             const data = await response.json();
             setCommunications(data.communications || []);
             setNewNote('');
@@ -76,7 +78,7 @@ export default function ProspectDetail() {
 
     const handleConvert = async (ensembleId) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects/${id}/convert`, {
+            const response = await fetch(`${API_URL}/api/recruiting/prospects/${id}/convert`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
