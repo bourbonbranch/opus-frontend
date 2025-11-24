@@ -1,8 +1,9 @@
+```javascript
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, GripVertical } from 'lucide-react';
-import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { DndContext, DragOverlay, pointerWithin, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 function ProspectCard({ prospect, isDragging }) {
@@ -12,7 +13,7 @@ function ProspectCard({ prospect, isDragging }) {
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: `prospect-${prospect.id}` });
+    } = useSortable({ id: `prospect - ${ prospect.id } ` });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -33,7 +34,7 @@ function ProspectCard({ prospect, isDragging }) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-gray-800/50 backdrop-blur-xl rounded-lg border border-white/10 p-4 mb-3 cursor-move hover:border-purple-500/50 transition-all ${getInterestColor(prospect.interest_level)}`}
+            className={`bg - gray - 800 / 50 backdrop - blur - xl rounded - lg border border - white / 10 p - 4 mb - 3 cursor - move hover: border - purple - 500 / 50 transition - all ${ getInterestColor(prospect.interest_level) } `}
             {...attributes}
             {...listeners}
         >
@@ -70,20 +71,21 @@ function ProspectCard({ prospect, isDragging }) {
 
 function PipelineStage({ stage, prospects }) {
     const { setNodeRef, isOver } = useDroppable({
-        id: `stage-${stage.id}`,
+        id: `stage - ${ stage.id } `,
     });
 
-    const prospectIds = prospects.map(p => `prospect-${p.id}`);
+    const prospectIds = prospects.map(p => `prospect - ${ p.id } `);
 
     return (
         <div className="flex-1 min-w-[280px]">
             <div
                 ref={setNodeRef}
-                className={`rounded-lg border-2 p-4 h-full transition-colors ${isOver ? 'bg-white/10 border-purple-500' : ''
-                    }`}
+                className={`rounded - lg border - 2 p - 4 h - full transition - colors ${
+    isOver ? 'bg-white/10 border-purple-500' : ''
+} `}
                 style={{
                     borderColor: isOver ? undefined : stage.color,
-                    backgroundColor: isOver ? undefined : `${stage.color}10`
+                    backgroundColor: isOver ? undefined : `${ stage.color } 10`
                 }}
             >
                 <div className="flex items-center justify-between mb-4">
@@ -130,7 +132,7 @@ export default function RecruitingPipeline() {
         try {
             setLoading(true);
             const response = await fetch(
-                `${API_URL}/api/recruiting/pipeline?director_id=${directorId}`
+                `${ API_URL } /api/recruiting / pipeline ? director_id = ${ directorId } `
             );
             const data = await response.json();
             setPipeline(data);
@@ -145,113 +147,134 @@ export default function RecruitingPipeline() {
         setActiveId(event.active.id);
     };
 
+    const handleDragOver = (event) => {
+        const { active, over } = event;
+        if (!over) return;
+
+        const activeId = active.id;
+        const overId = over.id;
+
+        // Find source and destination containers
+        const activeStage = pipeline.stages.find(s => s.prospects.some(p => `prospect - ${ p.id } ` === activeId));
+        
+        let overStage;
+        if (overId.startsWith('stage-')) {
+            const stageId = parseInt(overId.replace('stage-', ''));
+            overStage = pipeline.stages.find(s => s.id === stageId);
+        } else {
+            overStage = pipeline.stages.find(s => s.prospects.some(p => `prospect - ${ p.id } ` === overId));
+        }
+
+        if (!activeStage || !overStage || activeStage.id === overStage.id) return;
+
+        // Move item to new stage in state
+        setPipeline(prev => {
+            const newStages = [...prev.stages];
+            const sourceStageIndex = newStages.findIndex(s => s.id === activeStage.id);
+            const destStageIndex = newStages.findIndex(s => s.id === overStage.id);
+
+            const sourceStage = { ...newStages[sourceStageIndex] };
+            const destStage = { ...newStages[destStageIndex] };
+
+            const prospectIndex = sourceStage.prospects.findIndex(p => `prospect - ${ p.id } ` === activeId);
+            const [prospect] = sourceStage.prospects.splice(prospectIndex, 1);
+            
+            destStage.prospects.push(prospect);
+
+            newStages[sourceStageIndex] = sourceStage;
+            newStages[destStageIndex] = destStage;
+
+            return { ...prev, stages: newStages };
+        });
+    };
+
     const handleDragEnd = async (event) => {
         const { active, over } = event;
         setActiveId(null);
 
         if (!over) return;
 
-        // Parse IDs
         const activeProspectId = parseInt(active.id.replace('prospect-', ''));
-
-        let targetStageId;
-        if (over.id.startsWith('stage-')) {
-            targetStageId = parseInt(over.id.replace('stage-', ''));
-        } else if (over.id.startsWith('prospect-')) {
-            // Dropped on another prospect, find their stage
-            const overProspectId = parseInt(over.id.replace('prospect-', ''));
-            const stage = pipeline.stages.find(s => s.prospects.some(p => p.id === overProspectId));
-            if (stage) targetStageId = stage.id;
-        }
-
-        if (!targetStageId) return;
-
-        // Optimistic update
-        const newPipeline = { ...pipeline };
-        const sourceStage = newPipeline.stages.find(s => s.prospects.some(p => p.id === activeProspectId));
-        const destStage = newPipeline.stages.find(s => s.id === targetStageId);
-
-        if (sourceStage && destStage && sourceStage.id !== destStage.id) {
-            const prospect = sourceStage.prospects.find(p => p.id === activeProspectId);
-            sourceStage.prospects = sourceStage.prospects.filter(p => p.id !== activeProspectId);
-            destStage.prospects.push(prospect);
-            setPipeline(newPipeline);
-
-            // API Update
+        
+        // Find final stage
+        const finalStage = pipeline.stages.find(s => s.prospects.some(p => p.id === activeProspectId));
+        
+        if (finalStage) {
             try {
                 await fetch(
-                    `${API_URL}/api/recruiting/prospects/${activeProspectId}/stage`,
-                    {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ stage_id: targetStageId })
-                    }
+                    `${ API_URL } /api/recruiting / prospects / ${ activeProspectId }/stage`,
+{
+    method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stage_id: finalStage.id })
+}
                 );
             } catch (err) {
-                console.error('Error updating stage:', err);
-                loadPipeline(); // Revert on error
-            }
+    console.error('Error updating stage:', err);
+    loadPipeline(); // Revert on error
+}
         }
     };
 
-    const activeProspect = activeId
-        ? pipeline.stages.flatMap(s => s.prospects).find(p => `prospect-${p.id}` === activeId)
-        : null;
+const activeProspect = activeId
+    ? pipeline.stages.flatMap(s => s.prospects).find(p => `prospect-${p.id}` === activeId)
+    : null;
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6 flex items-center justify-center">
-                <div className="text-white text-xl">Loading pipeline...</div>
-            </div>
-        );
-    }
-
+if (loading) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <button
-                        onClick={() => navigate('/director/recruiting')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                        <ArrowLeft className="w-6 h-6 text-white" />
-                    </button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Recruiting Pipeline</h1>
-                        <p className="text-white/60">Drag prospects between stages to update their status</p>
-                    </div>
-                </div>
-
-                {/* Pipeline Board */}
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCorners}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                >
-                    <div className="flex gap-4 overflow-x-auto pb-4">
-                        {pipeline.stages.map((stage) => (
-                            <PipelineStage
-                                key={stage.id}
-                                stage={stage}
-                                prospects={stage.prospects || []}
-                            />
-                        ))}
-                    </div>
-
-                    <DragOverlay>
-                        {activeProspect ? (
-                            <div className="bg-gray-800 rounded-lg border border-purple-500 p-4 shadow-2xl">
-                                <h3 className="text-white font-semibold">
-                                    {activeProspect.first_name} {activeProspect.last_name}
-                                </h3>
-                                <p className="text-white/60 text-sm">{activeProspect.email}</p>
-                            </div>
-                        ) : null}
-                    </DragOverlay>
-                </DndContext>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6 flex items-center justify-center">
+            <div className="text-white text-xl">Loading pipeline...</div>
         </div>
     );
+}
+
+return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6">
+        <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+                <button
+                    onClick={() => navigate('/director/recruiting')}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                    <ArrowLeft className="w-6 h-6 text-white" />
+                </button>
+                <div>
+                    <h1 className="text-3xl font-bold text-white mb-2">Recruiting Pipeline</h1>
+                    <p className="text-white/60">Drag prospects between stages to update their status</p>
+                </div>
+            </div>
+
+            {/* Pipeline Board */}
+            <DndContext
+                sensors={sensors}
+                collisionDetection={pointerWithin}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+            >
+                <div className="flex gap-4 overflow-x-auto pb-4">
+                    {pipeline.stages.map((stage) => (
+                        <PipelineStage
+                            key={stage.id}
+                            stage={stage}
+                            prospects={stage.prospects || []}
+                        />
+                    ))}
+                </div>
+
+                <DragOverlay>
+                    {activeProspect ? (
+                        <div className="bg-gray-800 rounded-lg border border-purple-500 p-4 shadow-2xl pointer-events-none">
+                            <h3 className="text-white font-semibold">
+                                {activeProspect.first_name} {activeProspect.last_name}
+                            </h3>
+                            <p className="text-white/60 text-sm">{activeProspect.email}</p>
+                        </div>
+                    ) : null}
+                </DragOverlay>
+            </DndContext>
+        </div>
+    </div>
+);
 }
