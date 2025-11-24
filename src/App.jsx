@@ -21,6 +21,7 @@ import RecruitingPipeline from './pages/RecruitingPipeline';
 import AddProspect from './pages/AddProspect';
 import RecruitingQRCode from './pages/RecruitingQRCode';
 import RecruitingAnalytics from './pages/RecruitingAnalytics';
+import ProspectDetail from './pages/ProspectDetail';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -75,6 +76,7 @@ const App = () => {
             <Route path="recruiting/new" element={<AddProspect />} />
             <Route path="recruiting/qr-code" element={<RecruitingQRCode />} />
             <Route path="recruiting/analytics" element={<RecruitingAnalytics />} />
+            <Route path="recruiting/:id" element={<ProspectDetail />} />
             <Route path="events" element={<Events />} />
             <Route path="calendar" element={<CalendarView />} />
             <Route path="messages" element={<Messages />} />
