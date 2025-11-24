@@ -4,6 +4,7 @@ import {
     HomeIcon,
     MapPinIcon,
     UsersIcon,
+    UserPlusIcon,
     CalendarIcon,
     LayoutGridIcon,
     DollarSignIcon,
@@ -57,6 +58,11 @@ export function DashboardLayout() {
             to: '/director/roster',
             icon: UsersIcon,
             label: 'Roster',
+        },
+        {
+            to: '/director/recruiting',
+            icon: UserPlusIcon,
+            label: 'Recruiting',
         },
         {
             to: '/director/events',

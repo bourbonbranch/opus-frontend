@@ -16,6 +16,7 @@ import Tickets from './pages/Tickets';
 import CreateEvent from './pages/CreateEvent';
 import SeatingChart from './pages/SeatingChart';
 import EnsembleDetail from './pages/EnsembleDetail';
+import Recruiting from './pages/Recruiting';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -65,6 +66,7 @@ const App = () => {
             <Route path="today" element={<TodayDashboard />} />
             <Route path="rooms" element={<RoomSetup />} />
             <Route path="roster" element={<Roster />} />
+            <Route path="recruiting" element={<Recruiting />} />
             <Route path="events" element={<Events />} />
             <Route path="calendar" element={<CalendarView />} />
             <Route path="messages" element={<Messages />} />
