@@ -10,11 +10,13 @@ import {
     rectIntersection
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
-import { Users, Settings, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Users, Settings, ChevronRight, ChevronLeft, Wand2 } from 'lucide-react';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
+import AutoSeatingModal from '../components/seating/AutoSeatingModal';
 import { getEnsembles, getRoster } from '../lib/opusApi';
+import { generateAutoSeating } from '../utils/autoSeating';
 
 // Custom collision detection algorithm
 const customCollisionDetection = (args) => {
@@ -50,6 +52,7 @@ export default function SeatingChart() {
     const [globalModuleWidth, setGlobalModuleWidth] = useState(4); // feet
     const [globalTreadDepth, setGlobalTreadDepth] = useState(24); // inches
     const [isCurved, setIsCurved] = useState(true);
+    const [isAutoSeatingModalOpen, setIsAutoSeatingModalOpen] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -122,6 +125,22 @@ export default function SeatingChart() {
             case 'Bass': return 'bg-green-500';
             default: return 'bg-gray-500';
         }
+    };
+
+    const handleAutoPopulate = (layoutType) => {
+        const placements = generateAutoSeating(
+            students,
+            placedStudents,
+            riserSections,
+            globalRows,
+            globalModuleWidth,
+            layoutType
+        );
+
+        // Apply placements to state (same format as manual drag-drop)
+        setPlacedStudents(prev => [...prev, ...placements]);
+
+        console.log(`Auto-populated ${placements.length} students using ${layoutType} layout`);
     };
 
     const handleDragStart = (event) => {
@@ -330,6 +349,13 @@ export default function SeatingChart() {
 
                         <div className="flex items-center gap-2 md:gap-3 shrink-0">
                             <button
+                                onClick={() => setIsAutoSeatingModalOpen(true)}
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-green-500/20"
+                            >
+                                <Wand2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Auto-Populate</span>
+                            </button>
+                            <button
                                 onClick={() => setIsConfigOpen(!isConfigOpen)}
                                 className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-colors text-sm font-medium min-h-[44px] ${isConfigOpen ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}
                             >
@@ -418,6 +444,13 @@ export default function SeatingChart() {
                         </div>
                     ) : null}
                 </DragOverlay>
+
+                {/* Auto-Seating Modal */}
+                <AutoSeatingModal
+                    isOpen={isAutoSeatingModalOpen}
+                    onClose={() => setIsAutoSeatingModalOpen(false)}
+                    onSelectLayout={handleAutoPopulate}
+                />
             </DndContext >
         </div >
     );
