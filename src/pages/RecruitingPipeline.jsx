@@ -311,10 +311,7 @@ export default function RecruitingPipeline() {
                     </DragOverlay>
                 </DndContext>
 
-                {/* Debug Info (Hidden in production usually, but helpful now) */}
-                <div className="fixed bottom-2 right-2 text-xs text-white/20 font-mono pointer-events-none">
-                    Stages: {pipeline.stages?.length || 0} | Dir: {directorId}
-                </div>
+
             </div>
         </div>
     );
