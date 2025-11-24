@@ -75,6 +75,13 @@ export default function Recruiting() {
                             <span className="hidden sm:inline">Analytics</span>
                         </button>
                         <button
+                            onClick={() => navigate('/director/recruiting/import')}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                        >
+                            <Upload className="w-4 h-4" />
+                            <span className="hidden sm:inline">Import CSV</span>
+                        </button>
+                        <button
                             onClick={() => navigate('/director/recruiting/qr-code')}
                             className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                         >
@@ -83,7 +90,7 @@ export default function Recruiting() {
                         </button>
                         <button
                             onClick={() => navigate('/director/recruiting/pipeline')}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
                         >
                             <Filter className="w-4 h-4" />
                             <span className="hidden sm:inline">Pipeline</span>
