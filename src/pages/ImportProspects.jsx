@@ -10,11 +10,11 @@ export default function ImportProspects() {
 
     let directorId = localStorage.getItem('directorId');
 
-    // Fallback: if no directorId, try to set it to 1 (for testing)
+    // Fallback: if no directorId, use ID 66 (jccook103@gmail.com)
     if (!directorId || directorId === 'null' || directorId === 'undefined') {
-        console.warn('No directorId found in localStorage, using fallback ID 1');
-        directorId = '1';
-        localStorage.setItem('directorId', '1');
+        console.warn('No directorId found in localStorage, using fallback ID 66');
+        directorId = '66';
+        localStorage.setItem('directorId', '66');
     }
 
     // Fallback API URL if environment variable is not set
