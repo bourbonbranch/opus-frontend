@@ -8,7 +8,14 @@ export default function ImportProspects() {
     const [importing, setImporting] = useState(false);
     const [results, setResults] = useState(null);
 
-    const directorId = localStorage.getItem('directorId');
+    let directorId = localStorage.getItem('directorId');
+
+    // Fallback: if no directorId, try to set it to 1 (for testing)
+    if (!directorId || directorId === 'null' || directorId === 'undefined') {
+        console.warn('No directorId found in localStorage, using fallback ID 1');
+        directorId = '1';
+        localStorage.setItem('directorId', '1');
+    }
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
