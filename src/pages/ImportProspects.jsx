@@ -52,6 +52,9 @@ export default function ImportProspects() {
             const text = await file.text();
             const prospects = parseCSV(text);
 
+            console.log('Parsed prospects:', prospects);
+            console.log('Director ID:', directorId);
+
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/recruiting/prospects/bulk-import`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -61,11 +64,16 @@ export default function ImportProspects() {
                 })
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
             setResults(data);
         } catch (err) {
             console.error('Error importing CSV:', err);
-            alert('Failed to import CSV');
+            alert(`Failed to import CSV: ${err.message}`);
         } finally {
             setImporting(false);
         }
