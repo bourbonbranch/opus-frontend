@@ -13,7 +13,7 @@ function ProspectCard({ prospect, isDragging }) {
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: `prospect - ${prospect.id} ` });
+    } = useSortable({ id: `prospect-${prospect.id}` });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -34,7 +34,7 @@ function ProspectCard({ prospect, isDragging }) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg - gray - 800 / 50 backdrop - blur - xl rounded - lg border border - white / 10 p - 4 mb - 3 cursor - move hover: border - purple - 500 / 50 transition - all ${getInterestColor(prospect.interest_level)} `}
+            className={`bg-gray-800 rounded-lg border border-white/10 p-4 mb-3 cursor-move hover:border-purple-500/50 transition-all ${getInterestColor(prospect.interest_level)}`}
             {...attributes}
             {...listeners}
         >
@@ -71,36 +71,38 @@ function ProspectCard({ prospect, isDragging }) {
 
 function PipelineStage({ stage, prospects }) {
     const { setNodeRef, isOver } = useDroppable({
-        id: `stage - ${stage.id} `,
+        id: `stage-${stage.id}`,
     });
 
-    const prospectIds = prospects.map(p => `prospect - ${p.id} `);
+    const prospectIds = prospects.map(p => `prospect-${p.id}`);
 
     return (
-        <div className="flex-1 min-w-[280px]">
+        <div className="flex-1 min-w-[320px] h-full">
             <div
                 ref={setNodeRef}
-                className={`rounded - lg border - 2 p - 4 h - full transition - colors ${isOver ? 'bg-white/10 border-purple-500' : ''
-                    } `}
+                className={`rounded-lg border-2 p-4 h-full flex flex-col transition-colors ${isOver ? 'bg-white/10 border-purple-500' : ''
+                    }`}
                 style={{
                     borderColor: isOver ? undefined : stage.color,
-                    backgroundColor: isOver ? undefined : `${stage.color} 10`
+                    backgroundColor: isOver ? undefined : `${stage.color}10`
                 }}
             >
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 flex-shrink-0">
                     <h2 className="text-white font-semibold">{stage.name}</h2>
                     <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white">
                         {prospects.length}
                     </span>
                 </div>
 
-                <SortableContext items={prospectIds} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-2 min-h-[200px]">
-                        {prospects.map((prospect) => (
-                            <ProspectCard key={prospect.id} prospect={prospect} />
-                        ))}
-                    </div>
-                </SortableContext>
+                <div className="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+                    <SortableContext items={prospectIds} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-2 pb-2">
+                            {prospects.map((prospect) => (
+                                <ProspectCard key={prospect.id} prospect={prospect} />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </div>
             </div>
         </div>
     );
@@ -265,10 +267,10 @@ export default function RecruitingPipeline() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6 overflow-hidden">
+            <div className="max-w-7xl mx-auto h-full flex flex-col">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-4 mb-8 flex-shrink-0">
                     <button
                         onClick={() => navigate('/director/recruiting')}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -289,7 +291,7 @@ export default function RecruitingPipeline() {
                     onDragOver={handleDragOver}
                     onDragEnd={handleDragEnd}
                 >
-                    <div className="flex gap-4 overflow-x-auto pb-4">
+                    <div className="flex gap-4 overflow-x-auto pb-4 h-[calc(100vh-180px)]">
                         {pipeline.stages?.map((stage) => (
                             <PipelineStage
                                 key={stage.id}
@@ -316,3 +318,4 @@ export default function RecruitingPipeline() {
         </div>
     );
 }
+```
