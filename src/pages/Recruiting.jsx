@@ -40,11 +40,20 @@ export default function Recruiting() {
             }
 
             const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+            console.log('🔍 Fetching prospects...');
+            console.log('📍 API URL:', API_URL);
+            console.log('👤 Director ID:', directorId);
+            console.log('🔗 Params:', params.toString());
+
             const response = await fetch(`${API_URL}/api/recruiting/prospects?${params}`);
             const data = await response.json();
+
+            console.log('📦 API Response:', data);
+            console.log('🔢 Prospects count:', data.prospects?.length);
+
             setProspects(data.prospects || []);
         } catch (err) {
-            console.error('Error loading prospects:', err);
+            console.error('❌ Error loading prospects:', err);
         } finally {
             setLoading(false);
         }
