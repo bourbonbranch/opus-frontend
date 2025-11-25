@@ -43,10 +43,10 @@ export default function CreateCampaign() {
         try {
             const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
 
-            // Convert dollars to cents
+            // Convert dollars to cents and ensure proper types
             const payload = {
-                director_id: directorId,
-                ensemble_id: formData.ensemble_id,
+                director_id: parseInt(directorId),
+                ensemble_id: formData.ensemble_id ? parseInt(formData.ensemble_id) : null,
                 name: formData.name,
                 description: formData.description,
                 goal_amount_cents: Math.round(parseFloat(formData.goal_amount) * 100),
@@ -55,19 +55,27 @@ export default function CreateCampaign() {
                 ends_at: formData.ends_at ? new Date(formData.ends_at).toISOString() : null
             };
 
+            console.log('Creating campaign with payload:', payload);
+
             const response = await fetch(`${API_URL}/api/campaigns`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error('Failed to create campaign');
+            const responseText = await response.text();
+            console.log('Response status:', response.status);
+            console.log('Response body:', responseText);
 
-            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(`Failed to create campaign: ${responseText}`);
+            }
+
+            const data = JSON.parse(responseText);
             navigate(`/director/fundraising/${data.id}`);
         } catch (err) {
             console.error('Error creating campaign:', err);
-            setError('Failed to create campaign. Please try again.');
+            setError(err.message || 'Failed to create campaign. Please try again.');
         } finally {
             setLoading(false);
         }
