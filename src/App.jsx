@@ -23,6 +23,11 @@ import RecruitingQRCode from './pages/RecruitingQRCode';
 import RecruitingAnalytics from './pages/RecruitingAnalytics';
 import ProspectDetail from './pages/ProspectDetail';
 import ImportProspects from './pages/ImportProspects';
+import FundraisingDashboard from './pages/FundraisingDashboard';
+import CreateCampaign from './pages/CreateCampaign';
+import CampaignDetail from './pages/CampaignDetail';
+import PublicDonationPage from './pages/PublicDonationPage';
+import StudentFundraising from './pages/StudentFundraising';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -66,6 +71,8 @@ const App = () => {
           <Route path="/rooms/:roomId/live" element={<LiveAttendance />} />
           <Route path="/add-ensemble" element={<AddEnsemble />} />
           <Route path="/ensembles/new" element={<AddEnsemble />} />
+          <Route path="/fundraising/:campaignSlug/:token" element={<PublicDonationPage />} />
+          <Route path="/student/fundraising" element={<StudentFundraising />} />
 
           <Route path="/director" element={<DashboardLayout />}>
             <Route index element={<Navigate to="/director/today" replace />} />
@@ -79,6 +86,11 @@ const App = () => {
             <Route path="recruiting/qr-code" element={<RecruitingQRCode />} />
             <Route path="recruiting/analytics" element={<RecruitingAnalytics />} />
             <Route path="recruiting/:id" element={<ProspectDetail />} />
+
+            <Route path="fundraising" element={<FundraisingDashboard />} />
+            <Route path="fundraising/new" element={<CreateCampaign />} />
+            <Route path="fundraising/:id" element={<CampaignDetail />} />
+
             <Route path="events" element={<Events />} />
             <Route path="calendar" element={<CalendarView />} />
             <Route path="messages" element={<Messages />} />
