@@ -55,7 +55,10 @@ export default function CreateCampaign() {
                 ends_at: formData.ends_at ? new Date(formData.ends_at).toISOString() : null
             };
 
+            console.log('=== CreateCampaign v2.0 - 2025-11-24 ===');
             console.log('Creating campaign with payload:', payload);
+            console.log('Raw form data:', formData);
+            console.log('Ensembles loaded:', ensembles);
 
             const response = await fetch(`${API_URL}/api/campaigns`, {
                 method: 'POST',
