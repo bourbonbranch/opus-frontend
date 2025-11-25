@@ -88,7 +88,6 @@ const App = () => {
             <Route index element={<Navigate to="/director/today" replace />} />
             <Route path="today" element={<TodayDashboard />} />
             <Route path="rooms" element={<RoomSetup />} />
-            <Route path="roster" element={<Roster />} />
             <Route path="recruiting" element={<Recruiting />} />
             <Route path="recruiting/pipeline" element={<RecruitingPipeline />} />
             <Route path="recruiting/new" element={<AddProspect />} />

@@ -55,11 +55,6 @@ export function DashboardLayout() {
             label: 'Rooms',
         },
         {
-            to: '/director/roster',
-            icon: UsersIcon,
-            label: 'Roster',
-        },
-        {
             to: '/director/ensembles',
             icon: UsersIcon,
             label: 'Ensembles',
