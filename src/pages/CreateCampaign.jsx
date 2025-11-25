@@ -18,7 +18,15 @@ export default function CreateCampaign() {
         ends_at: ''
     });
 
-    const directorId = localStorage.getItem('directorId');
+    let directorId = localStorage.getItem('directorId');
+
+    // Fallback: if no directorId or invalid, use ID 64 (jacobclaudecochran@gmail.com)
+    if (!directorId || directorId === 'null' || directorId === 'undefined' || directorId === '1') {
+        console.warn('Invalid directorId found in localStorage, correcting to ID 64');
+        directorId = '64';
+        localStorage.setItem('directorId', '64');
+    }
+
 
     useEffect(() => {
         loadEnsembles();
