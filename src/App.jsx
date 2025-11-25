@@ -28,6 +28,16 @@ import CreateCampaign from './pages/CreateCampaign';
 import CampaignDetail from './pages/CampaignDetail';
 import PublicDonationPage from './pages/PublicDonationPage';
 import StudentFundraising from './pages/StudentFundraising';
+import EnsemblesList from './pages/EnsemblesList';
+import EnsembleDetailLayout from './pages/EnsembleDetail';
+import EnsembleOverview from './pages/ensemble/Overview';
+import EnsembleRoster from './pages/ensemble/Roster';
+import EnsembleAttendance from './pages/ensemble/Attendance';
+import EnsembleAssignments from './pages/ensemble/Assignments';
+import EnsembleLibrary from './pages/ensemble/Library';
+import EnsembleMessages from './pages/ensemble/Messages';
+import EnsembleEvents from './pages/ensemble/Events';
+import EnsembleSettings from './pages/ensemble/Settings';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -96,8 +106,20 @@ const App = () => {
             <Route path="messages" element={<Messages />} />
             <Route path="tickets" element={<Tickets />} />
             <Route path="tickets/events/new" element={<CreateEvent />} />
-            <Route path="ensembles/:ensembleId/roster" element={<Roster />} />
-            <Route path="ensembles/:ensembleId" element={<EnsembleDetail />} />
+
+            {/* Ensembles Routes */}
+            <Route path="ensembles" element={<EnsemblesList />} />
+            <Route path="ensembles/:id" element={<EnsembleDetailLayout />}>
+              <Route index element={<EnsembleOverview />} />
+              <Route path="roster" element={<EnsembleRoster />} />
+              <Route path="attendance" element={<EnsembleAttendance />} />
+              <Route path="assignments" element={<EnsembleAssignments />} />
+              <Route path="library" element={<EnsembleLibrary />} />
+              <Route path="messages" element={<EnsembleMessages />} />
+              <Route path="events" element={<EnsembleEvents />} />
+              <Route path="settings" element={<EnsembleSettings />} />
+            </Route>
+
             <Route path="seating" element={<SeatingChart />} />
           </Route>
 

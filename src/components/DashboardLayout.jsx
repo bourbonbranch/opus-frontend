@@ -60,6 +60,11 @@ export function DashboardLayout() {
             label: 'Roster',
         },
         {
+            to: '/director/ensembles',
+            icon: UsersIcon,
+            label: 'Ensembles',
+        },
+        {
             to: '/director/recruiting',
             icon: UserPlusIcon,
             label: 'Recruiting',
