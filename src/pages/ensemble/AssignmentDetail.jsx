@@ -70,7 +70,7 @@ export default function AssignmentDetail() {
         return (
             <div className="text-center py-12">
                 <p className="text-gray-400">Assignment not found</p>
-                <button
+                <button 
                     onClick={() => navigate(`/ director / ensembles / ${ id }/assignments`)}
 className = "mt-4 text-purple-400 hover:text-purple-300"
     >
