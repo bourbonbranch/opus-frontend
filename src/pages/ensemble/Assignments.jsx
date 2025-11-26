@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Filter, Calendar, List, Clock, CheckCircle, Users } from 'lucide-react';
-import { getAssignments } from '../../lib/opusApi';
+import { getAssignments, createAssignment } from '../../lib/opusApi';
+import NewAssignmentModal from '../../components/assignments/NewAssignmentModal';
 
 export default function Assignments() {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Filters
     const [statusFilter, setStatusFilter] = useState('all');
@@ -41,6 +43,17 @@ export default function Assignments() {
             if (value !== 'all') filters.type = value;
         }
         loadAssignments(selectedEnsembleId, filters);
+    };
+
+    const handleCreateAssignment = async (assignmentData) => {
+        try {
+            await createAssignment(assignmentData);
+            await loadAssignments(selectedEnsembleId);
+            alert('Assignment created successfully!');
+        } catch (err) {
+            console.error('Failed to create assignment:', err);
+            alert('Failed to create assignment. Please try again.');
+        }
     };
 
     const getStatusColor = (status) => {
@@ -85,7 +98,10 @@ export default function Assignments() {
                         <h1 className="text-3xl font-bold">Assignments</h1>
                         <p className="text-gray-400 mt-1">Manage and track student assignments</p>
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg shadow-purple-500/20">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg shadow-purple-500/20"
+                    >
                         <Plus className="w-5 h-5" />
                         New Assignment
                     </button>
@@ -157,7 +173,10 @@ export default function Assignments() {
                         </div>
                         <h3 className="text-xl font-semibold mb-2">No assignments yet</h3>
                         <p className="text-gray-400 mb-6">Create your first assignment to get started</p>
-                        <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all"
+                        >
                             Create Assignment
                         </button>
                     </div>
@@ -220,6 +239,14 @@ export default function Assignments() {
                     </div>
                 )}
             </div>
+
+            {/* New Assignment Modal */}
+            <NewAssignmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleCreateAssignment}
+                ensembleId={selectedEnsembleId}
+            />
         </div>
     );
 }
