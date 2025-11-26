@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Filter, Calendar, List, Clock, CheckCircle, Users } from 'lucide-react';
 import { getAssignments, createAssignment } from '../../lib/opusApi';
 import NewAssignmentModal from '../../components/assignments/NewAssignmentModal';
 
 export default function Assignments() {
+    const navigate = useNavigate();
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
@@ -195,7 +197,11 @@ export default function Assignments() {
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {assignments.map((assignment) => (
-                                    <tr key={assignment.id} className="hover:bg-white/5 cursor-pointer transition-colors">
+                                    <tr
+                                        key={assignment.id}
+                                        onClick={() => navigate(`${assignment.id}`)}
+                                        className="hover:bg-white/5 cursor-pointer transition-colors"
+                                    >
                                         <td className="px-6 py-4">
                                             <div className="font-medium">{assignment.title}</div>
                                             {assignment.measures_text && (

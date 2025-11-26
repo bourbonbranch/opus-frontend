@@ -34,6 +34,7 @@ import EnsembleOverview from './pages/ensemble/Overview';
 import EnsembleRoster from './pages/ensemble/Roster';
 import EnsembleAttendance from './pages/ensemble/Attendance';
 import EnsembleAssignments from './pages/ensemble/Assignments';
+import AssignmentDetail from './pages/ensemble/AssignmentDetail';
 import EnsembleLibrary from './pages/ensemble/Library';
 import EnsembleMessages from './pages/ensemble/Messages';
 import EnsembleEvents from './pages/ensemble/Events';
@@ -113,6 +114,7 @@ const App = () => {
               <Route path="attendance" element={<EnsembleAttendance />} />
               <Route path="rooms" element={<EnsembleRooms />} />
               <Route path="assignments" element={<EnsembleAssignments />} />
+              <Route path="assignments/:assignmentId" element={<AssignmentDetail />} />
               <Route path="library" element={<EnsembleLibrary />} />
               <Route path="messages" element={<EnsembleMessages />} />
               <Route path="events" element={<EnsembleEvents />} />
