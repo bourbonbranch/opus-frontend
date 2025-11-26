@@ -151,9 +151,11 @@ export default function SeatingCanvas({
             initialScale={1}
             minScale={0.5}
             maxScale={3}
-            centerOnInit={true}
+            centerOnInit={false}
             wheel={{ step: 0.1 }}
             panning={{ disabled: isDragging }}
+            initialPositionX={0}
+            initialPositionY={0}
         >
             <TransformComponent wrapperClass="w-full h-full" contentClass="w-full h-full">
                 <div className="relative w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
