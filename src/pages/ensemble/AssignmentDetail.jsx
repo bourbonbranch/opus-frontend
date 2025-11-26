@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, Clock, FileText, CheckCircle,
-    Users, Download, Play, MessageSquare, MoreVertical
+    Users, Download, Play, MessageSquare, MoreVertical, AlertCircle
 } from 'lucide-react';
-import { getAssignment, updateSubmission } from '../../lib/opusApi';
+import { getAssignment, updateSubmission, deleteAssignment } from '../../lib/opusApi';
 import SubmissionDrawer from '../../components/assignments/SubmissionDrawer';
 
 export default function AssignmentDetail() {
@@ -277,3 +277,4 @@ return (
     </div>
 );
 }
+```
