@@ -38,6 +38,7 @@ import EnsembleLibrary from './pages/ensemble/Library';
 import EnsembleMessages from './pages/ensemble/Messages';
 import EnsembleEvents from './pages/ensemble/Events';
 import EnsembleSettings from './pages/ensemble/Settings';
+import EnsembleRooms from './pages/ensemble/Rooms';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -112,6 +113,7 @@ const App = () => {
               <Route index element={<EnsembleOverview />} />
               <Route path="roster" element={<EnsembleRoster />} />
               <Route path="attendance" element={<EnsembleAttendance />} />
+              <Route path="rooms" element={<EnsembleRooms />} />
               <Route path="assignments" element={<EnsembleAssignments />} />
               <Route path="library" element={<EnsembleLibrary />} />
               <Route path="messages" element={<EnsembleMessages />} />

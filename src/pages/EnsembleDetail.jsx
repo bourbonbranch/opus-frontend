@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Users, Calendar, FileText, Library, MessageSquare, CalendarDays, Settings } from 'lucide-react';
+import { ArrowLeft, Home, Users, Calendar, MapPin, FileText, Library, MessageSquare, CalendarDays, Settings } from 'lucide-react';
 
 export default function EnsembleDetail() {
     const { id } = useParams();
@@ -29,6 +29,7 @@ export default function EnsembleDetail() {
         { path: '', label: 'Overview', icon: Home },
         { path: 'roster', label: 'Roster', icon: Users },
         { path: 'attendance', label: 'Attendance', icon: Calendar },
+        { path: 'rooms', label: 'Rooms', icon: MapPin },
         { path: 'assignments', label: 'Assignments', icon: FileText },
         { path: 'library', label: 'Library', icon: Library },
         { path: 'messages', label: 'Messages', icon: MessageSquare },
