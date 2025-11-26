@@ -57,7 +57,7 @@ export default function Assignments() {
             alert('Assignment created successfully!');
         } catch (err) {
             console.error('Failed to create assignment:', err);
-            alert('Failed to create assignment. Please try again.');
+            alert(`Failed to create assignment: ${err.message}`);
         }
     };
 

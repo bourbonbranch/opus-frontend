@@ -25,8 +25,14 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
 
         // Get director ID safely
         const directorId = localStorage.getItem('directorId');
+
         if (!directorId) {
             alert('Session expired. Please log in again.');
+            return;
+        }
+
+        if (!ensembleId) {
+            alert('Error: No ensemble selected. Please refresh the page.');
             return;
         }
 
