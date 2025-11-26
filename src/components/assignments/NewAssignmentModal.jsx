@@ -23,6 +23,13 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
         // Combine date and time
         const dueAt = new Date(`${formData.due_date}T${formData.due_time}`);
 
+        // Get director ID safely
+        const directorId = localStorage.getItem('directorId');
+        if (!directorId) {
+            alert('Session expired. Please log in again.');
+            return;
+        }
+
         const assignmentData = {
             ensemble_id: ensembleId,
             title: formData.title,
@@ -32,7 +39,7 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
             status: 'active',
             submission_required: formData.submission_required,
             grading_type: formData.grading_type,
-            created_by: parseInt(localStorage.getItem('directorId') || '64'),
+            created_by: parseInt(directorId),
             targets: [{
                 target_type: formData.target_type,
                 target_value: formData.target_value || null,

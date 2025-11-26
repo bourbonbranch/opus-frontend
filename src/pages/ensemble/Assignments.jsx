@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Filter, Calendar, List, Clock, CheckCircle, Users } from 'lucide-react';
 import { getAssignments, createAssignment } from '../../lib/opusApi';
 import NewAssignmentModal from '../../components/assignments/NewAssignmentModal';
 
 export default function Assignments() {
     const navigate = useNavigate();
+    const { id } = useParams(); // Get ensemble ID from URL
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedEnsembleId, setSelectedEnsembleId] = useState(null);
+    const [selectedEnsembleId, setSelectedEnsembleId] = useState(id || null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Filters
@@ -17,11 +18,13 @@ export default function Assignments() {
     const [viewMode, setViewMode] = useState('list');
 
     useEffect(() => {
-        // Get ensemble ID from URL or localStorage
-        const ensembleId = localStorage.getItem('selectedEnsembleId') || 1;
-        setSelectedEnsembleId(ensembleId);
-        loadAssignments(ensembleId);
-    }, []);
+        // Use ID from URL if available, otherwise fallback (though URL should always have it in this route)
+        const ensembleId = id || localStorage.getItem('selectedEnsembleId');
+        if (ensembleId) {
+            setSelectedEnsembleId(ensembleId);
+            loadAssignments(ensembleId);
+        }
+    }, [id]);
 
     const loadAssignments = async (ensembleId, filters = {}) => {
         try {
