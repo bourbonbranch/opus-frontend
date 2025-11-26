@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import {
     CalendarIcon,
@@ -9,9 +10,12 @@ import {
     DownloadIcon,
     LinkIcon,
     TrashIcon,
-    XIcon
+    XIcon,
+    ClockIcon,
+    MapPinIcon,
+    RepeatIcon
 } from 'lucide-react';
-import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem, getTicketEvents } from '../lib/opusApi';
+import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem, getTicketEvents, createEvent, deleteEvent, getRooms } from '../lib/opusApi';
 
 export function CalendarView() {
     const [ensembles, setEnsembles] = useState([]);
@@ -19,8 +23,10 @@ export function CalendarView() {
     const [events, setEvents] = useState([]);
     const [ticketEvents, setTicketEvents] = useState([]);
     const [calendarItems, setCalendarItems] = useState([]);
+    const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
+    const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
     const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
     const [newItem, setNewItem] = useState({
         title: '',
@@ -29,11 +35,24 @@ export function CalendarView() {
         description: '',
         color: '#8b5cf6',
     });
+    const [newEvent, setNewEvent] = useState({
+        name: '',
+        type: 'rehearsal',
+        room_id: '',
+        start_time: '',
+        end_time: '',
+        description: '',
+        is_recurring: false,
+        recurrence_pattern: 'weekly',
+        recurrence_days: [],
+        recurrence_end_date: '',
+    });
     const [creating, setCreating] = useState(false);
     const calendarRef = useRef(null);
 
     useEffect(() => {
         loadEnsembles();
+        loadRooms();
     }, []);
 
     useEffect(() => {
@@ -56,6 +75,15 @@ export function CalendarView() {
         }
     };
 
+    const loadRooms = async () => {
+        try {
+            const data = await getRooms();
+            setRooms(data || []);
+        } catch (err) {
+            console.error('Failed to load rooms', err);
+        }
+    };
+
     const loadCalendarData = async () => {
         if (!selectedEnsembleId) return;
         try {
@@ -69,6 +97,100 @@ export function CalendarView() {
             setCalendarItems(calendarItemsData || []);
         } catch (err) {
             console.error('Failed to load calendar data', err);
+        }
+    };
+
+    const generateRecurringEvents = () => {
+        const events = [];
+        const startDate = new Date(newEvent.start_time);
+        const endDate = new Date(newEvent.end_time);
+        const recurEndDate = new Date(newEvent.recurrence_end_date);
+
+        const duration = endDate - startDate;
+
+        let currentDate = new Date(startDate);
+
+        while (currentDate <= recurEndDate) {
+            const dayOfWeek = currentDate.getDay();
+
+            if (newEvent.recurrence_pattern === 'daily' ||
+                (newEvent.recurrence_pattern === 'weekly' && newEvent.recurrence_days.includes(dayOfWeek))) {
+
+                const eventStart = new Date(currentDate);
+                const eventEnd = new Date(currentDate.getTime() + duration);
+
+                events.push({
+                    ensemble_id: selectedEnsembleId,
+                    room_id: newEvent.room_id || null,
+                    name: newEvent.name,
+                    type: newEvent.type,
+                    start_time: eventStart.toISOString(),
+                    end_time: eventEnd.toISOString(),
+                    description: newEvent.description,
+                });
+            }
+
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return events;
+    };
+
+    const handleAddEvent = async (e) => {
+        e.preventDefault();
+        setCreating(true);
+        try {
+            if (newEvent.is_recurring) {
+                const recurringEvents = generateRecurringEvents();
+
+                if (recurringEvents.length === 0) {
+                    alert('No events match your recurrence pattern. Please check your settings.');
+                    setCreating(false);
+                    return;
+                }
+
+                if (recurringEvents.length > 100) {
+                    if (!confirm(`This will create ${recurringEvents.length} events. Continue?`)) {
+                        setCreating(false);
+                        return;
+                    }
+                }
+
+                for (const event of recurringEvents) {
+                    await createEvent(event);
+                }
+
+                alert(`Successfully created ${recurringEvents.length} recurring events!`);
+            } else {
+                await createEvent({
+                    ensemble_id: selectedEnsembleId,
+                    room_id: newEvent.room_id || null,
+                    name: newEvent.name,
+                    type: newEvent.type,
+                    start_time: newEvent.start_time,
+                    end_time: newEvent.end_time,
+                    description: newEvent.description,
+                });
+            }
+
+            setNewEvent({
+                name: '',
+                type: 'rehearsal',
+                room_id: '',
+                start_time: '',
+                end_time: '',
+                description: '',
+                is_recurring: false,
+                recurrence_pattern: 'weekly',
+                recurrence_days: [],
+                recurrence_end_date: '',
+            });
+            setIsAddEventModalOpen(false);
+            loadCalendarData();
+        } catch (err) {
+            alert('Failed to create event: ' + err.message);
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -112,6 +234,16 @@ export function CalendarView() {
         }
     };
 
+    const handleDeleteEvent = async (eventId) => {
+        if (!confirm('Are you sure you want to delete this event?')) return;
+        try {
+            await deleteEvent(eventId);
+            loadCalendarData();
+        } catch (err) {
+            alert('Failed to delete event: ' + err.message);
+        }
+    };
+
     const handleDateClick = (arg) => {
         setNewItem({
             ...newItem,
@@ -126,13 +258,31 @@ export function CalendarView() {
             if (confirm(`Delete "${event.title}"?`)) {
                 handleDeleteItem(event.extendedProps.itemId);
             }
+        } else if (event.extendedProps.isEvent) {
+            if (confirm(`Delete "${event.title}"?`)) {
+                handleDeleteEvent(event.extendedProps.eventId);
+            }
+        }
+    };
+
+    const toggleRecurrenceDay = (day) => {
+        if (newEvent.recurrence_days.includes(day)) {
+            setNewEvent({
+                ...newEvent,
+                recurrence_days: newEvent.recurrence_days.filter(d => d !== day),
+            });
+        } else {
+            setNewEvent({
+                ...newEvent,
+                recurrence_days: [...newEvent.recurrence_days, day],
+            });
         }
     };
 
     const getCalendarEvents = () => {
         const allEvents = [];
 
-        // Add events from events table (Calendar Events)
+        // Add events from events table
         events.forEach(event => {
             allEvents.push({
                 id: `event-${event.id}`,
@@ -142,6 +292,8 @@ export function CalendarView() {
                 backgroundColor: getEventTypeColor(event.type),
                 borderColor: getEventTypeColor(event.type),
                 extendedProps: {
+                    isEvent: true,
+                    eventId: event.id,
                     type: event.type,
                     description: event.description,
                     room: event.room_name,
@@ -149,16 +301,12 @@ export function CalendarView() {
             });
         });
 
-        // Add ticket events (Performances)
+        // Add ticket events
         ticketEvents.forEach(event => {
             if (event.ensemble_id && event.ensemble_id !== selectedEnsembleId) return;
             if (!event.performances || !Array.isArray(event.performances)) return;
 
             event.performances.forEach(perf => {
-                // Combine date and time
-                // perf.performance_date is YYYY-MM-DD (or Date object)
-                // perf.start_time is HH:MM:SS
-
                 const dateStr = typeof perf.performance_date === 'string'
                     ? perf.performance_date.split('T')[0]
                     : new Date(perf.performance_date).toISOString().split('T')[0];
@@ -171,7 +319,7 @@ export function CalendarView() {
                     title: `🎫 ${event.title}`,
                     start: startDateTime,
                     end: endDateTime,
-                    backgroundColor: '#ec4899', // Pink for performances
+                    backgroundColor: '#ec4899',
                     borderColor: '#ec4899',
                     extendedProps: {
                         type: 'performance',
@@ -234,6 +382,8 @@ export function CalendarView() {
         alert('Outlook export coming soon! This will generate an .ics file you can import to Outlook/Microsoft 365.');
     };
 
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
     if (loading) {
         return (
             <div className="p-8 max-w-7xl mx-auto">
@@ -269,11 +419,18 @@ export function CalendarView() {
                         className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
                     >
                         <LinkIcon className="w-5 h-5" />
-                        <span>Sync Calendar</span>
+                        <span>Sync</span>
+                    </button>
+                    <button
+                        onClick={() => setIsAddEventModalOpen(true)}
+                        className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-purple-600 transition-all shadow-2xl shadow-blue-500/50 border border-white/20"
+                    >
+                        <ClockIcon className="w-5 h-5" />
+                        <span>Add Event</span>
                     </button>
                     <button
                         onClick={() => setIsAddItemModalOpen(true)}
-                        className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
+                        className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
                     >
                         <PlusIcon className="w-5 h-5" />
                         <span>Add Item</span>
@@ -305,12 +462,12 @@ export function CalendarView() {
             <div className="bg-white/10 backdrop-blur-3xl rounded-2xl border border-white/30 shadow-2xl p-6">
                 <FullCalendar
                     ref={calendarRef}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                     initialView="dayGridMonth"
                     headerToolbar={{
                         left: 'prev,next today',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
                     }}
                     events={getCalendarEvents()}
                     dateClick={handleDateClick}
@@ -323,6 +480,203 @@ export function CalendarView() {
                     }}
                 />
             </div>
+
+            {/* Add Event Modal */}
+            {isAddEventModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-900 rounded-2xl max-w-2xl w-full shadow-2xl border border-white/20 max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <h2 className="text-xl font-semibold text-white">Add Event</h2>
+                            <button
+                                onClick={() => setIsAddEventModalOpen(false)}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <XIcon className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleAddEvent} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-200 mb-2">
+                                    Event Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newEvent.name}
+                                    onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+                                    placeholder="e.g., Monday Rehearsal, Spring Concert"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Event Type *
+                                    </label>
+                                    <select
+                                        value={newEvent.type}
+                                        onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="rehearsal">Rehearsal</option>
+                                        <option value="concert">Concert</option>
+                                        <option value="performance">Performance</option>
+                                        <option value="sectional">Sectional</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Room (for attendance)
+                                    </label>
+                                    <select
+                                        value={newEvent.room_id}
+                                        onChange={(e) => setNewEvent({ ...newEvent, room_id: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="">No room</option>
+                                        {rooms.map((room) => (
+                                            <option key={room.id} value={room.id}>
+                                                {room.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Start Time *
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        value={newEvent.start_time}
+                                        onChange={(e) => setNewEvent({ ...newEvent, start_time: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        End Time *
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        value={newEvent.end_time}
+                                        onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Recurring Event Section */}
+                            <div className="border-t border-white/10 pt-4">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={newEvent.is_recurring}
+                                        onChange={(e) => setNewEvent({ ...newEvent, is_recurring: e.target.checked })}
+                                        className="w-5 h-5 rounded bg-white/5 border-white/10 text-purple-500 focus:ring-2 focus:ring-purple-500"
+                                    />
+                                    <div className="flex items-center gap-2">
+                                        <RepeatIcon className="w-5 h-5 text-purple-300" />
+                                        <span className="text-sm font-medium text-white">Recurring Event</span>
+                                    </div>
+                                </label>
+
+                                {newEvent.is_recurring && (
+                                    <div className="mt-4 space-y-4 p-4 bg-white/5 rounded-lg border border-white/10">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                Repeat Pattern
+                                            </label>
+                                            <select
+                                                value={newEvent.recurrence_pattern}
+                                                onChange={(e) => setNewEvent({ ...newEvent, recurrence_pattern: e.target.value })}
+                                                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            >
+                                                <option value="daily">Every Day</option>
+                                                <option value="weekly">Specific Days of Week</option>
+                                            </select>
+                                        </div>
+
+                                        {newEvent.recurrence_pattern === 'weekly' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                    Select Days *
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    {dayNames.map((day, index) => (
+                                                        <button
+                                                            key={index}
+                                                            type="button"
+                                                            onClick={() => toggleRecurrenceDay(index)}
+                                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${newEvent.recurrence_days.includes(index)
+                                                                    ? 'bg-purple-500 text-white'
+                                                                    : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                                }`}
+                                                        >
+                                                            {day}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                Repeat Until *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={newEvent.recurrence_end_date}
+                                                onChange={(e) => setNewEvent({ ...newEvent, recurrence_end_date: e.target.value })}
+                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                required={newEvent.is_recurring}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-200 mb-2">
+                                    Description (optional)
+                                </label>
+                                <textarea
+                                    value={newEvent.description}
+                                    onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                                    placeholder="Add any notes or details about this event..."
+                                    rows={3}
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddEventModalOpen(false)}
+                                    className="flex-1 px-4 py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={creating}
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50"
+                                >
+                                    {creating ? 'Creating...' : newEvent.is_recurring ? 'Create Recurring Events' : 'Add Event'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Add Calendar Item Modal */}
             {isAddItemModalOpen && (

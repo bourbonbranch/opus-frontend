@@ -100,7 +100,6 @@ const App = () => {
             <Route path="fundraising/new" element={<CreateCampaign />} />
             <Route path="fundraising/:id" element={<CampaignDetail />} />
 
-            <Route path="events" element={<Events />} />
             <Route path="calendar" element={<CalendarView />} />
             <Route path="messages" element={<Messages />} />
             <Route path="tickets" element={<Tickets />} />

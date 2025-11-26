@@ -60,11 +60,6 @@ export function DashboardLayout() {
             label: 'Recruiting',
         },
         {
-            to: '/director/events',
-            icon: CalendarIcon,
-            label: 'Events',
-        },
-        {
             to: '/director/calendar',
             icon: CalendarIcon,
             label: 'Calendar',
