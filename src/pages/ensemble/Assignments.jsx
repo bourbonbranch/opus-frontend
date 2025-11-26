@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Filter, Calendar, List, Clock, CheckCircle, Users } from 'lucide-react';
-import { getAssignments } from '../lib/opusApi';
+import { getAssignments } from '../../lib/opusApi';
 
 export default function Assignments() {
     const [assignments, setAssignments] = useState([]);
