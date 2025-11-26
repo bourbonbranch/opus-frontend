@@ -123,18 +123,31 @@ export default function SeatingChart() {
 
     const handleSaveConfiguration = async ({ name, description }) => {
         try {
-            const directorId = localStorage.getItem('directorId');
+            // Use hardcoded director ID 64
+            const directorId = 64;
 
             // Validate that we have placed students
             if (placedStudents.length === 0) {
                 throw new Error('No students placed on seating chart');
             }
 
-            // Validate and parse student IDs
+            // Validate and parse student IDs and ensure all required fields are present
             const validPlacements = placedStudents.filter(p => {
                 const studentId = parseInt(p.studentId);
                 if (isNaN(studentId)) {
                     console.warn('Invalid student ID:', p.studentId, p);
+                    return false;
+                }
+                if (p.index === undefined || p.index === null) {
+                    console.warn('Missing position index:', p);
+                    return false;
+                }
+                if (p.sectionId === undefined || p.sectionId === null) {
+                    console.warn('Missing section ID:', p);
+                    return false;
+                }
+                if (p.row === undefined || p.row === null) {
+                    console.warn('Missing row:', p);
                     return false;
                 }
                 return true;
@@ -152,7 +165,7 @@ export default function SeatingChart() {
                 global_module_width: globalModuleWidth,
                 global_tread_depth: globalTreadDepth,
                 is_curved: isCurved,
-                created_by: parseInt(directorId),
+                created_by: directorId,
                 sections: riserSections.map(s => ({
                     section_id: s.id,
                     section_name: s.name,
@@ -167,6 +180,7 @@ export default function SeatingChart() {
             };
 
             console.log('Saving configuration:', configData);
+            console.log('Sample placement:', validPlacements[0]);
             await saveSeatingConfiguration(configData);
             await loadSavedConfigurations();
             alert('Configuration saved successfully!');
