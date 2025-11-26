@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { MusicIcon, LogInIcon } from 'lucide-react';
+import { login } from '../lib/opusApi';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -16,24 +17,21 @@ export default function Login() {
         setLoading(true);
         setError('');
 
-        // For now, just check if there's a directorId in localStorage
-        // In production, you'd call a login API endpoint
-        let directorId = localStorage.getItem('directorId');
-        let savedEmail = localStorage.getItem('directorEmail');
+        try {
+            const user = await login(formData);
 
-        // TEMPORARY FIX: If no user found or email mismatch, just log them in as ID 1
-        // This unblocks the user who is locked out
-        if (!directorId || savedEmail !== formData.email) {
-            directorId = '1';
-            savedEmail = formData.email;
-            localStorage.setItem('directorId', directorId);
-            localStorage.setItem('directorEmail', savedEmail);
-            localStorage.setItem('directorName', 'Director'); // Default name
+            // Store user info
+            localStorage.setItem('directorId', user.id);
+            localStorage.setItem('directorEmail', user.email);
+            localStorage.setItem('directorName', `${user.firstName} ${user.lastName}`);
+
+            navigate('/director/today');
+        } catch (err) {
+            console.error('Login failed:', err);
+            setError(err.message || 'Invalid email or password');
+        } finally {
+            setLoading(false);
         }
-
-        navigate('/director/today');
-
-        setLoading(false);
     };
 
     const handleChange = (e) => {
