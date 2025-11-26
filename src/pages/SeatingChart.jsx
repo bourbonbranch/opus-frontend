@@ -10,12 +10,13 @@ import {
     rectIntersection
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
-import { Users, Settings, ChevronRight, ChevronLeft, Wand2, RotateCcw } from 'lucide-react';
+import { Users, Settings, ChevronRight, ChevronLeft, Wand2, RotateCcw, SaveIcon, FolderOpenIcon } from 'lucide-react';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
 import AutoSeatingModal from '../components/seating/AutoSeatingModal';
-import { getEnsembles, getRoster } from '../lib/opusApi';
+import SaveConfigurationModal from '../components/seating/SaveConfigurationModal';
+import { getEnsembles, getRoster, saveSeatingConfiguration, getSeatingConfigurations, getSeatingConfiguration } from '../lib/opusApi';
 import { generateAutoSeating } from '../utils/autoSeating';
 
 // Custom collision detection algorithm
@@ -53,6 +54,9 @@ export default function SeatingChart() {
     const [globalTreadDepth, setGlobalTreadDepth] = useState(24); // inches
     const [isCurved, setIsCurved] = useState(true);
     const [isAutoSeatingModalOpen, setIsAutoSeatingModalOpen] = useState(false);
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [savedConfigurations, setSavedConfigurations] = useState([]);
+    const [selectedConfigId, setSelectedConfigId] = useState(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -65,6 +69,12 @@ export default function SeatingChart() {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (selectedEnsembleId) {
+            loadSavedConfigurations();
+        }
+    }, [selectedEnsembleId]);
 
     const loadData = async () => {
         try {
@@ -99,6 +109,87 @@ export default function SeatingChart() {
             setStudents(mappedStudents);
         } catch (err) {
             console.error('Failed to load roster:', err);
+        }
+    };
+
+    const loadSavedConfigurations = async () => {
+        try {
+            const configs = await getSeatingConfigurations(selectedEnsembleId);
+            setSavedConfigurations(configs || []);
+        } catch (err) {
+            console.error('Failed to load configurations:', err);
+        }
+    };
+
+    const handleSaveConfiguration = async ({ name, description }) => {
+        try {
+            const directorId = localStorage.getItem('directorId');
+            const configData = {
+                ensemble_id: selectedEnsembleId,
+                name,
+                description,
+                global_rows: globalRows,
+                global_module_width: globalModuleWidth,
+                global_tread_depth: globalTreadDepth,
+                is_curved: isCurved,
+                created_by: parseInt(directorId),
+                sections: riserSections.map(s => ({
+                    section_id: s.id,
+                    section_name: s.name,
+                    ada_row: s.adaRow
+                })),
+                placements: placedStudents.map(p => ({
+                    student_id: parseInt(p.studentId),
+                    section_id: p.sectionId,
+                    row: p.row,
+                    position_index: p.index
+                }))
+            };
+
+            await saveSeatingConfiguration(configData);
+            await loadSavedConfigurations();
+            alert('Configuration saved successfully!');
+        } catch (err) {
+            console.error('Error saving configuration:', err);
+            throw err;
+        }
+    };
+
+    const handleLoadConfiguration = async (configId) => {
+        try {
+            const config = await getSeatingConfiguration(configId);
+
+            // Update global settings
+            setGlobalRows(config.global_rows);
+            setGlobalModuleWidth(parseFloat(config.global_module_width));
+            setGlobalTreadDepth(parseFloat(config.global_tread_depth));
+            setIsCurved(config.is_curved);
+
+            // Update sections
+            setRiserSections(config.sections.map(s => ({
+                id: s.section_id,
+                name: s.section_name,
+                adaRow: s.ada_row
+            })));
+
+            // Update placements
+            const placements = config.placements.map(p => {
+                const student = students.find(s => String(s.id) === String(p.student_id));
+                return {
+                    studentId: String(p.student_id),
+                    student: student || { id: String(p.student_id), name: `${p.first_name} ${p.last_name}` },
+                    sectionId: p.section_id,
+                    row: p.row,
+                    index: p.position_index
+                };
+            });
+            setPlacedStudents(placements);
+            setSelectedConfigId(configId);
+
+            alert('Configuration loaded successfully!');
+        } catch (err) {
+            console.error('Error loading configuration:', err);
+            alert('Failed to load configuration: ' + err.message);
         }
     };
 
@@ -356,6 +447,23 @@ export default function SeatingChart() {
                                 <RotateCcw className="w-4 h-4" />
                                 <span className="hidden sm:inline">Reset</span>
                             </button>
+
+                            {/* Load Configuration Dropdown */}
+                            {savedConfigurations.length > 0 && (
+                                <select
+                                    value={selectedConfigId || ''}
+                                    onChange={(e) => e.target.value && handleLoadConfiguration(parseInt(e.target.value))}
+                                    className="px-3 md:px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm font-medium min-h-[44px] hover:bg-white/20 transition-colors cursor-pointer"
+                                >
+                                    <option value="">Load Configuration...</option>
+                                    {savedConfigurations.map(config => (
+                                        <option key={config.id} value={config.id} className="bg-gray-800">
+                                            {config.name} ({config.student_count} students)
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+
                             <button
                                 onClick={() => setIsAutoSeatingModalOpen(true)}
                                 className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-green-500/20"
@@ -370,9 +478,14 @@ export default function SeatingChart() {
                                 <Settings className="w-4 h-4" />
                                 <span className="hidden sm:inline">Configuration</span>
                             </button>
-                            <button className="px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium shadow-lg shadow-purple-500/20 min-h-[44px]">
-                                <span className="hidden sm:inline">Export</span>
-                                <span className="sm:hidden">Save</span>
+                            <button
+                                onClick={() => setIsSaveModalOpen(true)}
+                                disabled={placedStudents.length === 0}
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium shadow-lg shadow-purple-500/20 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={placedStudents.length === 0 ? "Place students before saving" : "Save configuration"}
+                            >
+                                <SaveIcon className="w-4 h-4" />
+                                <span className="hidden sm:inline">Save</span>
                             </button>
                         </div>
                     </div>
@@ -457,7 +570,19 @@ export default function SeatingChart() {
                 <AutoSeatingModal
                     isOpen={isAutoSeatingModalOpen}
                     onClose={() => setIsAutoSeatingModalOpen(false)}
-                    onSelectLayout={handleAutoPopulate}
+                    students={students}
+                    placedStudents={placedStudents}
+                    riserSections={riserSections}
+                    globalRows={globalRows}
+                    onApply={handleAutoSeatingApply}
+                />
+
+                {/* Save Configuration Modal */}
+                <SaveConfigurationModal
+                    isOpen={isSaveModalOpen}
+                    onClose={() => setIsSaveModalOpen(false)}
+                    onSave={handleSaveConfiguration}
+                    ensembleName={ensembles.find(e => e.id === selectedEnsembleId)?.name || 'Ensemble'}
                 />
             </DndContext >
         </div >

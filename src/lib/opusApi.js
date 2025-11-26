@@ -526,3 +526,49 @@ export async function deleteEnsemblePart(id) {
   });
   return handleResponse(res);
 }
+
+// ─────────────── SEATING CONFIGURATIONS ───────────────
+
+// Save new seating configuration
+export async function saveSeatingConfiguration(configData) {
+  const res = await fetch(`${API_BASE_URL}/api/seating-configurations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(configData),
+  });
+  return handleResponse(res);
+}
+
+// Get all configurations for an ensemble
+export async function getSeatingConfigurations(ensembleId) {
+  const res = await fetch(`${API_BASE_URL}/api/seating-configurations?ensemble_id=${ensembleId}`);
+  return handleResponse(res);
+}
+
+// Get specific configuration with details
+export async function getSeatingConfiguration(configId) {
+  const res = await fetch(`${API_BASE_URL}/api/seating-configurations/${configId}`);
+  return handleResponse(res);
+}
+
+// Update configuration
+export async function updateSeatingConfiguration(configId, configData) {
+  const res = await fetch(`${API_BASE_URL}/api/seating-configurations/${configId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(configData),
+  });
+  return handleResponse(res);
+}
+
+// Delete configuration
+export async function deleteSeatingConfiguration(configId) {
+  const res = await fetch(`${API_BASE_URL}/api/seating-configurations/${configId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
