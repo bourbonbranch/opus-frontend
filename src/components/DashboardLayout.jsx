@@ -50,11 +50,6 @@ export function DashboardLayout() {
             label: 'Today',
         },
         {
-            to: '/director/rooms',
-            icon: MapPinIcon,
-            label: 'Rooms',
-        },
-        {
             to: '/director/ensembles',
             icon: UsersIcon,
             label: 'Ensembles',
