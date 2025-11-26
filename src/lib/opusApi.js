@@ -572,3 +572,62 @@ export async function deleteSeatingConfiguration(configId) {
   });
   return handleResponse(res);
 }
+
+// ─────────────── ASSIGNMENTS ───────────────
+
+// Create new assignment
+export async function createAssignment(assignmentData) {
+  const res = await fetch(`${API_BASE_URL}/api/assignments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(assignmentData),
+  });
+  return handleResponse(res);
+}
+
+// Get assignments with filters
+export async function getAssignments(ensembleId, filters = {}) {
+  const params = new URLSearchParams({ ensemble_id: ensembleId, ...filters });
+  const res = await fetch(`${API_BASE_URL}/api/assignments?${params}`);
+  return handleResponse(res);
+}
+
+// Get specific assignment with details
+export async function getAssignment(assignmentId) {
+  const res = await fetch(`${API_BASE_URL}/api/assignments/${assignmentId}`);
+  return handleResponse(res);
+}
+
+// Update assignment
+export async function updateAssignment(assignmentId, assignmentData) {
+  const res = await fetch(`${API_BASE_URL}/api/assignments/${assignmentId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(assignmentData),
+  });
+  return handleResponse(res);
+}
+
+// Delete assignment
+export async function deleteAssignment(assignmentId) {
+  const res = await fetch(`${API_BASE_URL}/api/assignments/${assignmentId}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res);
+}
+
+// Update submission (for grading)
+export async function updateSubmission(submissionId, submissionData) {
+  const res = await fetch(`${API_BASE_URL}/api/assignment-submissions/${submissionId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(submissionData),
+  });
+  return handleResponse(res);
+}
