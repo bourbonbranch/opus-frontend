@@ -124,6 +124,26 @@ export default function SeatingChart() {
     const handleSaveConfiguration = async ({ name, description }) => {
         try {
             const directorId = localStorage.getItem('directorId');
+
+            // Validate that we have placed students
+            if (placedStudents.length === 0) {
+                throw new Error('No students placed on seating chart');
+            }
+
+            // Validate and parse student IDs
+            const validPlacements = placedStudents.filter(p => {
+                const studentId = parseInt(p.studentId);
+                if (isNaN(studentId)) {
+                    console.warn('Invalid student ID:', p.studentId, p);
+                    return false;
+                }
+                return true;
+            });
+
+            if (validPlacements.length === 0) {
+                throw new Error('No valid student placements found');
+            }
+
             const configData = {
                 ensemble_id: selectedEnsembleId,
                 name,
@@ -138,7 +158,7 @@ export default function SeatingChart() {
                     section_name: s.name,
                     ada_row: s.adaRow
                 })),
-                placements: placedStudents.map(p => ({
+                placements: validPlacements.map(p => ({
                     student_id: parseInt(p.studentId),
                     section_id: p.sectionId,
                     row: p.row,
@@ -146,6 +166,7 @@ export default function SeatingChart() {
                 }))
             };
 
+            console.log('Saving configuration:', configData);
             await saveSeatingConfiguration(configData);
             await loadSavedConfigurations();
             alert('Configuration saved successfully!');
