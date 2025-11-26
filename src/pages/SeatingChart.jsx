@@ -10,7 +10,7 @@ import {
     rectIntersection
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
-import { Users, Settings, ChevronRight, ChevronLeft, Wand2 } from 'lucide-react';
+import { Users, Settings, ChevronRight, ChevronLeft, Wand2, Plus, RotateCcw } from 'lucide-react';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
@@ -348,6 +348,22 @@ export default function SeatingChart() {
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                            <button
+                                onClick={handleAddSection}
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-blue-500/20"
+                                title="Add Section"
+                            >
+                                <Plus className="w-4 h-4" />
+                                <span className="hidden sm:inline">Add Section</span>
+                            </button>
+                            <button
+                                onClick={() => setPlacedStudents([])}
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-orange-500/20"
+                                title="Reset - Return all students to bank"
+                            >
+                                <RotateCcw className="w-4 h-4" />
+                                <span className="hidden sm:inline">Reset</span>
+                            </button>
                             <button
                                 onClick={() => setIsAutoSeatingModalOpen(true)}
                                 className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-green-500/20"
