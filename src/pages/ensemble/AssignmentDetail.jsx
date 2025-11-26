@@ -264,7 +264,6 @@ return (
                     </table>
                 </div>
             )}
-            )}
         </div>
 
         {/* Grading Drawer */}
@@ -277,4 +276,3 @@ return (
     </div>
 );
 }
-```
