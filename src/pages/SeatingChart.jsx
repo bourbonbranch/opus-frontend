@@ -570,11 +570,7 @@ export default function SeatingChart() {
                 <AutoSeatingModal
                     isOpen={isAutoSeatingModalOpen}
                     onClose={() => setIsAutoSeatingModalOpen(false)}
-                    students={students}
-                    placedStudents={placedStudents}
-                    riserSections={riserSections}
-                    globalRows={globalRows}
-                    onApply={handleAutoSeatingApply}
+                    onSelectLayout={handleAutoPopulate}
                 />
 
                 {/* Save Configuration Modal */}
