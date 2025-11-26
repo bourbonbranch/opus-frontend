@@ -123,13 +123,21 @@ export default function SeatingChart() {
 
     const handleSaveConfiguration = async ({ name, description }) => {
         try {
-            // Use hardcoded director ID 64
-            const directorId = 64;
+            // Get director ID from localStorage and validate
+            const directorId = localStorage.getItem('directorId');
+            if (!directorId) {
+                throw new Error('Director ID not found. Please log in again.');
+            }
+
+            const parsedDirectorId = parseInt(directorId);
+            if (isNaN(parsedDirectorId)) {
+                throw new Error('Invalid director ID. Please log in again.');
+            }
 
             console.log('=== SAVE CONFIGURATION DEBUG ===');
+            console.log('Director ID:', parsedDirectorId);
             console.log('Total placed students:', placedStudents.length);
             console.log('First placed student:', placedStudents[0]);
-            console.log('All placed students:', placedStudents);
 
             // Validate that we have placed students
             if (placedStudents.length === 0) {
@@ -157,7 +165,7 @@ export default function SeatingChart() {
                 global_module_width: globalModuleWidth,
                 global_tread_depth: globalTreadDepth,
                 is_curved: isCurved,
-                created_by: directorId,
+                created_by: parsedDirectorId,
                 sections: riserSections.map(s => ({
                     section_id: s.id,
                     section_name: s.name,
