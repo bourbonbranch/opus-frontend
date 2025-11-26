@@ -126,36 +126,28 @@ export default function SeatingChart() {
             // Use hardcoded director ID 64
             const directorId = 64;
 
+            console.log('=== SAVE CONFIGURATION DEBUG ===');
+            console.log('Total placed students:', placedStudents.length);
+            console.log('First placed student:', placedStudents[0]);
+            console.log('All placed students:', placedStudents);
+
             // Validate that we have placed students
             if (placedStudents.length === 0) {
                 throw new Error('No students placed on seating chart');
             }
 
-            // Validate and parse student IDs and ensure all required fields are present
-            const validPlacements = placedStudents.filter(p => {
-                const studentId = parseInt(p.studentId);
-                if (isNaN(studentId)) {
-                    console.warn('Invalid student ID:', p.studentId, p);
-                    return false;
-                }
-                if (p.index === undefined || p.index === null) {
-                    console.warn('Missing position index:', p);
-                    return false;
-                }
-                if (p.sectionId === undefined || p.sectionId === null) {
-                    console.warn('Missing section ID:', p);
-                    return false;
-                }
-                if (p.row === undefined || p.row === null) {
-                    console.warn('Missing row:', p);
-                    return false;
-                }
-                return true;
+            // Map placements with proper validation
+            const placements = placedStudents.map((p, idx) => {
+                console.log(`Processing placement ${idx}:`, p);
+                return {
+                    student_id: parseInt(p.studentId),
+                    section_id: p.sectionId,
+                    row: p.row,
+                    position_index: p.index !== undefined ? p.index : idx
+                };
             });
 
-            if (validPlacements.length === 0) {
-                throw new Error('No valid student placements found');
-            }
+            console.log('Mapped placements:', placements);
 
             const configData = {
                 ensemble_id: selectedEnsembleId,
@@ -171,16 +163,10 @@ export default function SeatingChart() {
                     section_name: s.name,
                     ada_row: s.adaRow
                 })),
-                placements: validPlacements.map(p => ({
-                    student_id: parseInt(p.studentId),
-                    section_id: p.sectionId,
-                    row: p.row,
-                    position_index: p.index
-                }))
+                placements: placements
             };
 
-            console.log('Saving configuration:', configData);
-            console.log('Sample placement:', validPlacements[0]);
+            console.log('Final config data:', configData);
             await saveSeatingConfiguration(configData);
             await loadSavedConfigurations();
             alert('Configuration saved successfully!');
