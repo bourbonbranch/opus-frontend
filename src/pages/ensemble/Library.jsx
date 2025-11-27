@@ -20,7 +20,7 @@ export default function EnsembleLibrary() {
 
     const loadFiles = async () => {
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://opus-backend-production.up.railway.app';
             const response = await fetch(`${API_URL}/api/ensembles/${id}/files`);
             const data = await response.json();
             setFiles(data || []);
@@ -62,7 +62,7 @@ export default function EnsembleLibrary() {
         setUploading(true);
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://opus-backend-production.up.railway.app';
             const directorId = localStorage.getItem('directorId');
 
             // Convert file to base64
