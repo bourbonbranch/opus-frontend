@@ -12,6 +12,7 @@ export default function EnsembleLibrary() {
         file_type: 'sheet_music',
     });
     const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFileToView, setSelectedFileToView] = useState(null);
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
@@ -152,7 +153,12 @@ export default function EnsembleLibrary() {
                                         <File className="w-5 h-5 text-blue-400" />
                                     )}
                                     <div>
-                                        <p className="text-white font-medium">{file.title}</p>
+                                        <button
+                                            onClick={() => setSelectedFileToView(file)}
+                                            className="text-white font-medium hover:text-blue-400 transition-colors text-left"
+                                        >
+                                            {file.title}
+                                        </button>
                                         {file.file_type && (
                                             <p className="text-white/60 text-sm uppercase">{file.file_type}</p>
                                         )}
@@ -220,7 +226,7 @@ export default function EnsembleLibrary() {
                                     </p>
                                 )}
                                 <p className="text-xs text-gray-400 mt-1">
-                                    PDF files only, max 10MB
+                                    PDF files only, max 2MB
                                 </p>
                             </div>
                             <div className="flex gap-3 pt-2">
@@ -240,6 +246,44 @@ export default function EnsembleLibrary() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* File Viewer Modal */}
+            {selectedFileToView && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-900 rounded-xl w-full max-w-5xl h-[85vh] flex flex-col border border-white/10">
+                        <div className="flex justify-between items-center p-4 border-b border-white/10">
+                            <h3 className="text-xl font-bold text-white">{selectedFileToView.title}</h3>
+                            <button
+                                onClick={() => setSelectedFileToView(null)}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                Close
+                            </button>
+                        </div>
+                        <div className="flex-1 bg-gray-800 p-1 overflow-hidden">
+                            {selectedFileToView.storage_url.startsWith('data:application/pdf') ? (
+                                <iframe
+                                    src={selectedFileToView.storage_url}
+                                    className="w-full h-full rounded-lg"
+                                    title="PDF Viewer"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                    <File className="w-16 h-16 mb-4 opacity-50" />
+                                    <p>Preview not available for this file type.</p>
+                                    <a
+                                        href={selectedFileToView.storage_url}
+                                        download={selectedFileToView.title}
+                                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    >
+                                        Download File
+                                    </a>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
