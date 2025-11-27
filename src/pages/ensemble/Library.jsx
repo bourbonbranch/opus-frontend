@@ -10,8 +10,8 @@ export default function EnsembleLibrary() {
     const [uploadData, setUploadData] = useState({
         title: '',
         file_type: 'sheet_music',
-        storage_url: '',
     });
+    const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
@@ -31,30 +31,72 @@ export default function EnsembleLibrary() {
         }
     };
 
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file type
+            if (file.type !== 'application/pdf') {
+                alert('Please select a PDF file');
+                return;
+            }
+            // Check file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+            setSelectedFile(file);
+            // Auto-fill title from filename if empty
+            if (!uploadData.title) {
+                setUploadData({ ...uploadData, title: file.name.replace('.pdf', '') });
+            }
+        }
+    };
+
     const handleUpload = async (e) => {
         e.preventDefault();
+        if (!selectedFile) {
+            alert('Please select a file');
+            return;
+        }
+
         setUploading(true);
         try {
             const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
             const directorId = localStorage.getItem('directorId');
 
-            const response = await fetch(`${API_URL}/api/ensembles/${id}/files`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...uploadData,
-                    uploaded_by: directorId,
-                }),
-            });
+            // Convert file to base64
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const base64 = reader.result;
 
-            if (!response.ok) throw new Error('Upload failed');
+                const response = await fetch(`${API_URL}/api/ensembles/${id}/files`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: uploadData.title,
+                        file_type: uploadData.file_type,
+                        storage_url: base64,
+                        file_size: selectedFile.size,
+                        uploaded_by: directorId,
+                    }),
+                });
 
-            await loadFiles();
-            setIsUploadModalOpen(false);
-            setUploadData({ title: '', file_type: 'sheet_music', storage_url: '' });
+                if (!response.ok) throw new Error('Upload failed');
+
+                await loadFiles();
+                setIsUploadModalOpen(false);
+                setUploadData({ title: '', file_type: 'sheet_music' });
+                setSelectedFile(null);
+            };
+
+            reader.onerror = () => {
+                throw new Error('Failed to read file');
+            };
+
+            reader.readAsDataURL(selectedFile);
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert('Failed to upload file');
+            alert('Failed to upload file: ' + error.message);
         } finally {
             setUploading(false);
         }
@@ -144,18 +186,22 @@ export default function EnsembleLibrary() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    File URL
+                                    PDF File
                                 </label>
                                 <input
-                                    type="url"
-                                    value={uploadData.storage_url}
-                                    onChange={(e) => setUploadData({ ...uploadData, storage_url: e.target.value })}
+                                    type="file"
+                                    accept=".pdf"
+                                    onChange={handleFileSelect}
                                     required
-                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                                    placeholder="https://..."
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:cursor-pointer hover:file:bg-purple-700"
                                 />
+                                {selectedFile && (
+                                    <p className="text-xs text-green-400 mt-2">
+                                        Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                                    </p>
+                                )}
                                 <p className="text-xs text-gray-400 mt-1">
-                                    Upload your file to Google Drive, Dropbox, or another service and paste the link here
+                                    PDF files only, max 10MB
                                 </p>
                             </div>
                             <div className="flex gap-3 pt-2">
