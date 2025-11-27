@@ -39,8 +39,6 @@ import EnsembleLibrary from './pages/ensemble/Library';
 import EnsembleMessages from './pages/ensemble/Messages';
 import EnsembleEvents from './pages/ensemble/Events';
 import EnsembleSettings from './pages/ensemble/Settings';
-import EnsembleEvents from './pages/ensemble/Events';
-import EnsembleSettings from './pages/ensemble/Settings';
 import EnsembleRooms from './pages/ensemble/Rooms';
 import Planner from './pages/Planner';
 
