@@ -39,7 +39,10 @@ import EnsembleLibrary from './pages/ensemble/Library';
 import EnsembleMessages from './pages/ensemble/Messages';
 import EnsembleEvents from './pages/ensemble/Events';
 import EnsembleSettings from './pages/ensemble/Settings';
+import EnsembleEvents from './pages/ensemble/Events';
+import EnsembleSettings from './pages/ensemble/Settings';
 import EnsembleRooms from './pages/ensemble/Rooms';
+import Planner from './pages/Planner';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -122,6 +125,7 @@ const App = () => {
             </Route>
 
             <Route path="seating" element={<SeatingChart />} />
+            <Route path="pieces/:pieceId/planner" element={<Planner />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/director/today" replace />} />

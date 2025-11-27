@@ -164,11 +164,21 @@ export default function EnsembleLibrary() {
                                         )}
                                     </div>
                                 </div>
-                                {file.created_at && (
-                                    <span className="text-white/60 text-sm">
-                                        {new Date(file.created_at).toLocaleDateString()}
-                                    </span>
-                                )}
+                                <div className="flex items-center gap-4">
+                                    {file.file_type === 'sheet_music' && (
+                                        <Link
+                                            to={`/director/pieces/${file.id}/planner`}
+                                            className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full transition-colors"
+                                        >
+                                            Open in Planner
+                                        </Link>
+                                    )}
+                                    {file.created_at && (
+                                        <span className="text-white/60 text-sm">
+                                            {new Date(file.created_at).toLocaleDateString()}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -176,117 +186,121 @@ export default function EnsembleLibrary() {
             </div>
 
             {/* Upload Modal */}
-            {isUploadModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full border border-white/10">
-                        <h3 className="text-xl font-bold text-white mb-4">Upload File</h3>
-                        <form onSubmit={handleUpload} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Title
-                                </label>
-                                <input
-                                    type="text"
-                                    value={uploadData.title}
-                                    onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
-                                    required
-                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                                    placeholder="e.g., Symphony No. 5"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    File Type
-                                </label>
-                                <select
-                                    value={uploadData.file_type}
-                                    onChange={(e) => setUploadData({ ...uploadData, file_type: e.target.value })}
-                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                                >
-                                    <option value="sheet_music">Sheet Music</option>
-                                    <option value="audio">Audio</option>
-                                    <option value="video">Video</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    PDF File
-                                </label>
-                                <input
-                                    type="file"
-                                    accept=".pdf"
-                                    onChange={handleFileSelect}
-                                    required
-                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:cursor-pointer hover:file:bg-purple-700"
-                                />
-                                {selectedFile && (
-                                    <p className="text-xs text-green-400 mt-2">
-                                        Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+            {
+                isUploadModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full border border-white/10">
+                            <h3 className="text-xl font-bold text-white mb-4">Upload File</h3>
+                            <form onSubmit={handleUpload} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Title
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={uploadData.title}
+                                        onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+                                        required
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                        placeholder="e.g., Symphony No. 5"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        File Type
+                                    </label>
+                                    <select
+                                        value={uploadData.file_type}
+                                        onChange={(e) => setUploadData({ ...uploadData, file_type: e.target.value })}
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                    >
+                                        <option value="sheet_music">Sheet Music</option>
+                                        <option value="audio">Audio</option>
+                                        <option value="video">Video</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        PDF File
+                                    </label>
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={handleFileSelect}
+                                        required
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:cursor-pointer hover:file:bg-purple-700"
+                                    />
+                                    {selectedFile && (
+                                        <p className="text-xs text-green-400 mt-2">
+                                            Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        PDF files only, max 2MB
                                     </p>
-                                )}
-                                <p className="text-xs text-gray-400 mt-1">
-                                    PDF files only, max 2MB
-                                </p>
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsUploadModalOpen(false)}
-                                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={uploading}
-                                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
-                                >
-                                    {uploading ? 'Uploading...' : 'Upload'}
-                                </button>
-                            </div>
-                        </form>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsUploadModalOpen(false)}
+                                        className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={uploading}
+                                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        {uploading ? 'Uploading...' : 'Upload'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* File Viewer Modal */}
-            {selectedFileToView && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-900 rounded-xl w-full max-w-5xl h-[85vh] flex flex-col border border-white/10">
-                        <div className="flex justify-between items-center p-4 border-b border-white/10">
-                            <h3 className="text-xl font-bold text-white">{selectedFileToView.title}</h3>
-                            <button
-                                onClick={() => setSelectedFileToView(null)}
-                                className="text-gray-400 hover:text-white"
-                            >
-                                Close
-                            </button>
-                        </div>
-                        <div className="flex-1 bg-gray-800 p-1 overflow-hidden">
-                            {selectedFileToView.storage_url.startsWith('data:application/pdf') ? (
-                                <iframe
-                                    src={selectedFileToView.storage_url}
-                                    className="w-full h-full rounded-lg"
-                                    title="PDF Viewer"
-                                />
-                            ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                    <File className="w-16 h-16 mb-4 opacity-50" />
-                                    <p>Preview not available for this file type.</p>
-                                    <a
-                                        href={selectedFileToView.storage_url}
-                                        download={selectedFileToView.title}
-                                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                                    >
-                                        Download File
-                                    </a>
-                                </div>
-                            )}
+            {
+                selectedFileToView && (
+                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                        <div className="bg-gray-900 rounded-xl w-full max-w-5xl h-[85vh] flex flex-col border border-white/10">
+                            <div className="flex justify-between items-center p-4 border-b border-white/10">
+                                <h3 className="text-xl font-bold text-white">{selectedFileToView.title}</h3>
+                                <button
+                                    onClick={() => setSelectedFileToView(null)}
+                                    className="text-gray-400 hover:text-white"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                            <div className="flex-1 bg-gray-800 p-1 overflow-hidden">
+                                {selectedFileToView.storage_url.startsWith('data:application/pdf') ? (
+                                    <iframe
+                                        src={selectedFileToView.storage_url}
+                                        className="w-full h-full rounded-lg"
+                                        title="PDF Viewer"
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                        <File className="w-16 h-16 mb-4 opacity-50" />
+                                        <p>Preview not available for this file type.</p>
+                                        <a
+                                            href={selectedFileToView.storage_url}
+                                            download={selectedFileToView.title}
+                                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                        >
+                                            Download File
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
