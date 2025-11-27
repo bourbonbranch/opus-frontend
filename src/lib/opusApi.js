@@ -672,3 +672,12 @@ export async function getAssignmentsSummary(directorId) {
   const res = await fetch(`${API_BASE_URL}/api/dashboard/assignments-summary?director_id=${id}`);
   return handleResponse(res);
 }
+
+export async function migrateLegacyData(directorId) {
+  const res = await fetch(`${API_BASE_URL}/api/migrate-legacy-data`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ director_id: directorId })
+  });
+  return handleResponse(res);
+}

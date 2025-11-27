@@ -20,7 +20,8 @@ import {
   getEnsemblesSummary,
   getUpcomingEvents,
   getAssignmentsSummary,
-  getMessages
+  getMessages,
+  migrateLegacyData
 } from '../lib/opusApi';
 
 export function TodayDashboard() {
@@ -31,6 +32,7 @@ export function TodayDashboard() {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [recentMessages, setRecentMessages] = useState([]);
+  const [migrating, setMigrating] = useState(false);
 
   useEffect(() => {
     const directorId = localStorage.getItem('directorId');
@@ -61,6 +63,23 @@ export function TodayDashboard() {
       console.error('Error loading dashboard data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMigrateData = async () => {
+    if (!confirm('This will move any ensembles created before the login update to your current account. Continue?')) return;
+
+    setMigrating(true);
+    try {
+      const directorId = localStorage.getItem('directorId');
+      const result = await migrateLegacyData(directorId);
+      alert(`Migration successful! Found ${result.migrated_ensembles} ensembles.`);
+      loadDashboardData(directorId);
+    } catch (err) {
+      console.error('Migration failed:', err);
+      alert('Migration failed: ' + err.message);
+    } finally {
+      setMigrating(false);
     }
   };
 
@@ -124,12 +143,23 @@ export function TodayDashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Your Ensembles</h2>
-          <button
-            onClick={() => navigate('/add-ensemble')}
-            className="text-sm text-purple-300 hover:text-purple-200 font-medium flex items-center gap-1"
-          >
-            <PlusIcon className="w-4 h-4" /> Add New
-          </button>
+          <div className="flex items-center gap-3">
+            {ensembles.length === 0 && (
+              <button
+                onClick={handleMigrateData}
+                disabled={migrating}
+                className="text-sm text-gray-400 hover:text-white underline disabled:opacity-50"
+              >
+                {migrating ? 'Migrating...' : 'Don\'t see your ensembles?'}
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/add-ensemble')}
+              className="text-sm text-purple-300 hover:text-purple-200 font-medium flex items-center gap-1"
+            >
+              <PlusIcon className="w-4 h-4" /> Add New
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {ensembles.map((ensemble) => (
