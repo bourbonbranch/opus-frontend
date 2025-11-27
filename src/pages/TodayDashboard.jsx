@@ -100,7 +100,7 @@ export function TodayDashboard() {
             </h2>
             <p className="text-sm text-purple-200">
               {todaySummary?.next_event ? (
-                <>Next: {todaySummary.next_event.name} at {new Date(todaySummary.next_event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
+                <>Next: {todaySummary.next_event.title || todaySummary.next_event.name} at {todaySummary.next_event.date ? new Date(todaySummary.next_event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time TBD'}</>
               ) : (
                 'No events today'
               )}
