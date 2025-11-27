@@ -60,40 +60,40 @@ export default function EnsembleLibrary() {
         }
 
         setUploading(true);
+
         try {
             const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
             const directorId = localStorage.getItem('directorId');
 
             // Convert file to base64
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const base64 = reader.result;
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(selectedFile);
+            });
 
-                const response = await fetch(`${API_URL}/api/ensembles/${id}/files`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: uploadData.title,
-                        file_type: uploadData.file_type,
-                        storage_url: base64,
-                        file_size: selectedFile.size,
-                        uploaded_by: directorId,
-                    }),
-                });
+            const response = await fetch(`${API_URL}/api/ensembles/${id}/files`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: uploadData.title,
+                    file_type: uploadData.file_type,
+                    storage_url: base64,
+                    file_size: selectedFile.size,
+                    uploaded_by: directorId,
+                }),
+            });
 
-                if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Upload failed');
+            }
 
-                await loadFiles();
-                setIsUploadModalOpen(false);
-                setUploadData({ title: '', file_type: 'sheet_music' });
-                setSelectedFile(null);
-            };
-
-            reader.onerror = () => {
-                throw new Error('Failed to read file');
-            };
-
-            reader.readAsDataURL(selectedFile);
+            await loadFiles();
+            setIsUploadModalOpen(false);
+            setUploadData({ title: '', file_type: 'sheet_music' });
+            setSelectedFile(null);
         } catch (error) {
             console.error('Error uploading file:', error);
             alert('Failed to upload file: ' + error.message);
