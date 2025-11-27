@@ -53,12 +53,20 @@ export function TodayDashboard() {
       ]);
 
       setTodaySummary(summary);
-      setEnsembles(Array.isArray(ensemblesData) ? ensemblesData : []);
+
+      if (ensemblesData && ensemblesData.error) {
+        alert('Error loading ensembles: ' + ensemblesData.error);
+        setEnsembles([]);
+      } else {
+        setEnsembles(Array.isArray(ensemblesData) ? ensemblesData : []);
+      }
+
       setUpcomingEvents(Array.isArray(events) ? events : []);
       setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
       setRecentMessages(Array.isArray(messages) ? messages.slice(0, 3) : []);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
+      alert('Failed to load dashboard: ' + err.message);
     } finally {
       setLoading(false);
     }
