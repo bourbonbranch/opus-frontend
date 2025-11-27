@@ -34,14 +34,16 @@ export default function EnsembleLibrary() {
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
         if (file) {
+            console.log('File selected:', file.name, file.size, file.type);
+
             // Check file type
             if (file.type !== 'application/pdf') {
                 alert('Please select a PDF file');
                 return;
             }
-            // Check file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File size must be less than 10MB');
+            // Check file size (max 2MB to avoid request size limits)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB. Please use a smaller PDF or compress it.');
                 return;
             }
             setSelectedFile(file);
@@ -59,20 +61,29 @@ export default function EnsembleLibrary() {
             return;
         }
 
+        console.log('Starting upload for:', selectedFile.name);
         setUploading(true);
 
         try {
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://opus-backend-production.up.railway.app';
             const directorId = localStorage.getItem('directorId');
 
+            console.log('API URL:', API_URL);
+            console.log('Director ID:', directorId);
+
             // Convert file to base64
+            console.log('Converting file to base64...');
             const base64 = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
+                reader.onload = () => {
+                    console.log('File read complete, base64 length:', reader.result.length);
+                    resolve(reader.result);
+                };
                 reader.onerror = () => reject(new Error('Failed to read file'));
                 reader.readAsDataURL(selectedFile);
             });
 
+            console.log('Sending request to:', `${API_URL}/api/ensembles/${id}/files`);
             const response = await fetch(`${API_URL}/api/ensembles/${id}/files`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -85,17 +96,25 @@ export default function EnsembleLibrary() {
                 }),
             });
 
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('Server error:', errorData);
                 throw new Error(errorData.error || 'Upload failed');
             }
+
+            const result = await response.json();
+            console.log('Upload successful:', result);
 
             await loadFiles();
             setIsUploadModalOpen(false);
             setUploadData({ title: '', file_type: 'sheet_music' });
             setSelectedFile(null);
+            alert('File uploaded successfully!');
         } catch (error) {
             console.error('Error uploading file:', error);
+            console.error('Error stack:', error.stack);
             alert('Failed to upload file: ' + error.message);
         } finally {
             setUploading(false);
