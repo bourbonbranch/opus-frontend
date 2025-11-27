@@ -6,6 +6,13 @@ export default function EnsembleLibrary() {
     const { id } = useParams();
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [uploadData, setUploadData] = useState({
+        title: '',
+        file_type: 'sheet_music',
+        storage_url: '',
+    });
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         loadFiles();
@@ -24,11 +31,43 @@ export default function EnsembleLibrary() {
         }
     };
 
+    const handleUpload = async (e) => {
+        e.preventDefault();
+        setUploading(true);
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+            const directorId = localStorage.getItem('directorId');
+
+            const response = await fetch(`${API_URL}/api/ensembles/${id}/files`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...uploadData,
+                    uploaded_by: directorId,
+                }),
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            await loadFiles();
+            setIsUploadModalOpen(false);
+            setUploadData({ title: '', file_type: 'sheet_music', storage_url: '' });
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('Failed to upload file');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white">Library</h2>
-                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                <button
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                >
                     <Upload className="w-4 h-4" />
                     Upload File
                 </button>
@@ -68,6 +107,77 @@ export default function EnsembleLibrary() {
                     </div>
                 )}
             </div>
+
+            {/* Upload Modal */}
+            {isUploadModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full border border-white/10">
+                        <h3 className="text-xl font-bold text-white mb-4">Upload File</h3>
+                        <form onSubmit={handleUpload} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Title
+                                </label>
+                                <input
+                                    type="text"
+                                    value={uploadData.title}
+                                    onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+                                    required
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                    placeholder="e.g., Symphony No. 5"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    File Type
+                                </label>
+                                <select
+                                    value={uploadData.file_type}
+                                    onChange={(e) => setUploadData({ ...uploadData, file_type: e.target.value })}
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                >
+                                    <option value="sheet_music">Sheet Music</option>
+                                    <option value="audio">Audio</option>
+                                    <option value="video">Video</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    File URL
+                                </label>
+                                <input
+                                    type="url"
+                                    value={uploadData.storage_url}
+                                    onChange={(e) => setUploadData({ ...uploadData, storage_url: e.target.value })}
+                                    required
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                    placeholder="https://..."
+                                />
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Upload your file to Google Drive, Dropbox, or another service and paste the link here
+                                </p>
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsUploadModalOpen(false)}
+                                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={uploading}
+                                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    {uploading ? 'Uploading...' : 'Upload'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

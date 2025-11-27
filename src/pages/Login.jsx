@@ -23,7 +23,9 @@ export default function Login() {
             // Store user info
             localStorage.setItem('directorId', user.id);
             localStorage.setItem('directorEmail', user.email);
-            localStorage.setItem('directorName', `${user.firstName} ${user.lastName}`);
+            localStorage.setItem('directorFirstName', user.firstName);
+            localStorage.setItem('directorLastName', user.lastName);
+            localStorage.setItem('directorRole', user.role || 'Director');
 
             navigate('/director/today');
         } catch (err) {
