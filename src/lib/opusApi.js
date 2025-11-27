@@ -643,3 +643,32 @@ export async function updateSubmission(submissionId, submissionData) {
   });
   return handleResponse(res);
 }
+// ─────────────── DASHBOARD ───────────────
+
+export async function getTodaySummary(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+  const res = await fetch(`${API_BASE_URL}/api/dashboard/today-summary?director_id=${id}`);
+  return handleResponse(res);
+}
+
+export async function getEnsemblesSummary(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+  const res = await fetch(`${API_BASE_URL}/api/dashboard/ensembles-summary?director_id=${id}`);
+  return handleResponse(res);
+}
+
+export async function getUpcomingEvents(directorId, days = 7) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+  const res = await fetch(`${API_BASE_URL}/api/dashboard/upcoming-events?director_id=${id}&days=${days}`);
+  return handleResponse(res);
+}
+
+export async function getAssignmentsSummary(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+  const res = await fetch(`${API_BASE_URL}/api/dashboard/assignments-summary?director_id=${id}`);
+  return handleResponse(res);
+}
