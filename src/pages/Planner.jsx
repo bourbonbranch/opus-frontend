@@ -534,10 +534,10 @@ export default function Planner() {
                                 {Array.from(new Array(numPages), (el, index) => {
                                     const pageNum = index + 1;
                                     return (
-                                        <div key={`page_${pageNum}`} className="relative">
+                                        <div key={`page_${pageNum}`} className="relative mb-4">
                                             <Page
                                                 pageNumber={pageNum}
-                                                width={800}
+                                                scale={1.2}
                                                 renderTextLayer={false}
                                                 renderAnnotationLayer={false}
                                             />
