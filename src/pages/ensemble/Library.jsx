@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Upload, File, Music } from 'lucide-react';
 
 export default function EnsembleLibrary() {
