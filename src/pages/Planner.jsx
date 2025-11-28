@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     ChevronRight, ChevronDown, Plus, MessageSquare, Trash2,
-    Type, StickyNote, PenTool, Eye, Save, MousePointer
+    Type, StickyNote, PenTool, Eye, Save, MousePointer, ArrowLeft
 } from 'lucide-react';
 import { VITE_API_BASE_URL } from '../lib/opusApi';
 
