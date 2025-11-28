@@ -303,7 +303,7 @@ export default function Roster() {
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 drop-shadow-lg">
-            Roster Management
+            Roster Management [v2.0 - FEES ENABLED]
           </h1>
           <p className="text-sm md:text-base text-gray-200">Manage your ensemble members</p>
         </div>
