@@ -6,7 +6,10 @@ import { VITE_API_BASE_URL } from '../lib/opusApi';
 export default function AddDonor() {
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
+    const [ensembles, setEnsembles] = useState([]);
+    const [loadingEnsembles, setLoadingEnsembles] = useState(true);
     const [formData, setFormData] = useState({
+        ensembleId: localStorage.getItem('currentEnsembleId') || localStorage.getItem('ensembleId') || '',
         firstName: '',
         lastName: '',
         organizationName: '',
@@ -25,7 +28,31 @@ export default function AddDonor() {
     });
     const [tagInput, setTagInput] = useState('');
 
-    const ensembleId = localStorage.getItem('currentEnsembleId') || localStorage.getItem('ensembleId');
+    useEffect(() => {
+        loadEnsembles();
+    }, []);
+
+    const loadEnsembles = async () => {
+        try {
+            const directorId = localStorage.getItem('directorId');
+            if (!directorId) return;
+
+            const response = await fetch(`${VITE_API_BASE_URL}/api/ensembles?directorId=${directorId}`);
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                setEnsembles(data);
+                // If no ensemble selected and we have ensembles, select the first one
+                if (!formData.ensembleId && data.length > 0) {
+                    setFormData(prev => ({ ...prev, ensembleId: data[0].id }));
+                }
+            }
+        } catch (err) {
+            console.error('Error loading ensembles:', err);
+        } finally {
+            setLoadingEnsembles(false);
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -57,13 +84,18 @@ export default function AddDonor() {
             return;
         }
 
+        if (!formData.ensembleId) {
+            alert('Please select an ensemble');
+            return;
+        }
+
         try {
             setSaving(true);
             const response = await fetch(`${VITE_API_BASE_URL}/api/donors`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ensembleId: parseInt(ensembleId),
+                    ensembleId: parseInt(formData.ensembleId),
                     email: formData.email,
                     firstName: formData.firstName || null,
                     lastName: formData.lastName || null,
@@ -119,6 +151,24 @@ export default function AddDonor() {
                     <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-white/10 p-6">
                         <h2 className="text-lg font-semibold text-white mb-4">Basic Information</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-white/80 mb-2">
+                                    Ensemble <span className="text-pink-400">*</span>
+                                </label>
+                                <select
+                                    name="ensembleId"
+                                    value={formData.ensembleId}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-pink-500/50"
+                                >
+                                    <option value="">Select an ensemble...</option>
+                                    {ensembles.map(ensemble => (
+                                        <option key={ensemble.id} value={ensemble.id}>
+                                            {ensemble.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-white/80 mb-2">
                                     First Name
