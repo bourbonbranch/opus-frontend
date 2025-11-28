@@ -48,30 +48,27 @@ export default function Planner() {
         priority: 'medium'
     });
 
+    const [error, setError] = useState(null);
+
     useEffect(() => {
         fetchData();
     }, [pieceId]);
 
     const fetchData = async () => {
         setLoading(true);
+        setError(null);
         try {
-            // 1. Fetch Piece Details (using existing files endpoint logic, but we need a specific one or filter)
-            // Since we don't have a direct "get file by ID" endpoint exposed in index.js easily, 
-            // we might need to fetch all files for the ensemble and find this one, OR add a specific endpoint.
-            // For MVP, let's assume we can get it or pass it. 
-            // Actually, we can't easily get it without an endpoint. 
-            // Let's add a quick fetch to the files endpoint if we know the ensemble ID, but we don't.
-            // Wait, the URL is /pieces/:pieceId/planner. We need to know the ensemble ID to fetch files?
-            // The `ensemble_files` table has `id` as PK. We can add a GET /api/files/:id endpoint to index.js or planner-api.js
-            // I'll add GET /api/files/:id to planner-api.js for convenience.
-
-            const pieceRes = await fetch(`${VITE_API_BASE_URL} /api/files / ${pieceId} `);
-            if (!pieceRes.ok) throw new Error('Failed to fetch piece');
+            // 1. Fetch Piece Details
+            const pieceRes = await fetch(`${VITE_API_BASE_URL}/api/files/${pieceId}`);
+            if (!pieceRes.ok) {
+                const errText = await pieceRes.text();
+                throw new Error(`Failed to fetch piece (${pieceRes.status}): ${errText}`);
+            }
             const pieceData = await pieceRes.json();
             setPiece(pieceData);
 
             // 2. Fetch Sections
-            const sectionsRes = await fetch(`${VITE_API_BASE_URL} /api/pieces / ${pieceId}/sections`);
+            const sectionsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/sections`);
             const sectionsData = await sectionsRes.json();
             setSections(Array.isArray(sectionsData) ? sectionsData : []);
 
@@ -87,6 +84,7 @@ export default function Planner() {
 
         } catch (err) {
             console.error('Error fetching planner data:', err);
+            setError(err);
         } finally {
             setLoading(false);
         }
@@ -364,8 +362,42 @@ export default function Planner() {
         }
     };
 
-    if (loading) return <div className="text-white p-8">Loading Planner...</div>;
-    if (!piece) return <div className="text-white p-8">Piece not found</div>;
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white p-8">
+                <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-6 max-w-md w-full text-center">
+                    <h2 className="text-xl font-bold text-red-400 mb-2">Error Loading Piece</h2>
+                    <p className="text-gray-300 mb-4">{error.message}</p>
+                    <p className="text-sm text-gray-500 mb-6">Piece ID: {pieceId}</p>
+                    <Link to="/director/library" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Back to Library
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (!piece) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white p-8">
+                <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full text-center">
+                    <h2 className="text-xl font-bold text-gray-400 mb-2">Piece Not Found</h2>
+                    <p className="text-gray-500 mb-6">The requested piece (ID: {pieceId}) could not be found.</p>
+                    <Link to="/director/library" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Back to Library
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
