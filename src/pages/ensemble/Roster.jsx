@@ -3,6 +3,7 @@ import { useParams, useOutletContext } from 'react-router-dom';
 import { Plus, Upload, Edit, Trash2 } from 'lucide-react';
 import { getRoster, addRosterMember, updateRosterMember, deleteRosterMember, importRoster, getEnsembleSections, getEnsembleParts, getEnsembleFeeSummary } from '../../lib/opusApi';
 import ManageFeesModal from '../../components/fees/ManageFeesModal';
+import AssignFeeModal from '../../components/fees/AssignFeeModal';
 
 export default function EnsembleRoster() {
     const { id } = useParams();
@@ -20,6 +21,7 @@ export default function EnsembleRoster() {
     const [saving, setSaving] = useState(false);
     const [feeSummary, setFeeSummary] = useState({});
     const [managingFeesStudent, setManagingFeesStudent] = useState(null);
+    const [showBulkAssign, setShowBulkAssign] = useState(false);
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -272,6 +274,14 @@ export default function EnsembleRoster() {
                         Import CSV
                     </button>
                     <button
+                        onClick={() => setShowBulkAssign(true)}
+                        disabled={members.length === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Assign fee to all students"
+                    >
+                        $ Assign All
+                    </button>
+                    <button
                         onClick={openAddModal}
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                     >
@@ -515,13 +525,24 @@ export default function EnsembleRoster() {
             )}
 
             <ManageFeesModal
-                isOpen={!!managingFeesStudent}
+                isOpen={!!managingFeesStudent && !managingFeesStudent.bulk}
                 onClose={() => {
                     setManagingFeesStudent(null);
                     loadMembers();
                 }}
                 student={managingFeesStudent}
                 ensembleId={id}
+            />
+
+            <AssignFeeModal
+                isOpen={showBulkAssign}
+                onClose={() => setShowBulkAssign(false)}
+                ensembleId={id}
+                studentIds={members.map(m => m.id)}
+                onSuccess={() => {
+                    setShowBulkAssign(false);
+                    loadMembers();
+                }}
             />
         </div>
     );
