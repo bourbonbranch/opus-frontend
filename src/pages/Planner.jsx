@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, Plus, Trash2, Save, MessageSquare,
-    Calendar, CheckSquare, Music, FileText, MoreVertical,
-    ChevronRight, ChevronDown, Send
+    ChevronRight, ChevronDown, Plus, MessageSquare, Trash2,
+    Type, StickyNote, PenTool, Eye, Save, MousePointer
 } from 'lucide-react';
 import { VITE_API_BASE_URL } from '../lib/opusApi';
 
@@ -25,6 +24,13 @@ export default function Planner() {
     const [activeTab, setActiveTab] = useState('plans'); // plans, chat
     const [chatMessage, setChatMessage] = useState('');
     const [chatHistory, setChatHistory] = useState([]);
+
+    // Markup State
+    const [markupMode, setMarkupMode] = useState('view'); // view, text, note, draw
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [currentPath, setCurrentPath] = useState('');
+    const [showTextModal, setShowTextModal] = useState(false);
+    const [newAnnotation, setNewAnnotation] = useState({ x: 0, y: 0, text: '', type: 'text' });
     const [aiLoading, setAiLoading] = useState(false);
 
     // Modals
@@ -59,13 +65,13 @@ export default function Planner() {
             // The `ensemble_files` table has `id` as PK. We can add a GET /api/files/:id endpoint to index.js or planner-api.js
             // I'll add GET /api/files/:id to planner-api.js for convenience.
 
-            const pieceRes = await fetch(`${VITE_API_BASE_URL}/api/files/${pieceId}`);
+            const pieceRes = await fetch(`${VITE_API_BASE_URL} /api/files / ${pieceId} `);
             if (!pieceRes.ok) throw new Error('Failed to fetch piece');
             const pieceData = await pieceRes.json();
             setPiece(pieceData);
 
             // 2. Fetch Sections
-            const sectionsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/sections`);
+            const sectionsRes = await fetch(`${VITE_API_BASE_URL} /api/pieces / ${pieceId}/sections`);
             const sectionsData = await sectionsRes.json();
             setSections(Array.isArray(sectionsData) ? sectionsData : []);
 
@@ -156,10 +162,17 @@ export default function Planner() {
         if (!selectedPlanForTask) return;
 
         try {
+            const taskData = {
+                ...newTask,
+                piece_section_id: newTask.piece_section_id === '' ? null : newTask.piece_section_id,
+                measure_start: newTask.measure_start === '' ? null : newTask.measure_start,
+                measure_end: newTask.measure_end === '' ? null : newTask.measure_end
+            };
+
             const res = await fetch(`${VITE_API_BASE_URL}/api/rehearsal-plans/${selectedPlanForTask}/tasks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newTask)
+                body: JSON.stringify(taskData)
             });
             const data = await res.json();
 
@@ -199,6 +212,90 @@ export default function Planner() {
         } catch (err) {
             console.error('Error updating task:', err);
         }
+    };
+
+    const overlayRef = useRef(null);
+
+    const getRelativeCoords = (e) => {
+        if (!overlayRef.current) return { x: 0, y: 0 };
+        const rect = overlayRef.current.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    };
+
+    const saveAnnotation = async (annotation) => {
+        try {
+            const res = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/annotations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...annotation,
+                    created_by: localStorage.getItem('directorId'),
+                    page_number: 1, // Default to 1 for MVP
+                    section_id: null,
+                    measure_start: null,
+                    measure_end: null
+                })
+            });
+            const data = await res.json();
+            setAnnotations([...annotations, data]);
+        } catch (err) {
+            console.error('Error saving annotation:', err);
+        }
+    };
+
+    const handleMouseDown = (e) => {
+        if (markupMode !== 'draw') return;
+        setIsDrawing(true);
+        const { x, y } = getRelativeCoords(e);
+        setCurrentPath(`M ${x} ${y}`);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDrawing || markupMode !== 'draw') return;
+        const { x, y } = getRelativeCoords(e);
+        setCurrentPath(prev => `${prev} L ${x} ${y}`);
+    };
+
+    const handleMouseUp = async () => {
+        if (!isDrawing || markupMode !== 'draw') return;
+        setIsDrawing(false);
+        if (currentPath) {
+            await saveAnnotation({
+                type: 'draw',
+                data: currentPath,
+                x: 0, y: 0,
+                category: 'drawing'
+            });
+            setCurrentPath('');
+        }
+    };
+
+    const handleCanvasClick = (e) => {
+        if (markupMode === 'view' || markupMode === 'draw') return;
+        const { x, y } = getRelativeCoords(e);
+        setNewAnnotation({ ...newAnnotation, x, y, type: markupMode });
+        setShowTextModal(true);
+    };
+
+    const handleAddTextAnnotation = async (e) => {
+        e.preventDefault();
+        await saveAnnotation({
+            type: newAnnotation.type,
+            note_text: newAnnotation.text,
+            x: newAnnotation.x,
+            y: newAnnotation.y,
+            category: newAnnotation.type
+        });
+        setShowTextModal(false);
+        setNewAnnotation({ ...newAnnotation, text: '' });
+        setMarkupMode('view');
+    };
+
+    const handlePublish = async () => {
+        alert('Changes published to students!');
     };
 
     const handleDeleteTask = async (taskId, planId) => {
@@ -335,9 +432,24 @@ export default function Planner() {
                 {/* CENTER PANEL: Score Viewer */}
                 <div className="flex-1 bg-gray-900 relative flex flex-col">
                     {/* Toolbar */}
-                    <div className="h-10 bg-gray-800 border-b border-white/10 flex items-center px-4 gap-4">
-                        <span className="text-xs text-gray-400">PDF Viewer Mode</span>
-                        {/* Add annotation tools here later */}
+                    <div className="h-10 bg-gray-800 border-b border-white/10 flex items-center px-4 gap-2">
+                        <button onClick={() => setMarkupMode('view')} className={`p-1.5 rounded ${markupMode === 'view' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`} title="View Mode">
+                            <MousePointer className="w-4 h-4" />
+                        </button>
+                        <div className="w-px h-4 bg-gray-700 mx-2" />
+                        <button onClick={() => setMarkupMode('text')} className={`p-1.5 rounded ${markupMode === 'text' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`} title="Add Text">
+                            <Type className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setMarkupMode('note')} className={`p-1.5 rounded ${markupMode === 'note' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`} title="Add Sticky Note">
+                            <StickyNote className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setMarkupMode('draw')} className={`p-1.5 rounded ${markupMode === 'draw' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`} title="Draw">
+                            <PenTool className="w-4 h-4" />
+                        </button>
+                        <div className="flex-1" />
+                        <button onClick={handlePublish} className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+                            <Eye className="w-3 h-3" /> Publish Changes
+                        </button>
                     </div>
 
                     {/* PDF Container */}
@@ -355,8 +467,42 @@ export default function Planner() {
                             </div>
                         )}
 
-                        {/* Overlay Annotations (Placeholder) */}
-                        {/* In a real implementation, we'd map these to coordinates on top of a canvas or PDF wrapper */}
+                        {/* Overlay Annotations */}
+                        <div
+                            ref={overlayRef}
+                            className={`absolute inset-0 z-10 ${markupMode !== 'view' ? 'cursor-crosshair' : 'pointer-events-none'}`}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onClick={handleCanvasClick}
+                        >
+                            {/* Render Annotations */}
+                            {Array.isArray(annotations) && annotations.map(ann => {
+                                if (ann.type === 'draw') {
+                                    return (
+                                        <svg key={ann.id} className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
+                                            <path d={ann.data} stroke="red" strokeWidth="2" fill="none" />
+                                        </svg>
+                                    );
+                                }
+                                return (
+                                    <div
+                                        key={ann.id}
+                                        className={`absolute p-2 rounded text-sm ${ann.type === 'note' ? 'bg-yellow-200 text-black shadow-md' : 'text-red-600 font-bold'}`}
+                                        style={{ left: ann.x, top: ann.y }}
+                                    >
+                                        {ann.note_text || ann.data}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Current Drawing Path */}
+                            {isDrawing && (
+                                <svg className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
+                                    <path d={currentPath} stroke="red" strokeWidth="2" fill="none" />
+                                </svg>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -707,6 +853,29 @@ export default function Planner() {
                                 <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
                                     Add Task
                                 </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showTextModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 p-6 rounded-xl w-96 border border-white/10">
+                        <h3 className="text-white font-bold mb-4">Add Annotation</h3>
+                        <form onSubmit={handleAddTextAnnotation} className="space-y-4">
+                            <textarea
+                                placeholder="Enter text..."
+                                value={newAnnotation.text}
+                                onChange={e => setNewAnnotation({ ...newAnnotation, text: e.target.value })}
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white resize-none"
+                                rows={3}
+                                autoFocus
+                                required
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button type="button" onClick={() => setShowTextModal(false)} className="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add</button>
                             </div>
                         </form>
                     </div>
