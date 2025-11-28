@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     ChevronRight, ChevronDown, Plus, MessageSquare, Trash2,
     Type, StickyNote, PenTool, Eye, Save, MousePointer, ArrowLeft,
-    FileText, CheckSquare, Send
+    FileText, CheckSquare, Send, Eraser
 } from 'lucide-react';
 import { VITE_API_BASE_URL } from '../lib/opusApi';
 
@@ -38,11 +38,12 @@ export default function Planner() {
     const [chatHistory, setChatHistory] = useState([]);
 
     // Markup State
-    const [markupMode, setMarkupMode] = useState('view'); // view, text, note, draw
+    const [markupMode, setMarkupMode] = useState('view'); // view, text, note, draw, eraser
     const [isDrawing, setIsDrawing] = useState(false);
+    const [drawingPage, setDrawingPage] = useState(null);
     const [currentPath, setCurrentPath] = useState('');
     const [showTextModal, setShowTextModal] = useState(false);
-    const [newAnnotation, setNewAnnotation] = useState({ x: 0, y: 0, text: '', type: 'text' });
+    const [newAnnotation, setNewAnnotation] = useState({ x: 0, y: 0, text: '', type: 'text', page_number: 1 });
     const [aiLoading, setAiLoading] = useState(false);
 
     // Modals
@@ -241,8 +242,8 @@ export default function Planner() {
     };
 
     const getRelativeCoords = (e) => {
-        if (!overlayRef.current) return { x: 0, y: 0 };
-        const rect = overlayRef.current.getBoundingClientRect();
+        // Use e.currentTarget to get the specific overlay div
+        const rect = e.currentTarget.getBoundingClientRect();
         return {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
@@ -257,7 +258,6 @@ export default function Planner() {
                 body: JSON.stringify({
                     ...annotation,
                     created_by: localStorage.getItem('directorId'),
-                    page_number: pageNumber,
                     section_id: null,
                     measure_start: null,
                     measure_end: null
@@ -270,37 +270,40 @@ export default function Planner() {
         }
     };
 
-    const handleMouseDown = (e) => {
+    const handleMouseDown = (e, pageNum) => {
         if (markupMode !== 'draw') return;
         setIsDrawing(true);
+        setDrawingPage(pageNum);
         const { x, y } = getRelativeCoords(e);
         setCurrentPath(`M ${x} ${y}`);
     };
 
-    const handleMouseMove = (e) => {
-        if (!isDrawing || markupMode !== 'draw') return;
+    const handleMouseMove = (e, pageNum) => {
+        if (!isDrawing || markupMode !== 'draw' || drawingPage !== pageNum) return;
         const { x, y } = getRelativeCoords(e);
         setCurrentPath(prev => `${prev} L ${x} ${y}`);
     };
 
-    const handleMouseUp = async () => {
-        if (!isDrawing || markupMode !== 'draw') return;
+    const handleMouseUp = async (pageNum) => {
+        if (!isDrawing || markupMode !== 'draw' || drawingPage !== pageNum) return;
         setIsDrawing(false);
+        setDrawingPage(null);
         if (currentPath) {
             await saveAnnotation({
                 type: 'draw',
                 data: currentPath,
                 x: 0, y: 0,
-                category: 'drawing'
+                category: 'drawing',
+                page_number: pageNum
             });
             setCurrentPath('');
         }
     };
 
-    const handleCanvasClick = (e) => {
-        if (markupMode === 'view' || markupMode === 'draw') return;
+    const handleCanvasClick = (e, pageNum) => {
+        if (markupMode === 'view' || markupMode === 'draw' || markupMode === 'eraser') return;
         const { x, y } = getRelativeCoords(e);
-        setNewAnnotation({ ...newAnnotation, x, y, type: markupMode });
+        setNewAnnotation({ ...newAnnotation, x, y, type: markupMode, page_number: pageNum });
         setShowTextModal(true);
     };
 
@@ -311,7 +314,8 @@ export default function Planner() {
             note_text: newAnnotation.text,
             x: newAnnotation.x,
             y: newAnnotation.y,
-            category: newAnnotation.type
+            category: newAnnotation.type,
+            page_number: newAnnotation.page_number
         });
         setShowTextModal(false);
         setNewAnnotation({ ...newAnnotation, text: '' });
@@ -504,6 +508,9 @@ export default function Planner() {
                         <button onClick={() => setMarkupMode('draw')} className={`p-1.5 rounded ${markupMode === 'draw' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`} title="Draw">
                             <PenTool className="w-4 h-4" />
                         </button>
+                        <button onClick={() => setMarkupMode('eraser')} className={`p-1.5 rounded ${markupMode === 'eraser' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'}`} title="Eraser">
+                            <Eraser className="w-4 h-4" />
+                        </button>
                         <div className="flex-1" />
                         <button onClick={handlePublish} className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded text-xs hover:bg-green-700">
                             <Eye className="w-3 h-3" /> Publish Changes
@@ -516,7 +523,7 @@ export default function Planner() {
                             <Document
                                 file={piece.storage_url}
                                 onLoadSuccess={onDocumentLoadSuccess}
-                                className="shadow-2xl"
+                                className="shadow-2xl flex flex-col gap-4"
                                 loading={
                                     <div className="text-white flex items-center gap-2">
                                         <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
@@ -524,67 +531,97 @@ export default function Planner() {
                                     </div>
                                 }
                             >
-                                <div className="relative">
-                                    <Page
-                                        pageNumber={pageNumber}
-                                        width={800} // Fixed width for now, could be responsive
-                                        renderTextLayer={false}
-                                        renderAnnotationLayer={false}
-                                    />
+                                {Array.from(new Array(numPages), (el, index) => {
+                                    const pageNum = index + 1;
+                                    return (
+                                        <div key={`page_${pageNum}`} className="relative">
+                                            <Page
+                                                pageNumber={pageNum}
+                                                width={800}
+                                                renderTextLayer={false}
+                                                renderAnnotationLayer={false}
+                                            />
 
-                                    {/* Overlay Annotations - Now relative to the Page */}
-                                    <div
-                                        ref={overlayRef}
-                                        className={`absolute inset-0 z-10 ${markupMode !== 'view' ? 'cursor-crosshair' : ''}`}
-                                        onMouseDown={handleMouseDown}
-                                        onMouseMove={handleMouseMove}
-                                        onMouseUp={handleMouseUp}
-                                        onClick={handleCanvasClick}
-                                    >
-                                        {/* Render Annotations */}
-                                        {Array.isArray(annotations) && annotations.map(ann => {
-                                            if (ann.type === 'draw') {
-                                                return (
-                                                    <div key={ann.id} className="absolute inset-0 pointer-events-none group">
-                                                        <svg className="absolute inset-0" style={{ overflow: 'visible' }}>
-                                                            <path d={ann.data} stroke="red" strokeWidth="2" fill="none" />
-                                                        </svg>
-                                                        {/* Delete Button for Drawing (positioned at start of path or center?) */}
-                                                        {/* Hard to position delete button for path. Let's skip for now or put it at 0,0 of path bounding box if we calculated it. */}
-                                                        {/* Alternative: Click to delete? */}
-                                                    </div>
-                                                );
-                                            }
-                                            return (
-                                                <div
-                                                    key={ann.id}
-                                                    className={`absolute p-2 rounded text-sm group ${ann.type === 'note' ? 'bg-yellow-200 text-black shadow-md' : 'text-red-600 font-bold'}`}
-                                                    style={{ left: ann.x, top: ann.y }}
-                                                >
-                                                    {ann.note_text || ann.data}
-                                                    {/* Delete Button */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteAnnotation(ann.id);
-                                                        }}
-                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            );
-                                        })}
+                                            {/* Overlay Annotations */}
+                                            <div
+                                                ref={overlayRef} // Note: This ref might need to be per-page or handled differently for coords. 
+                                                // Actually, for multi-page, we need to calculate coords relative to THIS page's overlay.
+                                                // We can use e.currentTarget in handlers instead of a single ref.
+                                                className={`absolute inset-0 z-10 ${markupMode === 'draw' ? 'cursor-crosshair' : markupMode === 'eraser' ? 'cursor-cell' : ''}`}
+                                                onMouseDown={(e) => handleMouseDown(e, pageNum)}
+                                                onMouseMove={(e) => handleMouseMove(e, pageNum)}
+                                                onMouseUp={() => handleMouseUp(pageNum)}
+                                                onClick={(e) => handleCanvasClick(e, pageNum)}
+                                            >
+                                                {/* Render Annotations for this page */}
+                                                {Array.isArray(annotations) && annotations
+                                                    .filter(ann => (ann.page_number || 1) === pageNum)
+                                                    .map(ann => {
+                                                        if (ann.type === 'draw') {
+                                                            return (
+                                                                <div
+                                                                    key={ann.id}
+                                                                    className={`absolute inset-0 ${markupMode === 'eraser' ? 'cursor-pointer hover:opacity-50' : 'pointer-events-none'}`}
+                                                                    onClick={(e) => {
+                                                                        if (markupMode === 'eraser') {
+                                                                            e.stopPropagation();
+                                                                            handleDeleteAnnotation(ann.id);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <svg className="absolute inset-0" style={{ overflow: 'visible' }}>
+                                                                        <path
+                                                                            d={ann.data}
+                                                                            stroke={markupMode === 'eraser' ? "red" : "red"}
+                                                                            strokeWidth="2"
+                                                                            fill="none"
+                                                                            className={markupMode === 'eraser' ? "hover:stroke-4 transition-all" : ""}
+                                                                            style={{ pointerEvents: markupMode === 'eraser' ? 'all' : 'none' }}
+                                                                        />
+                                                                    </svg>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <div
+                                                                key={ann.id}
+                                                                className={`absolute p-2 rounded text-sm group ${ann.type === 'note' ? 'bg-yellow-200 text-black shadow-md' : 'text-red-600 font-bold'} ${markupMode === 'eraser' ? 'cursor-pointer hover:opacity-50' : ''}`}
+                                                                style={{ left: ann.x, top: ann.y }}
+                                                                onClick={(e) => {
+                                                                    if (markupMode === 'eraser') {
+                                                                        e.stopPropagation();
+                                                                        handleDeleteAnnotation(ann.id);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {ann.note_text || ann.data}
+                                                                {/* Delete Button (keep for non-eraser mode too) */}
+                                                                {markupMode !== 'eraser' && (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleDeleteAnnotation(ann.id);
+                                                                        }}
+                                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <Trash2 className="w-3 h-3" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
 
-                                        {/* Current Drawing Path */}
-                                        {isDrawing && (
-                                            <svg className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
-                                                <path d={currentPath} stroke="red" strokeWidth="2" fill="none" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                </div>
+                                                {/* Current Drawing Path (only if drawing on this page) */}
+                                                {isDrawing && drawingPage === pageNum && (
+                                                    <svg className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
+                                                        <path d={currentPath} stroke="red" strokeWidth="2" fill="none" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </Document>
                         ) : (
                             <div className="text-center text-gray-400 mt-20">
