@@ -518,12 +518,12 @@ export default function Planner() {
                     </div>
 
                     {/* PDF Container */}
-                    <div className="flex-1 relative bg-gray-900 overflow-auto flex justify-center p-8">
+                    <div className="flex-1 relative bg-gray-900 overflow-auto p-8">
                         {piece.storage_url ? (
                             <Document
                                 file={piece.storage_url}
                                 onLoadSuccess={onDocumentLoadSuccess}
-                                className="shadow-2xl flex flex-col gap-4"
+                                className="shadow-2xl flex flex-col gap-4 mx-auto"
                                 loading={
                                     <div className="text-white flex items-center gap-2">
                                         <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
