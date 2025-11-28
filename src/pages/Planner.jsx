@@ -67,17 +67,17 @@ export default function Planner() {
             // 2. Fetch Sections
             const sectionsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/sections`);
             const sectionsData = await sectionsRes.json();
-            setSections(sectionsData);
+            setSections(Array.isArray(sectionsData) ? sectionsData : []);
 
             // 3. Fetch Annotations
             const annotationsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/annotations`);
             const annotationsData = await annotationsRes.json();
-            setAnnotations(annotationsData);
+            setAnnotations(Array.isArray(annotationsData) ? annotationsData : []);
 
             // 4. Fetch Plans
             const plansRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/rehearsal-plans`);
             const plansData = await plansRes.json();
-            setPlans(plansData);
+            setPlans(Array.isArray(plansData) ? plansData : []);
 
         } catch (err) {
             console.error('Error fetching planner data:', err);
@@ -116,7 +116,7 @@ export default function Planner() {
                 })
             });
             const data = await res.json();
-            setPlans([data, ...plans]);
+            setPlans(prev => [data, ...(Array.isArray(prev) ? prev : [])]);
             setShowPlanModal(false);
             setNewPlan({ title: '', target_date: '' });
         } catch (err) {
@@ -136,7 +136,7 @@ export default function Planner() {
                 try {
                     const res = await fetch(`${VITE_API_BASE_URL}/api/rehearsal-plans/${planId}/tasks`);
                     const data = await res.json();
-                    setPlanTasks(prev => ({ ...prev, [planId]: data }));
+                    setPlanTasks(prev => ({ ...prev, [planId]: Array.isArray(data) ? data : [] }));
                 } catch (err) {
                     console.error('Error fetching tasks:', err);
                 } finally {
@@ -166,7 +166,7 @@ export default function Planner() {
             // Update tasks for this plan
             setPlanTasks(prev => ({
                 ...prev,
-                [selectedPlanForTask]: [...(prev[selectedPlanForTask] || []), data]
+                [selectedPlanForTask]: [...(Array.isArray(prev[selectedPlanForTask]) ? prev[selectedPlanForTask] : []), data]
             }));
 
             setShowTaskModal(false);
@@ -312,7 +312,7 @@ export default function Planner() {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-2 space-y-2">
-                            {sections.map(section => (
+                            {Array.isArray(sections) && sections.map(section => (
                                 <div key={section.id} className="p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 cursor-pointer group">
                                     <div className="flex justify-between items-start">
                                         <span className="text-white font-medium">{section.name}</span>
@@ -389,9 +389,9 @@ export default function Planner() {
                                     </button>
                                 </div>
                                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                    {plans.map(plan => {
+                                    {Array.isArray(plans) && plans.map(plan => {
                                         const isExpanded = expandedPlanId === plan.id;
-                                        const tasks = planTasks[plan.id] || [];
+                                        const tasks = Array.isArray(planTasks[plan.id]) ? planTasks[plan.id] : [];
 
                                         return (
                                             <div key={plan.id} className="bg-gray-700/50 rounded-lg overflow-hidden">
@@ -441,7 +441,7 @@ export default function Planner() {
                                                             <div className="p-4 text-center text-gray-500 text-sm">No tasks yet</div>
                                                         ) : (
                                                             <div className="p-2 space-y-2">
-                                                                {tasks.map(task => {
+                                                                {Array.isArray(tasks) && tasks.map(task => {
                                                                     const sectionName = task.section_name ||
                                                                         (task.piece_section_id && sections.find(s => s.id === task.piece_section_id)?.name);
 
@@ -523,7 +523,7 @@ export default function Planner() {
                                             <p>Ask me about rehearsal strategies, score analysis, or warm-up ideas!</p>
                                         </div>
                                     )}
-                                    {chatHistory.map((msg, idx) => (
+                                    {Array.isArray(chatHistory) && chatHistory.map((msg, idx) => (
                                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                             <div className={`max-w-[85%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'
                                                 }`}>
@@ -643,7 +643,7 @@ export default function Planner() {
                                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
                                 >
                                     <option value="">No section</option>
-                                    {sections.map(section => (
+                                    {Array.isArray(sections) && sections.map(section => (
                                         <option key={section.id} value={section.id}>
                                             {section.name} (mm. {section.measure_start}-{section.measure_end})
                                         </option>
