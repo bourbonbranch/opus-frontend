@@ -12,6 +12,7 @@ import {
     TicketIcon,
     MenuIcon,
     XIcon,
+    Heart,
 } from 'lucide-react';
 
 export function DashboardLayout() {
@@ -73,6 +74,11 @@ export function DashboardLayout() {
             to: '/director/fundraising',
             icon: DollarSignIcon,
             label: 'Fundraising',
+        },
+        {
+            to: '/director/donors',
+            icon: Heart,
+            label: 'Donors',
         },
         {
             to: '/director/messages',

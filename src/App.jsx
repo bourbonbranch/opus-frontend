@@ -26,6 +26,8 @@ import ImportProspects from './pages/ImportProspects';
 import FundraisingDashboard from './pages/FundraisingDashboard';
 import CreateCampaign from './pages/CreateCampaign';
 import CampaignDetail from './pages/CampaignDetail';
+import DonorsList from './pages/DonorsList';
+import DonorDetail from './pages/DonorDetail';
 import PublicDonationPage from './pages/PublicDonationPage';
 import StudentFundraising from './pages/StudentFundraising';
 import EnsemblesList from './pages/EnsemblesList';
@@ -101,6 +103,9 @@ const App = () => {
             <Route path="fundraising" element={<FundraisingDashboard />} />
             <Route path="fundraising/new" element={<CreateCampaign />} />
             <Route path="fundraising/:id" element={<CampaignDetail />} />
+
+            <Route path="donors" element={<DonorsList />} />
+            <Route path="donors/:id" element={<DonorDetail />} />
 
             <Route path="calendar" element={<CalendarView />} />
             <Route path="messages" element={<Messages />} />
