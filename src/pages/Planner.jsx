@@ -7,6 +7,13 @@ import {
 } from 'lucide-react';
 import { VITE_API_BASE_URL } from '../lib/opusApi';
 
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+
+// Set worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
 export default function Planner() {
     const { pieceId } = useParams();
     const navigate = useNavigate();
@@ -18,6 +25,10 @@ export default function Planner() {
     const [expandedPlanId, setExpandedPlanId] = useState(null);
     const [planTasks, setPlanTasks] = useState({}); // { planId: [tasks] }
     const [loadingTasks, setLoadingTasks] = useState(false);
+
+    // PDF State
+    const [numPages, setNumPages] = useState(null);
+    const [pageNumber, setPageNumber] = useState(1);
 
     // UI State
     const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -215,6 +226,20 @@ export default function Planner() {
 
     const overlayRef = useRef(null);
 
+    function onDocumentLoadSuccess({ numPages }) {
+        setNumPages(numPages);
+    }
+
+    const handleDeleteAnnotation = async (id) => {
+        if (!confirm('Are you sure you want to delete this annotation?')) return;
+        try {
+            await fetch(`${VITE_API_BASE_URL}/api/annotations/${id}`, { method: 'DELETE' });
+            setAnnotations(prev => prev.filter(a => a.id !== id));
+        } catch (err) {
+            console.error('Error deleting annotation:', err);
+        }
+    };
+
     const getRelativeCoords = (e) => {
         if (!overlayRef.current) return { x: 0, y: 0 };
         const rect = overlayRef.current.getBoundingClientRect();
@@ -232,7 +257,7 @@ export default function Planner() {
                 body: JSON.stringify({
                     ...annotation,
                     created_by: localStorage.getItem('directorId'),
-                    page_number: 1, // Default to 1 for MVP
+                    page_number: pageNumber,
                     section_id: null,
                     measure_start: null,
                     measure_end: null
@@ -486,56 +511,86 @@ export default function Planner() {
                     </div>
 
                     {/* PDF Container */}
-                    <div className="flex-1 relative bg-gray-900 overflow-hidden flex items-center justify-center">
-                        {piece.storage_url && piece.storage_url.startsWith('data:application/pdf') ? (
-                            <iframe
-                                src={piece.storage_url}
-                                className="w-full h-full"
-                                title="Score PDF"
-                            />
+                    <div className="flex-1 relative bg-gray-900 overflow-auto flex justify-center p-8">
+                        {piece.storage_url ? (
+                            <Document
+                                file={piece.storage_url}
+                                onLoadSuccess={onDocumentLoadSuccess}
+                                className="shadow-2xl"
+                                loading={
+                                    <div className="text-white flex items-center gap-2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                        Loading PDF...
+                                    </div>
+                                }
+                            >
+                                <div className="relative">
+                                    <Page
+                                        pageNumber={pageNumber}
+                                        width={800} // Fixed width for now, could be responsive
+                                        renderTextLayer={false}
+                                        renderAnnotationLayer={false}
+                                    />
+
+                                    {/* Overlay Annotations - Now relative to the Page */}
+                                    <div
+                                        ref={overlayRef}
+                                        className={`absolute inset-0 z-10 ${markupMode !== 'view' ? 'cursor-crosshair' : ''}`}
+                                        onMouseDown={handleMouseDown}
+                                        onMouseMove={handleMouseMove}
+                                        onMouseUp={handleMouseUp}
+                                        onClick={handleCanvasClick}
+                                    >
+                                        {/* Render Annotations */}
+                                        {Array.isArray(annotations) && annotations.map(ann => {
+                                            if (ann.type === 'draw') {
+                                                return (
+                                                    <div key={ann.id} className="absolute inset-0 pointer-events-none group">
+                                                        <svg className="absolute inset-0" style={{ overflow: 'visible' }}>
+                                                            <path d={ann.data} stroke="red" strokeWidth="2" fill="none" />
+                                                        </svg>
+                                                        {/* Delete Button for Drawing (positioned at start of path or center?) */}
+                                                        {/* Hard to position delete button for path. Let's skip for now or put it at 0,0 of path bounding box if we calculated it. */}
+                                                        {/* Alternative: Click to delete? */}
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div
+                                                    key={ann.id}
+                                                    className={`absolute p-2 rounded text-sm group ${ann.type === 'note' ? 'bg-yellow-200 text-black shadow-md' : 'text-red-600 font-bold'}`}
+                                                    style={{ left: ann.x, top: ann.y }}
+                                                >
+                                                    {ann.note_text || ann.data}
+                                                    {/* Delete Button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteAnnotation(ann.id);
+                                                        }}
+                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* Current Drawing Path */}
+                                        {isDrawing && (
+                                            <svg className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
+                                                <path d={currentPath} stroke="red" strokeWidth="2" fill="none" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </div>
+                            </Document>
                         ) : (
-                            <div className="text-center">
-                                <p className="text-gray-400 mb-4">PDF preview not available</p>
-                                <a href={piece.storage_url} download className="text-blue-400 hover:underline">Download File</a>
+                            <div className="text-center text-gray-400 mt-20">
+                                <p>No PDF available</p>
                             </div>
                         )}
-
-                        {/* Overlay Annotations */}
-                        <div
-                            ref={overlayRef}
-                            className={`absolute inset-0 z-10 ${markupMode !== 'view' ? 'cursor-crosshair' : 'pointer-events-none'}`}
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                            onClick={handleCanvasClick}
-                        >
-                            {/* Render Annotations */}
-                            {Array.isArray(annotations) && annotations.map(ann => {
-                                if (ann.type === 'draw') {
-                                    return (
-                                        <svg key={ann.id} className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
-                                            <path d={ann.data} stroke="red" strokeWidth="2" fill="none" />
-                                        </svg>
-                                    );
-                                }
-                                return (
-                                    <div
-                                        key={ann.id}
-                                        className={`absolute p-2 rounded text-sm ${ann.type === 'note' ? 'bg-yellow-200 text-black shadow-md' : 'text-red-600 font-bold'}`}
-                                        style={{ left: ann.x, top: ann.y }}
-                                    >
-                                        {ann.note_text || ann.data}
-                                    </div>
-                                );
-                            })}
-
-                            {/* Current Drawing Path */}
-                            {isDrawing && (
-                                <svg className="absolute inset-0 pointer-events-none" style={{ overflow: 'visible' }}>
-                                    <path d={currentPath} stroke="red" strokeWidth="2" fill="none" />
-                                </svg>
-                            )}
-                        </div>
                     </div>
                 </div>
 
