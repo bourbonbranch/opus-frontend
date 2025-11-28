@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadIcon, UsersIcon, PlusIcon } from 'lucide-react';
-import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember } from '../lib/opusApi';
+import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember, getEnsembleFeeSummary } from '../lib/opusApi';
+import ManageFeesModal from '../components/fees/ManageFeesModal';
 
 export default function Roster() {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ export default function Roster() {
   const [availableParts, setAvailableParts] = useState([]);
 
   const [editingStudent, setEditingStudent] = useState(null);
+  const [feeSummary, setFeeSummary] = useState({});
+  const [managingFeesStudent, setManagingFeesStudent] = useState(null);
 
   useEffect(() => {
     loadEnsembles();
@@ -54,10 +57,19 @@ export default function Roster() {
   const loadRoster = async () => {
     if (!selectedEnsembleId) return;
     try {
-      const data = await getRoster(selectedEnsembleId);
-      setRoster(data || []);
+      const [rosterData, feesData] = await Promise.all([
+        getRoster(selectedEnsembleId),
+        getEnsembleFeeSummary(selectedEnsembleId)
+      ]);
+      setRoster(rosterData || []);
+
+      const summaryMap = {};
+      if (feesData) {
+        feesData.forEach(f => summaryMap[f.student_id] = f.balance_cents);
+      }
+      setFeeSummary(summaryMap);
     } catch (err) {
-      console.error('Failed to load roster', err);
+      console.error('Failed to load roster data', err);
     }
   };
 
@@ -381,6 +393,9 @@ export default function Roster() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Pronouns
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Balance
+                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
@@ -422,6 +437,12 @@ export default function Roster() {
                     <td className="px-6 py-4 text-gray-300 text-sm">
                       {student.pronouns || '-'}
                     </td>
+                    <td className="px-6 py-4">
+                      <span className={`font-medium ${(feeSummary[student.id] || 0) > 0 ? 'text-pink-400' : 'text-green-400'
+                        }`}>
+                        ${((feeSummary[student.id] || 0) / 100).toFixed(2)}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => openEditModal(student)}
@@ -435,6 +456,12 @@ export default function Roster() {
                       >
                         Delete
                       </button>
+                      <button
+                        onClick={() => setManagingFeesStudent(student)}
+                        className="text-green-400 hover:text-green-300 font-medium text-sm ml-3"
+                      >
+                        Fees
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -447,6 +474,7 @@ export default function Roster() {
       {/* Add/Edit Student Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          {/* ... existing modal content ... */}
           <div className="bg-gray-900 rounded-2xl max-w-md w-full shadow-2xl border border-white/20">
             <div className="p-6 border-b border-white/10">
               <h2 className="text-xl font-semibold text-white">
@@ -454,6 +482,7 @@ export default function Roster() {
               </h2>
             </div>
             <form onSubmit={editingStudent ? handleUpdateStudent : handleAddStudent} className="p-6 space-y-4">
+              {/* ... existing form fields ... */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-200 mb-2">
@@ -598,6 +627,16 @@ export default function Roster() {
           </div>
         </div>
       )}
+
+      <ManageFeesModal
+        isOpen={!!managingFeesStudent}
+        onClose={() => {
+          setManagingFeesStudent(null);
+          loadRoster(); // Reload to update balances
+        }}
+        student={managingFeesStudent}
+        ensembleId={selectedEnsembleId}
+      />
     </div>
   );
 }

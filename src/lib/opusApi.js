@@ -678,3 +678,56 @@ export async function migrateLegacyData(directorId) {
   });
   return handleResponse(res);
 }
+
+// ───────────────── FEES ─────────────────
+
+export async function getFeeDefinitions(ensembleId) {
+  const res = await fetch(`${API_BASE_URL}/api/fees/definitions?ensembleId=${ensembleId}`);
+  return handleResponse(res);
+}
+
+export async function createFeeDefinition(data) {
+  const res = await fetch(`${API_BASE_URL}/api/fees/definitions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+export async function assignFee(data) {
+  const res = await fetch(`${API_BASE_URL}/api/fees/assignments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+export async function bulkAssignFee(data) {
+  const res = await fetch(`${API_BASE_URL}/api/fees/assignments/bulk`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+export async function getMemberFees(studentId) {
+  const res = await fetch(`${API_BASE_URL}/api/members/${studentId}/fees`);
+  return handleResponse(res);
+}
+
+export async function getEnsembleFeeSummary(ensembleId) {
+  const res = await fetch(`${API_BASE_URL}/api/ensembles/${ensembleId}/fees/summary`);
+  return handleResponse(res);
+}
+
+export async function recordFeePayment(data) {
+  const res = await fetch(`${API_BASE_URL}/api/fees/payments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
