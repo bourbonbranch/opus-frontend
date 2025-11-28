@@ -194,7 +194,7 @@ export default function Planner() {
             // Update task in state
             setPlanTasks(prev => ({
                 ...prev,
-                [planId]: prev[planId].map(t => t.id === taskId ? data : t)
+                [planId]: (prev[planId] || []).map(t => t.id === taskId ? data : t)
             }));
         } catch (err) {
             console.error('Error updating task:', err);
@@ -210,7 +210,7 @@ export default function Planner() {
             // Remove task from state
             setPlanTasks(prev => ({
                 ...prev,
-                [planId]: prev[planId].filter(t => t.id !== taskId)
+                [planId]: (prev[planId] || []).filter(t => t.id !== taskId)
             }));
         } catch (err) {
             console.error('Error deleting task:', err);
