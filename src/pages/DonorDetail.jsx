@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Mail, Phone, MapPin, Edit, Plus, DollarSign,
-    Calendar, Tag, FileText, Send, Trash2, Building2, User
+    Calendar, Tag, FileText, Send, Trash2, Building2, User, Save, X
 } from 'lucide-react';
 import { VITE_API_BASE_URL } from '../lib/opusApi';
 
@@ -12,11 +12,36 @@ export default function DonorDetail() {
     const [donor, setDonor] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [newNote, setNewNote] = useState('');
+    const [editForm, setEditForm] = useState({});
+    const [tagInput, setTagInput] = useState('');
 
     useEffect(() => {
         loadDonor();
     }, [id]);
+
+    useEffect(() => {
+        if (donor && isEditing) {
+            setEditForm({
+                first_name: donor.first_name || '',
+                last_name: donor.last_name || '',
+                organization_name: donor.organization_name || '',
+                email: donor.email || '',
+                phone: donor.phone || '',
+                address_line1: donor.address_line1 || '',
+                address_line2: donor.address_line2 || '',
+                city: donor.city || '',
+                state: donor.state || '',
+                postal_code: donor.postal_code || '',
+                country: donor.country || 'US',
+                employer: donor.employer || '',
+                preferred_contact_method: donor.preferred_contact_method || 'email',
+                tags: donor.tags || [],
+                notes: donor.notes || ''
+            });
+        }
+    }, [donor, isEditing]);
 
     const loadDonor = async () => {
         try {
@@ -29,6 +54,56 @@ export default function DonorDetail() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddTag = () => {
+        if (tagInput.trim() && !editForm.tags.includes(tagInput.trim())) {
+            setEditForm(prev => ({
+                ...prev,
+                tags: [...prev.tags, tagInput.trim()]
+            }));
+            setTagInput('');
+        }
+    };
+
+    const handleRemoveTag = (tagToRemove) => {
+        setEditForm(prev => ({
+            ...prev,
+            tags: prev.tags.filter(tag => tag !== tagToRemove)
+        }));
+    };
+
+    const handleSaveEdit = async () => {
+        try {
+            setSaving(true);
+            const response = await fetch(`${VITE_API_BASE_URL}/api/donors/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editForm)
+            });
+
+            if (response.ok) {
+                await loadDonor();
+                setIsEditing(false);
+            } else {
+                alert('Failed to update donor');
+            }
+        } catch (err) {
+            console.error('Error updating donor:', err);
+            alert('Failed to update donor');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setEditForm({});
     };
 
     const formatCurrency = (cents) => {
@@ -157,15 +232,193 @@ export default function DonorDetail() {
                                 )}
                             </div>
                         </div>
-                        <button
-                            onClick={() => setIsEditing(!isEditing)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
-                        >
-                            <Edit className="w-4 h-4" />
-                            Edit
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {isEditing ? (
+                                <>
+                                    <button
+                                        onClick={handleCancelEdit}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleSaveEdit}
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
+                                    >
+                                        <Save className="w-4 h-4" />
+                                        {saving ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                                >
+                                    <Edit className="w-4 h-4" />
+                                    Edit
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
+
+                {/* Edit Form Modal */}
+                {isEditing && (
+                    <div className="mb-6 bg-gray-800/50 backdrop-blur-xl rounded-xl border border-white/10 p-6">
+                        <h2 className="text-xl font-semibold text-white mb-6">Edit Donor Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">First Name</label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    value={editForm.first_name}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">Last Name</label>
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    value={editForm.last_name}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-white/80 mb-2">Organization Name</label>
+                                <input
+                                    type="text"
+                                    name="organization_name"
+                                    value={editForm.organization_name}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={editForm.email}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">Phone</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={editForm.phone}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-white/80 mb-2">Address Line 1</label>
+                                <input
+                                    type="text"
+                                    name="address_line1"
+                                    value={editForm.address_line1}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-white/80 mb-2">Address Line 2</label>
+                                <input
+                                    type="text"
+                                    name="address_line2"
+                                    value={editForm.address_line2}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">City</label>
+                                <input
+                                    type="text"
+                                    name="city"
+                                    value={editForm.city}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">State</label>
+                                <input
+                                    type="text"
+                                    name="state"
+                                    value={editForm.state}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/80 mb-2">Postal Code</label>
+                                <input
+                                    type="text"
+                                    name="postal_code"
+                                    value={editForm.postal_code}
+                                    onChange={handleEditChange}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-white/80 mb-2">Tags</label>
+                                <div className="flex gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        value={tagInput}
+                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                                        placeholder="Add tag"
+                                        className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTag}
+                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {editForm.tags && editForm.tags.map((tag, idx) => (
+                                        <span
+                                            key={idx}
+                                            className="px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full flex items-center gap-2"
+                                        >
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveTag(tag)}
+                                                className="hover:text-white"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-white/80 mb-2">Notes</label>
+                                <textarea
+                                    name="notes"
+                                    value={editForm.notes}
+                                    onChange={handleEditChange}
+                                    rows="4"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50 resize-none"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Three Column Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
