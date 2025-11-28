@@ -15,8 +15,9 @@ export default function Planner() {
     const [sections, setSections] = useState([]);
     const [annotations, setAnnotations] = useState([]);
     const [plans, setPlans] = useState([]);
-    const [activePlan, setActivePlan] = useState(null);
-    const [tasks, setTasks] = useState([]);
+    const [expandedPlanId, setExpandedPlanId] = useState(null);
+    const [planTasks, setPlanTasks] = useState({}); // { planId: [tasks] }
+    const [loadingTasks, setLoadingTasks] = useState(false);
 
     // UI State
     const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -29,8 +30,17 @@ export default function Planner() {
     // Modals
     const [showSectionModal, setShowSectionModal] = useState(false);
     const [showPlanModal, setShowPlanModal] = useState(false);
+    const [showTaskModal, setShowTaskModal] = useState(false);
+    const [selectedPlanForTask, setSelectedPlanForTask] = useState(null);
     const [newSection, setNewSection] = useState({ name: '', measure_start: '', measure_end: '' });
     const [newPlan, setNewPlan] = useState({ title: '', target_date: '' });
+    const [newTask, setNewTask] = useState({
+        description: '',
+        piece_section_id: '',
+        measure_start: '',
+        measure_end: '',
+        priority: 'medium'
+    });
 
     useEffect(() => {
         fetchData();
@@ -113,6 +123,119 @@ export default function Planner() {
             console.error(err);
         }
     };
+
+    const handleTogglePlan = async (planId) => {
+        if (expandedPlanId === planId) {
+            // Collapse
+            setExpandedPlanId(null);
+        } else {
+            // Expand and fetch tasks
+            setExpandedPlanId(planId);
+            if (!planTasks[planId]) {
+                setLoadingTasks(true);
+                try {
+                    const res = await fetch(`${VITE_API_BASE_URL}/api/rehearsal-plans/${planId}/tasks`);
+                    const data = await res.json();
+                    setPlanTasks(prev => ({ ...prev, [planId]: data }));
+                } catch (err) {
+                    console.error('Error fetching tasks:', err);
+                } finally {
+                    setLoadingTasks(false);
+                }
+            }
+        }
+    };
+
+    const handleOpenTaskModal = (planId) => {
+        setSelectedPlanForTask(planId);
+        setShowTaskModal(true);
+    };
+
+    const handleAddTask = async (e) => {
+        e.preventDefault();
+        if (!selectedPlanForTask) return;
+
+        try {
+            const res = await fetch(`${VITE_API_BASE_URL}/api/rehearsal-plans/${selectedPlanForTask}/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTask)
+            });
+            const data = await res.json();
+
+            // Update tasks for this plan
+            setPlanTasks(prev => ({
+                ...prev,
+                [selectedPlanForTask]: [...(prev[selectedPlanForTask] || []), data]
+            }));
+
+            setShowTaskModal(false);
+            setNewTask({
+                description: '',
+                piece_section_id: '',
+                measure_start: '',
+                measure_end: '',
+                priority: 'medium'
+            });
+        } catch (err) {
+            console.error('Error adding task:', err);
+        }
+    };
+
+    const handleUpdateTaskStatus = async (taskId, planId, newStatus) => {
+        try {
+            const res = await fetch(`${VITE_API_BASE_URL}/api/rehearsal-tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const data = await res.json();
+
+            // Update task in state
+            setPlanTasks(prev => ({
+                ...prev,
+                [planId]: prev[planId].map(t => t.id === taskId ? data : t)
+            }));
+        } catch (err) {
+            console.error('Error updating task:', err);
+        }
+    };
+
+    const handleDeleteTask = async (taskId, planId) => {
+        try {
+            await fetch(`${VITE_API_BASE_URL}/api/rehearsal-tasks/${taskId}`, {
+                method: 'DELETE'
+            });
+
+            // Remove task from state
+            setPlanTasks(prev => ({
+                ...prev,
+                [planId]: prev[planId].filter(t => t.id !== taskId)
+            }));
+        } catch (err) {
+            console.error('Error deleting task:', err);
+        }
+    };
+
+    const handleSectionChange = (sectionId) => {
+        const section = sections.find(s => s.id === parseInt(sectionId));
+        if (section) {
+            setNewTask({
+                ...newTask,
+                piece_section_id: sectionId,
+                measure_start: section.measure_start,
+                measure_end: section.measure_end
+            });
+        } else {
+            setNewTask({
+                ...newTask,
+                piece_section_id: '',
+                measure_start: '',
+                measure_end: ''
+            });
+        }
+    };
+
 
     const handleAiChat = async (e) => {
         e.preventDefault();
@@ -265,21 +388,124 @@ export default function Planner() {
                                         <Plus className="w-5 h-5" />
                                     </button>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                    {plans.map(plan => (
-                                        <div key={plan.id} className="bg-gray-700/50 rounded-lg p-3">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h4 className="text-white font-medium">{plan.title}</h4>
-                                                <span className="text-xs text-gray-400">
-                                                    {plan.target_date && new Date(plan.target_date).toLocaleDateString()}
-                                                </span>
+                                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                    {plans.map(plan => {
+                                        const isExpanded = expandedPlanId === plan.id;
+                                        const tasks = planTasks[plan.id] || [];
+
+                                        return (
+                                            <div key={plan.id} className="bg-gray-700/50 rounded-lg overflow-hidden">
+                                                {/* Plan Header */}
+                                                <div
+                                                    className="p-3 cursor-pointer hover:bg-gray-700/70 transition-colors"
+                                                    onClick={() => handleTogglePlan(plan.id)}
+                                                >
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            {isExpanded ? (
+                                                                <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                            ) : (
+                                                                <ChevronRight className="w-4 h-4 text-gray-400" />
+                                                            )}
+                                                            <h4 className="text-white font-medium">{plan.title}</h4>
+                                                        </div>
+                                                        <span className="text-xs text-gray-400">
+                                                            {plan.target_date && new Date(plan.target_date).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="ml-6 text-xs text-gray-500">
+                                                        {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                                                    </div>
+                                                </div>
+
+                                                {/* Tasks List (when expanded) */}
+                                                {isExpanded && (
+                                                    <div className="border-t border-white/10 bg-gray-800/30">
+                                                        <div className="p-3 border-b border-white/10 flex justify-between items-center">
+                                                            <span className="text-xs text-gray-400 font-medium">TASKS</span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleOpenTaskModal(plan.id);
+                                                                }}
+                                                                className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                                                            >
+                                                                <Plus className="w-3 h-3" />
+                                                                Add Task
+                                                            </button>
+                                                        </div>
+
+                                                        {loadingTasks && tasks.length === 0 ? (
+                                                            <div className="p-4 text-center text-gray-500 text-sm">Loading tasks...</div>
+                                                        ) : tasks.length === 0 ? (
+                                                            <div className="p-4 text-center text-gray-500 text-sm">No tasks yet</div>
+                                                        ) : (
+                                                            <div className="p-2 space-y-2">
+                                                                {tasks.map(task => {
+                                                                    const sectionName = task.section_name ||
+                                                                        (task.piece_section_id && sections.find(s => s.id === task.piece_section_id)?.name);
+
+                                                                    return (
+                                                                        <div key={task.id} className="bg-gray-700/50 rounded p-2 group">
+                                                                            <div className="flex items-start gap-2">
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    checked={task.status === 'done'}
+                                                                                    onChange={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleUpdateTaskStatus(
+                                                                                            task.id,
+                                                                                            plan.id,
+                                                                                            task.status === 'done' ? 'planned' : 'done'
+                                                                                        );
+                                                                                    }}
+                                                                                    className="mt-1 cursor-pointer"
+                                                                                />
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <p className={`text-sm ${task.status === 'done' ? 'text-gray-500 line-through' : 'text-white'}`}>
+                                                                                        {task.description}
+                                                                                    </p>
+                                                                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                                                        {sectionName && (
+                                                                                            <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">
+                                                                                                {sectionName}
+                                                                                            </span>
+                                                                                        )}
+                                                                                        {(task.measure_start || task.measure_end) && (
+                                                                                            <span className="text-xs text-gray-400">
+                                                                                                mm. {task.measure_start || '?'}-{task.measure_end || '?'}
+                                                                                            </span>
+                                                                                        )}
+                                                                                        {task.priority && (
+                                                                                            <span className={`text-xs px-2 py-0.5 rounded ${task.priority === 'high' ? 'bg-red-500/20 text-red-300' :
+                                                                                                task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                                                                                                    'bg-gray-500/20 text-gray-300'
+                                                                                                }`}>
+                                                                                                {task.priority}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleDeleteTask(task.id, plan.id);
+                                                                                    }}
+                                                                                    className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                >
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
-                                            {/* Tasks would go here - fetching them when plan is expanded */}
-                                            <button className="text-xs text-purple-400 hover:text-purple-300 mt-2">
-                                                View Tasks
-                                            </button>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {plans.length === 0 && (
                                         <p className="text-gray-500 text-sm text-center">No rehearsal plans yet</p>
                                     )}
@@ -389,6 +615,98 @@ export default function Planner() {
                             <div className="flex justify-end gap-2">
                                 <button type="button" onClick={() => setShowPlanModal(false)} className="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
                                 <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Create</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showTaskModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 p-6 rounded-xl w-96 border border-white/10">
+                        <h3 className="text-white font-bold mb-4">Add Task</h3>
+                        <form onSubmit={handleAddTask} className="space-y-4">
+                            <textarea
+                                placeholder="Task description (e.g., Work on intonation in measures 45-60)"
+                                value={newTask.description}
+                                onChange={e => setNewTask({ ...newTask, description: e.target.value })}
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white resize-none"
+                                rows={3}
+                                required
+                            />
+
+                            <div>
+                                <label className="text-xs text-gray-400 mb-1 block">Link to Section (optional)</label>
+                                <select
+                                    value={newTask.piece_section_id}
+                                    onChange={e => handleSectionChange(e.target.value)}
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                                >
+                                    <option value="">No section</option>
+                                    {sections.map(section => (
+                                        <option key={section.id} value={section.id}>
+                                            {section.name} (mm. {section.measure_start}-{section.measure_end})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <label className="text-xs text-gray-400 mb-1 block">Start Measure</label>
+                                    <input
+                                        type="number"
+                                        placeholder="Start"
+                                        value={newTask.measure_start}
+                                        onChange={e => setNewTask({ ...newTask, measure_start: e.target.value })}
+                                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-xs text-gray-400 mb-1 block">End Measure</label>
+                                    <input
+                                        type="number"
+                                        placeholder="End"
+                                        value={newTask.measure_end}
+                                        onChange={e => setNewTask({ ...newTask, measure_end: e.target.value })}
+                                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-xs text-gray-400 mb-1 block">Priority</label>
+                                <select
+                                    value={newTask.priority}
+                                    onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                                >
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowTaskModal(false);
+                                        setNewTask({
+                                            description: '',
+                                            piece_section_id: '',
+                                            measure_start: '',
+                                            measure_end: '',
+                                            priority: 'medium'
+                                        });
+                                    }}
+                                    className="px-4 py-2 text-gray-400 hover:text-white"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                    Add Task
+                                </button>
                             </div>
                         </form>
                     </div>
