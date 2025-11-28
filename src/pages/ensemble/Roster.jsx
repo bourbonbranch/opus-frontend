@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import { Plus, Upload, Edit, Trash2 } from 'lucide-react';
-import { getRoster, addRosterMember, updateRosterMember, deleteRosterMember, importRoster, getEnsembleSections, getEnsembleParts } from '../../lib/opusApi';
+import { getRoster, addRosterMember, updateRosterMember, deleteRosterMember, importRoster, getEnsembleSections, getEnsembleParts, getEnsembleFeeSummary } from '../../lib/opusApi';
+import ManageFeesModal from '../../components/fees/ManageFeesModal';
 
 export default function EnsembleRoster() {
     const { id } = useParams();
@@ -17,6 +18,8 @@ export default function EnsembleRoster() {
     const [parts, setParts] = useState([]);
     const [availableParts, setAvailableParts] = useState([]);
     const [saving, setSaving] = useState(false);
+    const [feeSummary, setFeeSummary] = useState({});
+    const [managingFeesStudent, setManagingFeesStudent] = useState(null);
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -49,8 +52,17 @@ export default function EnsembleRoster() {
 
     const loadMembers = async () => {
         try {
-            const data = await getRoster(id);
-            setMembers(data || []);
+            const [rosterData, feesData] = await Promise.all([
+                getRoster(id),
+                getEnsembleFeeSummary(id)
+            ]);
+            setMembers(rosterData || []);
+
+            const summaryMap = {};
+            if (feesData) {
+                feesData.forEach(f => summaryMap[f.student_id] = f.balance_cents);
+            }
+            setFeeSummary(summaryMap);
         } catch (error) {
             console.error('Error loading members:', error);
         } finally {
@@ -300,6 +312,9 @@ export default function EnsembleRoster() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white/60 uppercase tracking-wider">
                                     Pronouns
                                 </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white/60 uppercase tracking-wider">
+                                    Balance
+                                </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-white/60 uppercase tracking-wider">
                                     Actions
                                 </th>
@@ -340,6 +355,11 @@ export default function EnsembleRoster() {
                                     <td className="px-6 py-4 text-white/80 text-sm">
                                         {member.pronouns || '-'}
                                     </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`font-medium ${(feeSummary[member.id] || 0) > 0 ? 'text-pink-400' : 'text-green-400'}`}>
+                                            ${((feeSummary[member.id] || 0) / 100).toFixed(2)}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
                                             onClick={() => openEditModal(member)}
@@ -349,9 +369,16 @@ export default function EnsembleRoster() {
                                         </button>
                                         <button
                                             onClick={() => handleDelete(member.id)}
-                                            className="text-red-400 hover:text-red-300"
+                                            className="text-red-400 hover:text-red-300 mr-3"
                                         >
                                             <Trash2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => setManagingFeesStudent(member)}
+                                            className="text-green-400 hover:text-green-300"
+                                            title="Manage Fees"
+                                        >
+                                            $
                                         </button>
                                     </td>
                                 </tr>
@@ -486,6 +513,16 @@ export default function EnsembleRoster() {
                     </div>
                 </div>
             )}
+
+            <ManageFeesModal
+                isOpen={!!managingFeesStudent}
+                onClose={() => {
+                    setManagingFeesStudent(null);
+                    loadMembers();
+                }}
+                student={managingFeesStudent}
+                ensembleId={id}
+            />
         </div>
     );
 }
