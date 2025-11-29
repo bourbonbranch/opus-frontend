@@ -16,16 +16,20 @@ const RoomCalibration = () => {
     const checkInUrl = `${window.location.origin}/checkin/${roomId}`;
 
     const startScan = async () => {
+        console.log('Starting beacon scan...');
         setScanning(true);
         setBeaconFound(null);
 
         // Check if Web Bluetooth is available
         if (navigator.bluetooth) {
+            console.log('Web Bluetooth API is available');
             try {
+                console.log('Requesting Bluetooth device...');
                 const device = await navigator.bluetooth.requestDevice({
                     acceptAllDevices: true,
                     optionalServices: ['battery_service'] // Example service
                 });
+                console.log('Device found:', device);
                 setBeaconFound({
                     name: device.name || 'Unknown Device',
                     id: device.id,
@@ -34,13 +38,20 @@ const RoomCalibration = () => {
                     minor: 1
                 });
             } catch (error) {
-                console.error(error);
-                alert('Bluetooth scan failed or cancelled: ' + error.message);
-            } finally {
+                console.error('Bluetooth scan error:', error);
+                if (error.name === 'NotFoundError') {
+                    alert('No Bluetooth devices found. Make sure Bluetooth is enabled and devices are nearby.');
+                } else if (error.name === 'NotAllowedError') {
+                    alert('Bluetooth access was denied. Please allow Bluetooth access and try again.');
+                } else {
+                    alert('Bluetooth scan failed: ' + error.message);
+                }
                 setScanning(false);
             }
         } else {
             // Simulation for non-supported browsers
+            console.log('Web Bluetooth not supported, using simulation mode');
+            alert('Web Bluetooth is not supported in this browser. Using simulation mode for testing.');
             setTimeout(() => {
                 setBeaconFound({
                     name: 'Simulated Beacon',
@@ -93,10 +104,10 @@ const RoomCalibration = () => {
                         onClick={startScan}
                         disabled={scanning || beaconFound}
                         className={`w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${scanning
-                                ? 'bg-gray-700 cursor-wait'
-                                : beaconFound
-                                    ? 'bg-green-600/20 text-green-400 border border-green-500/50'
-                                    : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30'
+                            ? 'bg-gray-700 cursor-wait'
+                            : beaconFound
+                                ? 'bg-green-600/20 text-green-400 border border-green-500/50'
+                                : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30'
                             }`}
                     >
                         {scanning ? (
