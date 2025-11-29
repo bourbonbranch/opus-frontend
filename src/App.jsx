@@ -46,6 +46,7 @@ import EnsembleRooms from './pages/ensemble/Rooms';
 import Planner from './pages/Planner';
 import EventDetail from './pages/EventDetail';
 import Beacons from './pages/Beacons';
+import RoomCalibration from './pages/RoomCalibration';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -87,6 +88,7 @@ const App = () => {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/checkin/:roomId" element={<StudentCheckIn />} />
           <Route path="/rooms/:roomId/live" element={<LiveAttendance />} />
+          <Route path="/rooms/:roomId/calibration" element={<RoomCalibration />} />
           <Route path="/add-ensemble" element={<AddEnsemble />} />
           <Route path="/ensembles/new" element={<AddEnsemble />} />
           <Route path="/fundraising/:campaignSlug/:token" element={<PublicDonationPage />} />
