@@ -431,6 +431,17 @@ export async function importRoster(ensembleId, students) {
   return handleResponse(res);
 }
 
+export async function sendInvites(ensembleId, studentIds) {
+  const res = await fetch(`${API_BASE_URL}/api/ensembles/${ensembleId}/invite`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ studentIds }),
+  });
+  return handleResponse(res);
+}
+
 export async function createOrder(orderData) {
   const res = await fetch(`${API_BASE_URL}/orders`, {
     method: 'POST',

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadIcon, UsersIcon, PlusIcon } from 'lucide-react';
-import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember, getEnsembleFeeSummary } from '../lib/opusApi';
+import { UploadIcon, UsersIcon, PlusIcon, Mail } from 'lucide-react';
+import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember, getEnsembleFeeSummary, sendInvites } from '../lib/opusApi';
 import ManageFeesModal from '../components/fees/ManageFeesModal';
 
 export default function Roster() {
@@ -70,6 +70,16 @@ export default function Roster() {
       setFeeSummary(summaryMap);
     } catch (err) {
       console.error('Failed to load roster data', err);
+    }
+  };
+
+  const handleSendInvites = async (studentIds) => {
+    if (!confirm(`Send app invites to ${studentIds.length} student(s)?`)) return;
+    try {
+      const res = await sendInvites(selectedEnsembleId, studentIds);
+      alert(res.message);
+    } catch (error) {
+      alert('Failed to send invites: ' + error.message);
     }
   };
 
@@ -323,6 +333,15 @@ export default function Roster() {
             <span>Import CSV</span>
           </button>
           <button
+            onClick={() => handleSendInvites(roster.filter(m => m.email).map(m => m.id))}
+            disabled={roster.filter(m => m.email).length === 0}
+            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all border border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Send app invites to all students with email"
+          >
+            <Mail className="w-5 h-5" />
+            <span>Send Invites</span>
+          </button>
+          <button
             onClick={openAddModal}
             className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
           >
@@ -461,6 +480,14 @@ export default function Roster() {
                         className="text-green-400 hover:text-green-300 font-medium text-sm ml-3"
                       >
                         Fees
+                      </button>
+                      <button
+                        onClick={() => handleSendInvites([student.id])}
+                        disabled={!student.email}
+                        className="text-indigo-400 hover:text-indigo-300 ml-3 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={student.email ? "Send App Invite" : "Add email to invite"}
+                      >
+                        <Mail className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
-import { Plus, Upload, Edit, Trash2 } from 'lucide-react';
-import { getRoster, addRosterMember, updateRosterMember, deleteRosterMember, importRoster, getEnsembleSections, getEnsembleParts, getEnsembleFeeSummary } from '../../lib/opusApi';
+import { Plus, Upload, Edit, Trash2, Mail } from 'lucide-react';
+import { getRoster, addRosterMember, updateRosterMember, deleteRosterMember, importRoster, getEnsembleSections, getEnsembleParts, getEnsembleFeeSummary, sendInvites } from '../../lib/opusApi';
 import ManageFeesModal from '../../components/fees/ManageFeesModal';
 import AssignFeeModal from '../../components/fees/AssignFeeModal';
 
@@ -240,6 +240,16 @@ export default function EnsembleRoster() {
         }
     };
 
+    const handleSendInvites = async (studentIds) => {
+        if (!confirm(`Send app invites to ${studentIds.length} student(s)?`)) return;
+        try {
+            const res = await sendInvites(id, studentIds);
+            alert(res.message);
+        } catch (error) {
+            alert('Failed to send invites: ' + error.message);
+        }
+    };
+
     const uniqueSections = [...new Set(members.map(m => m.section).filter(Boolean))];
 
     return (
@@ -280,6 +290,15 @@ export default function EnsembleRoster() {
                         title="Assign fee to all students"
                     >
                         $ Assign All
+                    </button>
+                    <button
+                        onClick={() => handleSendInvites(members.filter(m => m.email).map(m => m.id))}
+                        disabled={members.filter(m => m.email).length === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Send app invites to all students with email"
+                    >
+                        <Mail className="w-4 h-4" />
+                        Send App Invites
                     </button>
                     <button
                         onClick={openAddModal}
@@ -389,6 +408,13 @@ export default function EnsembleRoster() {
                                             title="Manage Fees"
                                         >
                                             $
+                                        </button>
+                                        <button
+                                            onClick={() => handleSendInvites([member.id])}
+                                            className={`ml-3 ${!member.email ? 'text-gray-600 cursor-not-allowed' : 'text-indigo-400 hover:text-indigo-300'}`}
+                                            title={member.email ? "Send App Invite" : "Add email to invite"}
+                                        >
+                                            <Mail className="w-4 h-4" />
                                         </button>
                                     </td>
                                 </tr>
