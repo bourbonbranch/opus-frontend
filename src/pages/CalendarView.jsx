@@ -167,8 +167,8 @@ export function CalendarView() {
                     room_id: newEvent.room_id || null,
                     name: newEvent.name,
                     type: newEvent.type,
-                    start_time: newEvent.start_time,
-                    end_time: newEvent.end_time,
+                    start_time: new Date(newEvent.start_time).toISOString(),
+                    end_time: new Date(newEvent.end_time).toISOString(),
                     description: newEvent.description,
                 });
             }
@@ -279,6 +279,17 @@ export function CalendarView() {
         }
     };
 
+    const ensureUTC = (dateStr) => {
+        if (!dateStr) return null;
+        if (typeof dateStr !== 'string') return dateStr;
+        // If it looks like a date string but has no timezone info (no Z, no +HH:MM, no -HH:MM)
+        // assume it is UTC and append Z.
+        if (!dateStr.includes('Z') && !dateStr.match(/[+-]\d{2}:?\d{2}$/)) {
+            return dateStr + 'Z';
+        }
+        return dateStr;
+    };
+
     const getCalendarEvents = () => {
         const allEvents = [];
 
@@ -287,8 +298,8 @@ export function CalendarView() {
             allEvents.push({
                 id: `event-${event.id}`,
                 title: event.name,
-                start: event.start_time,
-                end: event.end_time,
+                start: ensureUTC(event.start_time),
+                end: ensureUTC(event.end_time),
                 backgroundColor: getEventTypeColor(event.type),
                 borderColor: getEventTypeColor(event.type),
                 extendedProps: {
@@ -617,8 +628,8 @@ export function CalendarView() {
                                                             type="button"
                                                             onClick={() => toggleRecurrenceDay(index)}
                                                             className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${newEvent.recurrence_days.includes(index)
-                                                                    ? 'bg-purple-500 text-white'
-                                                                    : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                                ? 'bg-purple-500 text-white'
+                                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
                                                                 }`}
                                                         >
                                                             {day}
