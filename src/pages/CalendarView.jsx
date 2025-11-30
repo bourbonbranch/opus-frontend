@@ -16,6 +16,7 @@ import {
     RepeatIcon
 } from 'lucide-react';
 import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem, getTicketEvents, createEvent, deleteEvent, getRooms } from '../lib/opusApi';
+import AutoAttendancePanel from '../components/AutoAttendancePanel';
 
 export function CalendarView() {
     const [ensembles, setEnsembles] = useState([]);
@@ -48,6 +49,8 @@ export function CalendarView() {
         recurrence_end_date: '',
     });
     const [creating, setCreating] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isEventDetailModalOpen, setIsEventDetailModalOpen] = useState(false);
     const calendarRef = useRef(null);
 
     useEffect(() => {
@@ -259,9 +262,17 @@ export function CalendarView() {
                 handleDeleteItem(event.extendedProps.itemId);
             }
         } else if (event.extendedProps.isEvent) {
-            if (confirm(`Delete "${event.title}"?`)) {
-                handleDeleteEvent(event.extendedProps.eventId);
-            }
+            // Open event detail modal
+            setSelectedEvent({
+                id: event.extendedProps.eventId,
+                title: event.title,
+                type: event.extendedProps.type,
+                description: event.extendedProps.description,
+                room: event.extendedProps.room,
+                start: event.start,
+                end: event.end
+            });
+            setIsEventDetailModalOpen(true);
         }
     };
 
@@ -851,6 +862,72 @@ export function CalendarView() {
                                     💡 Tip: After exporting, you can import the .ics file into any calendar app that supports iCalendar format.
                                 </p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Event Detail Modal */}
+            {isEventDetailModalOpen && selectedEvent && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-900 rounded-2xl border border-white/20 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">{selectedEvent.title}</h2>
+                                <p className="text-gray-400 text-sm mt-1">
+                                    {selectedEvent.start && new Date(selectedEvent.start).toLocaleString()}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsEventDetailModalOpen(false)}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <XIcon className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            {/* Event Details */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 text-gray-300">
+                                    <ClockIcon className="w-5 h-5 text-purple-400" />
+                                    <div>
+                                        <p className="text-sm text-gray-400">Type</p>
+                                        <p className="font-medium capitalize">{selectedEvent.type}</p>
+                                    </div>
+                                </div>
+                                {selectedEvent.room && (
+                                    <div className="flex items-center gap-3 text-gray-300">
+                                        <MapPinIcon className="w-5 h-5 text-purple-400" />
+                                        <div>
+                                            <p className="text-sm text-gray-400">Location</p>
+                                            <p className="font-medium">{selectedEvent.room}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {selectedEvent.description && (
+                                    <div className="text-gray-300">
+                                        <p className="text-sm text-gray-400 mb-1">Description</p>
+                                        <p>{selectedEvent.description}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Auto Attendance Panel */}
+                            <AutoAttendancePanel eventId={selectedEvent.id} />
+
+                            {/* Delete Button */}
+                            <button
+                                onClick={() => {
+                                    if (confirm(`Delete "${selectedEvent.title}"?`)) {
+                                        handleDeleteEvent(selectedEvent.id);
+                                        setIsEventDetailModalOpen(false);
+                                    }
+                                }}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                            >
+                                <TrashIcon className="w-5 h-5" />
+                                Delete Event
+                            </button>
                         </div>
                     </div>
                 </div>
