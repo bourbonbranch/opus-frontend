@@ -18,7 +18,11 @@ export default function EnsembleAttendance() {
             const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
             const response = await fetch(`${API_URL}/api/ensembles/${id}/attendance?date=${date}`);
             const data = await response.json();
-            setRecords(data.records || []);
+            const recordsWithDefault = (data.records || []).map(r => ({
+                ...r,
+                status: r.status || 'present'
+            }));
+            setRecords(recordsWithDefault);
         } catch (error) {
             console.error('Error loading attendance:', error);
         } finally {
@@ -96,8 +100,8 @@ export default function EnsembleAttendance() {
                                 <button
                                     onClick={() => handleStatusChange(member.id, 'present')}
                                     className={`px-4 py-2 rounded-lg transition-colors ${member.status === 'present'
-                                            ? 'bg-green-600 text-white'
-                                            : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-white/10 text-white/60 hover:bg-white/20'
                                         }`}
                                 >
                                     Present
@@ -105,8 +109,8 @@ export default function EnsembleAttendance() {
                                 <button
                                     onClick={() => handleStatusChange(member.id, 'absent')}
                                     className={`px-4 py-2 rounded-lg transition-colors ${member.status === 'absent'
-                                            ? 'bg-red-600 text-white'
-                                            : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                        ? 'bg-red-600 text-white'
+                                        : 'bg-white/10 text-white/60 hover:bg-white/20'
                                         }`}
                                 >
                                     Absent
@@ -114,8 +118,8 @@ export default function EnsembleAttendance() {
                                 <button
                                     onClick={() => handleStatusChange(member.id, 'excused')}
                                     className={`px-4 py-2 rounded-lg transition-colors ${member.status === 'excused'
-                                            ? 'bg-yellow-600 text-white'
-                                            : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                        ? 'bg-yellow-600 text-white'
+                                        : 'bg-white/10 text-white/60 hover:bg-white/20'
                                         }`}
                                 >
                                     Excused

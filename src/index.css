@@ -60,9 +60,9 @@
 
 /* Day headers */
 .fc .fc-col-header-cell {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: rgb(209, 213, 219) !important;
-  font-weight: 600 !important;
+  background: white !important;
+  color: rgb(139, 92, 246) !important;
+  font-weight: 700 !important;
   padding: 0.75rem 0 !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
@@ -98,6 +98,7 @@
   padding: 0.25rem 0.5rem !important;
   border: none !important;
   font-weight: 500 !important;
+  color: white !important;
 }
 
 .fc-event:hover {

@@ -26,7 +26,7 @@ export default function EnsemblesList() {
     };
 
     const handleCreateEnsemble = () => {
-        navigate('/director/ensembles/new');
+        navigate('/ensembles/new');
     };
 
     if (loading) {
