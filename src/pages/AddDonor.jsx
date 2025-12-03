@@ -108,7 +108,7 @@ export default function AddDonor() {
                     },
                     tags: formData.tags,
                     notes: formData.notes || null,
-                    initialDonationCents: formData.donationAmount ? Math.round(parseFloat(formData.donationAmount) * 100) : null
+                    initialDonationCents: formData.donationAmount ? Math.round(parseFloat(formData.donationAmount.replace(/,/g, '')) * 100) : null
                 })
             });
 
@@ -376,12 +376,27 @@ export default function AddDonor() {
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60">$</span>
                                 <input
-                                    type="number"
+                                    type="text"
                                     name="donationAmount"
                                     value={formData.donationAmount}
-                                    onChange={handleChange}
-                                    step="0.01"
-                                    min="0"
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9.]/g, '');
+                                        setFormData({ ...formData, donationAmount: value });
+                                    }}
+                                    onBlur={(e) => {
+                                        const value = e.target.value;
+                                        if (value && !isNaN(value)) {
+                                            const formatted = parseFloat(value).toLocaleString('en-US', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            });
+                                            setFormData({ ...formData, donationAmount: formatted });
+                                        }
+                                    }}
+                                    onFocus={(e) => {
+                                        const value = e.target.value.replace(/,/g, '');
+                                        setFormData({ ...formData, donationAmount: value });
+                                    }}
                                     placeholder="0.00"
                                     className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
                                 />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Heart, Search, Filter, ArrowUpDown, Mail, Tag, DollarSign, Upload } from 'lucide-react';
-import { VITE_API_BASE_URL } from '../lib/opusApi';
+import { VITE_API_BASE_URL, getEnsembles } from '../lib/opusApi';
 
 export default function DonorsList() {
     const navigate = useNavigate();
@@ -11,8 +11,39 @@ export default function DonorsList() {
     const [sortBy, setSortBy] = useState('last_donation_at');
     const [sortOrder, setSortOrder] = useState('DESC');
     const fileInputRef = React.useRef(null);
+    const [ensembles, setEnsembles] = useState([]);
+    const [selectedEnsembleId, setSelectedEnsembleId] = useState(
+        localStorage.getItem('currentEnsembleId') || localStorage.getItem('ensembleId') || ''
+    );
 
-    const ensembleId = localStorage.getItem('currentEnsembleId') || localStorage.getItem('ensembleId');
+    const ensembleId = selectedEnsembleId;
+
+    useEffect(() => {
+        loadEnsembles();
+    }, []);
+
+    const loadEnsembles = async () => {
+        try {
+            const data = await getEnsembles();
+            if (Array.isArray(data)) {
+                setEnsembles(data);
+                // Auto-select first ensemble if none selected
+                if (!selectedEnsembleId && data.length > 0) {
+                    const firstId = data[0].id.toString();
+                    setSelectedEnsembleId(firstId);
+                    localStorage.setItem('currentEnsembleId', firstId);
+                }
+            }
+        } catch (err) {
+            console.error('Error loading ensembles:', err);
+        }
+    };
+
+    const handleEnsembleChange = (e) => {
+        const newId = e.target.value;
+        setSelectedEnsembleId(newId);
+        localStorage.setItem('currentEnsembleId', newId);
+    };
 
     useEffect(() => {
         if (ensembleId) {
@@ -196,7 +227,17 @@ export default function DonorsList() {
                         <h1 className="text-3xl font-bold text-white mb-2">Donors</h1>
                         <p className="text-white/60">Manage your donor relationships and giving history</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-3">
+                        <select
+                            value={selectedEnsembleId}
+                            onChange={handleEnsembleChange}
+                            className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg focus:outline-none focus:border-pink-500/50"
+                        >
+                            <option value="">Select Ensemble...</option>
+                            {ensembles.map(ens => (
+                                <option key={ens.id} value={ens.id}>{ens.name}</option>
+                            ))}
+                        </select>
                         <input
                             type="file"
                             ref={fileInputRef}
