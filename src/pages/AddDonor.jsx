@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, X } from 'lucide-react';
-import { VITE_API_BASE_URL } from '../lib/opusApi';
+import { VITE_API_BASE_URL, getEnsembles } from '../lib/opusApi';
 
 export default function AddDonor() {
     const navigate = useNavigate();
@@ -34,11 +34,7 @@ export default function AddDonor() {
 
     const loadEnsembles = async () => {
         try {
-            const directorId = localStorage.getItem('directorId');
-            if (!directorId) return;
-
-            const response = await fetch(`${VITE_API_BASE_URL}/api/ensembles?directorId=${directorId}`);
-            const data = await response.json();
+            const data = await getEnsembles();
 
             if (Array.isArray(data)) {
                 setEnsembles(data);
