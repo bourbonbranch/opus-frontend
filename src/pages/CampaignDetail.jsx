@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, DollarSign, Users, Calendar, Link as LinkIcon, ExternalLink, Search } from 'lucide-react';
+import { ArrowLeft, DollarSign, Users, Calendar, Link as LinkIcon, ExternalLink, Search, Trash2 } from 'lucide-react';
 
 export default function CampaignDetail() {
     const { id } = useParams();
@@ -60,6 +60,28 @@ export default function CampaignDetail() {
         p.last_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleDelete = async () => {
+        if (!confirm(`Are you sure you want to delete the campaign "${campaign.name}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+            const response = await fetch(`${API_URL}/api/campaigns/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                navigate('/director/fundraising');
+            } else {
+                alert('Failed to delete campaign');
+            }
+        } catch (err) {
+            console.error('Error deleting campaign:', err);
+            alert('Failed to delete campaign');
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -114,6 +136,13 @@ export default function CampaignDetail() {
                         <div className="flex gap-3">
                             <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
                                 Edit Campaign
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
                             </button>
                         </div>
                     </div>

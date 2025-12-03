@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Heart, Search, Filter, ArrowUpDown, Mail, Tag, DollarSign } from 'lucide-react';
+import { Plus, Heart, Search, Filter, ArrowUpDown, Mail, Tag, DollarSign, Upload } from 'lucide-react';
 import { VITE_API_BASE_URL } from '../lib/opusApi';
 
 export default function DonorsList() {
@@ -10,6 +10,7 @@ export default function DonorsList() {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('last_donation_at');
     const [sortOrder, setSortOrder] = useState('DESC');
+    const fileInputRef = React.useRef(null);
 
     const ensembleId = localStorage.getItem('currentEnsembleId') || localStorage.getItem('ensembleId');
 
@@ -81,6 +82,109 @@ export default function DonorsList() {
         }
     };
 
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const text = event.target.result;
+                const donors = [];
+                const rawLines = text.split('\n');
+                let startIdx = 0;
+                const headerMap = {
+                    first_name: 0,
+                    last_name: 1,
+                    email: 2,
+                    organization_name: 3,
+                    phone: 4,
+                    tags: 5,
+                };
+
+                // Detect header row
+                if (rawLines.length > 0) {
+                    const firstLine = rawLines[0].trim();
+                    const firstCols = firstLine.split(',').map(p => p.trim().toLowerCase());
+                    const headerKeywords = {
+                        first_name: ['first name', 'first_name', 'firstname'],
+                        last_name: ['last name', 'last_name', 'lastname'],
+                        email: ['email'],
+                        organization_name: ['organization', 'organization_name', 'org'],
+                        phone: ['phone'],
+                        tags: ['tags', 'tag'],
+                    };
+                    const looksLikeHeader = firstCols.some(col =>
+                        Object.values(headerKeywords).flat().includes(col)
+                    );
+                    if (looksLikeHeader) {
+                        startIdx = 1;
+                        firstCols.forEach((col, idx) => {
+                            for (const [field, aliases] of Object.entries(headerKeywords)) {
+                                if (aliases.includes(col)) {
+                                    headerMap[field] = idx;
+                                }
+                            }
+                        });
+                    }
+                }
+
+                for (let i = startIdx; i < rawLines.length; i++) {
+                    const line = rawLines[i].trim();
+                    if (!line) continue;
+                    const rawParts = line.split(',').map(p => p.trim());
+                    while (rawParts.length < 6) rawParts.push('');
+
+                    const donor = {
+                        first_name: rawParts[headerMap.first_name] || '',
+                        last_name: rawParts[headerMap.last_name] || '',
+                        email: rawParts[headerMap.email] || '',
+                        organization_name: rawParts[headerMap.organization_name] || '',
+                        phone: rawParts[headerMap.phone] || '',
+                        tags: rawParts[headerMap.tags] ? rawParts[headerMap.tags].split(';').map(t => t.trim()).filter(Boolean) : [],
+                    };
+
+                    if (donor.email) {
+                        donors.push(donor);
+                    }
+                }
+
+                if (donors.length === 0) {
+                    alert('No valid donors found in CSV. Format should be: First Name, Last Name, Email, Organization, Phone, Tags (semicolon-separated)');
+                    return;
+                }
+
+                if (confirm(`Found ${donors.length} donors. Import them?`)) {
+                    // Bulk create donors
+                    for (const donor of donors) {
+                        try {
+                            await fetch(`${VITE_API_BASE_URL}/api/donors`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    ensembleId: parseInt(ensembleId),
+                                    ...donor
+                                })
+                            });
+                        } catch (err) {
+                            console.error('Error importing donor:', err);
+                        }
+                    }
+                    alert(`Successfully imported ${donors.length} donors!`);
+                    loadDonors();
+                }
+            } catch (err) {
+                console.error('Error parsing CSV:', err);
+                alert('Failed to parse CSV: ' + err.message);
+            } finally {
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            }
+        };
+        reader.readAsText(file);
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-6">
             <div className="max-w-7xl mx-auto">
@@ -90,13 +194,29 @@ export default function DonorsList() {
                         <h1 className="text-3xl font-bold text-white mb-2">Donors</h1>
                         <p className="text-white/60">Manage your donor relationships and giving history</p>
                     </div>
-                    <button
-                        onClick={() => navigate('/director/donors/new')}
-                        className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors shadow-lg shadow-pink-500/20"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span className="hidden sm:inline">Add Donor</span>
-                    </button>
+                    <div className="flex gap-2">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileUpload}
+                            accept=".csv"
+                            className="hidden"
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/10"
+                        >
+                            <Upload className="w-4 h-4" />
+                            <span className="hidden sm:inline">Import CSV</span>
+                        </button>
+                        <button
+                            onClick={() => navigate('/director/donors/new')}
+                            className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors shadow-lg shadow-pink-500/20"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span className="hidden sm:inline">Add Donor</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Search and Filters */}
