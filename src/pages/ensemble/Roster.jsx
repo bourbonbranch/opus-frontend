@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
-import { Plus, Upload, Edit, Trash2, Mail } from 'lucide-react';
+import { Plus, Upload, Edit, Trash2, Mail, CheckSquare } from 'lucide-react';
 import { getRoster, addRosterMember, updateRosterMember, deleteRosterMember, importRoster, getEnsembleSections, getEnsembleParts, getEnsembleFeeSummary, sendInvites } from '../../lib/opusApi';
 import ManageFeesModal from '../../components/fees/ManageFeesModal';
 import AssignFeeModal from '../../components/fees/AssignFeeModal';
@@ -22,6 +22,8 @@ export default function EnsembleRoster() {
     const [feeSummary, setFeeSummary] = useState({});
     const [managingFeesStudent, setManagingFeesStudent] = useState(null);
     const [showBulkAssign, setShowBulkAssign] = useState(false);
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedStudentIds, setSelectedStudentIds] = useState([]);
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -250,6 +252,22 @@ export default function EnsembleRoster() {
         }
     };
 
+    const toggleSelectAll = () => {
+        if (selectedStudentIds.length === members.length) {
+            setSelectedStudentIds([]);
+        } else {
+            setSelectedStudentIds(members.map(m => m.id));
+        }
+    };
+
+    const toggleSelectStudent = (id) => {
+        if (selectedStudentIds.includes(id)) {
+            setSelectedStudentIds(selectedStudentIds.filter(sid => sid !== id));
+        } else {
+            setSelectedStudentIds([...selectedStudentIds, id]);
+        }
+    };
+
     const uniqueSections = [...new Set(members.map(m => m.section).filter(Boolean))];
 
     return (
@@ -284,6 +302,19 @@ export default function EnsembleRoster() {
                         Import CSV
                     </button>
                     <button
+                        onClick={() => {
+                            if (isSelectionMode) setSelectedStudentIds([]);
+                            setIsSelectionMode(!isSelectionMode);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${isSelectionMode
+                            ? 'bg-purple-600 text-white shadow-lg'
+                            : 'bg-white/10 border border-white/20 text-white hover:bg-white/20'
+                            }`}
+                    >
+                        <CheckSquare className="w-4 h-4" />
+                        {isSelectionMode ? 'Done Selecting' : 'Select Students'}
+                    </button>
+                    <button
                         onClick={() => setShowBulkAssign(true)}
                         disabled={members.length === 0}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -310,6 +341,34 @@ export default function EnsembleRoster() {
                 </div>
             </div>
 
+            {/* Batch Action Bar */}
+            {selectedStudentIds.length > 0 && (
+                <div className="p-3 bg-purple-900/40 border border-purple-500/30 rounded-xl flex items-center justify-between animate-in fade-in">
+                    <div className="flex items-center gap-3">
+                        <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {selectedStudentIds.length}
+                        </span>
+                        <span className="text-sm text-purple-200 font-medium">Students Selected</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => {
+                                setShowBulkAssign(true);
+                            }}
+                            className="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                            $ Assign Fee
+                        </button>
+                        <button
+                            onClick={() => setSelectedStudentIds([])}
+                            className="px-3 py-1.5 text-gray-400 hover:text-white text-sm"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Members Table */}
             <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
                 {members.length === 0 ? (
@@ -326,6 +385,16 @@ export default function EnsembleRoster() {
                     <table className="w-full">
                         <thead className="bg-white/5">
                             <tr>
+                                {isSelectionMode && (
+                                    <th className="px-6 py-3 w-10">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedStudentIds.length === members.length && members.length > 0}
+                                            onChange={toggleSelectAll}
+                                            className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                                        />
+                                    </th>
+                                )}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white/60 uppercase tracking-wider">
                                     Name
                                 </th>
@@ -351,7 +420,17 @@ export default function EnsembleRoster() {
                         </thead>
                         <tbody className="divide-y divide-white/10">
                             {members.map((member) => (
-                                <tr key={member.id} className="hover:bg-white/5">
+                                <tr key={member.id} className={`hover:bg-white/5 ${selectedStudentIds.includes(member.id) ? 'bg-purple-500/10' : ''}`}>
+                                    {isSelectionMode && (
+                                        <td className="px-6 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedStudentIds.includes(member.id)}
+                                                onChange={() => toggleSelectStudent(member.id)}
+                                                className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                                            />
+                                        </td>
+                                    )}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
@@ -564,9 +643,10 @@ export default function EnsembleRoster() {
                 isOpen={showBulkAssign}
                 onClose={() => setShowBulkAssign(false)}
                 ensembleId={id}
-                studentIds={members.map(m => m.id)}
+                studentIds={selectedStudentIds.length > 0 ? selectedStudentIds : members.map(m => m.id)}
                 onSuccess={() => {
                     setShowBulkAssign(false);
+                    setSelectedStudentIds([]);
                     loadMembers();
                 }}
             />
