@@ -17,6 +17,8 @@ export default function DonorsList() {
     useEffect(() => {
         if (ensembleId) {
             loadDonors();
+        } else {
+            setLoading(false);
         }
     }, [ensembleId, search, sortBy, sortOrder]);
 
@@ -254,7 +256,11 @@ export default function DonorsList() {
                         </div>
                         <h3 className="text-xl font-semibold text-white mb-2">No Donors Yet</h3>
                         <p className="text-white/60 mb-6 max-w-md mx-auto">
-                            {search ? 'No donors match your search criteria.' : 'Donors will appear here as people make donations to your campaigns.'}
+                            {!ensembleId
+                                ? 'Please select an ensemble from the Ensembles page to view donors.'
+                                : search
+                                    ? 'No donors match your search criteria.'
+                                    : 'Donors will appear here as people make donations to your campaigns.'}
                         </p>
                         {!search && (
                             <button

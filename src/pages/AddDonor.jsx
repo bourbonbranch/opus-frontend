@@ -24,7 +24,8 @@ export default function AddDonor() {
         employer: '',
         preferredContactMethod: 'email',
         tags: [],
-        notes: ''
+        notes: '',
+        donationAmount: ''
     });
     const [tagInput, setTagInput] = useState('');
 
@@ -106,7 +107,8 @@ export default function AddDonor() {
                         country: formData.country
                     },
                     tags: formData.tags,
-                    notes: formData.notes || null
+                    notes: formData.notes || null,
+                    initialDonationCents: formData.donationAmount ? Math.round(parseFloat(formData.donationAmount) * 100) : null
                 })
             });
 
@@ -361,6 +363,32 @@ export default function AddDonor() {
                                     </span>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Initial Donation */}
+                    <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-white/10 p-6">
+                        <h2 className="text-lg font-semibold text-white mb-4">Initial Donation (Optional)</h2>
+                        <div>
+                            <label className="block text-sm font-medium text-white/80 mb-2">
+                                Donation Amount
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60">$</span>
+                                <input
+                                    type="number"
+                                    name="donationAmount"
+                                    value={formData.donationAmount}
+                                    onChange={handleChange}
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                />
+                            </div>
+                            <p className="text-xs text-white/40 mt-1">
+                                Record an initial donation amount if this donor has already contributed
+                            </p>
                         </div>
                     </div>
 
