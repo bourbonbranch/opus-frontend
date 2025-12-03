@@ -132,12 +132,6 @@ export function TodayDashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Your Ensembles</h2>
-          <button
-            onClick={() => navigate('/add-ensemble')}
-            className="text-sm text-purple-300 hover:text-purple-200 font-medium flex items-center gap-1"
-          >
-            <PlusIcon className="w-4 h-4" /> Add New
-          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {ensembles.map((ensemble) => (

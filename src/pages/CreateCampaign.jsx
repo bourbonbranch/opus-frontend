@@ -43,6 +43,25 @@ export default function CreateCampaign() {
         }
     };
 
+    const handleMoneyChange = (field, value) => {
+        // Remove existing commas and non-numeric chars (keep decimal)
+        const cleanValue = value.replace(/[^0-9.]/g, '');
+
+        // Check for multiple decimals
+        const parts = cleanValue.split('.');
+        if (parts.length > 2) return; // Ignore invalid input
+
+        // Format integer part with commas
+        const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        let formatted = intPart;
+        if (parts.length > 1) {
+            formatted += '.' + parts[1].slice(0, 2); // Limit to 2 decimal places
+        }
+
+        setFormData({ ...formData, [field]: formatted });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -57,8 +76,8 @@ export default function CreateCampaign() {
                 ensemble_id: formData.ensemble_id ? parseInt(formData.ensemble_id) : null,
                 name: formData.name,
                 description: formData.description,
-                goal_amount_cents: Math.round(parseFloat(formData.goal_amount) * 100),
-                per_student_goal_cents: Math.round(parseFloat(formData.per_student_goal) * 100),
+                goal_amount_cents: Math.round(parseFloat(formData.goal_amount.replace(/,/g, '')) * 100),
+                per_student_goal_cents: Math.round(parseFloat(formData.per_student_goal.replace(/,/g, '')) * 100),
                 starts_at: formData.starts_at ? new Date(formData.starts_at).toISOString() : null,
                 ends_at: formData.ends_at ? new Date(formData.ends_at).toISOString() : null
             };
@@ -164,13 +183,11 @@ export default function CreateCampaign() {
                                 <div className="relative">
                                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                                     <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
+                                        type="text"
                                         value={formData.goal_amount}
-                                        onChange={(e) => setFormData({ ...formData, goal_amount: e.target.value })}
+                                        onChange={(e) => handleMoneyChange('goal_amount', e.target.value)}
                                         className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        placeholder="5000.00"
+                                        placeholder="5,000.00"
                                     />
                                 </div>
                             </div>
@@ -179,11 +196,9 @@ export default function CreateCampaign() {
                                 <div className="relative">
                                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                                     <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
+                                        type="text"
                                         value={formData.per_student_goal}
-                                        onChange={(e) => setFormData({ ...formData, per_student_goal: e.target.value })}
+                                        onChange={(e) => handleMoneyChange('per_student_goal', e.target.value)}
                                         className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         placeholder="100.00"
                                     />

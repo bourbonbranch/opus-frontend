@@ -15,6 +15,11 @@ export default function AssignFeeModal({ isOpen, onClose, ensembleId, studentIds
         notes: ''
     });
 
+    // Split Payment State
+    const [isSplitPayment, setIsSplitPayment] = useState(false);
+    const [splitMonths, setSplitMonths] = useState(3);
+    const [splitStartDate, setSplitStartDate] = useState('');
+
     const [newDefinition, setNewDefinition] = useState({
         name: '',
         description: '',
@@ -25,6 +30,8 @@ export default function AssignFeeModal({ isOpen, onClose, ensembleId, studentIds
     useEffect(() => {
         if (isOpen && ensembleId) {
             loadDefinitions();
+            // Default split start date to today
+            setSplitStartDate(new Date().toISOString().split('T')[0]);
         }
     }, [isOpen, ensembleId]);
 
@@ -87,24 +94,63 @@ export default function AssignFeeModal({ isOpen, onClose, ensembleId, studentIds
 
         try {
             setSubmitting(true);
-            const payload = {
-                ensembleId,
-                feeDefinitionId: parseInt(formData.feeDefinitionId),
-                amountCents: Math.round(parseFloat(formData.amountCents) * 100),
-                dueDate: formData.dueDate || null,
-                notes: formData.notes
-            };
+            const totalAmountCents = Math.round(parseFloat(formData.amountCents) * 100);
 
-            if (Array.isArray(studentIds) && studentIds.length > 1) {
-                await bulkAssignFee({
-                    ...payload,
-                    studentIds
-                });
+            if (isSplitPayment && splitMonths > 1) {
+                const monthlyAmountCents = Math.floor(totalAmountCents / splitMonths);
+                const remainderCents = totalAmountCents % splitMonths;
+
+                // Create assignments for each month
+                for (let i = 0; i < splitMonths; i++) {
+                    // Add remainder to first month
+                    const currentAmountCents = i === 0 ? monthlyAmountCents + remainderCents : monthlyAmountCents;
+
+                    // Calculate due date
+                    const dueDate = new Date(splitStartDate);
+                    dueDate.setMonth(dueDate.getMonth() + i);
+                    const dueDateStr = dueDate.toISOString().split('T')[0];
+
+                    const payload = {
+                        ensembleId,
+                        feeDefinitionId: parseInt(formData.feeDefinitionId),
+                        amountCents: currentAmountCents,
+                        dueDate: dueDateStr,
+                        notes: `${formData.notes ? formData.notes + ' - ' : ''}Installment ${i + 1}/${splitMonths}`
+                    };
+
+                    if (Array.isArray(studentIds) && studentIds.length > 1) {
+                        await bulkAssignFee({
+                            ...payload,
+                            studentIds
+                        });
+                    } else {
+                        await assignFee({
+                            ...payload,
+                            studentId: Array.isArray(studentIds) ? studentIds[0] : studentIds
+                        });
+                    }
+                }
             } else {
-                await assignFee({
-                    ...payload,
-                    studentId: Array.isArray(studentIds) ? studentIds[0] : studentIds
-                });
+                // Single payment assignment
+                const payload = {
+                    ensembleId,
+                    feeDefinitionId: parseInt(formData.feeDefinitionId),
+                    amountCents: totalAmountCents,
+                    dueDate: formData.dueDate || null,
+                    notes: formData.notes
+                };
+
+                if (Array.isArray(studentIds) && studentIds.length > 1) {
+                    await bulkAssignFee({
+                        ...payload,
+                        studentIds
+                    });
+                } else {
+                    await assignFee({
+                        ...payload,
+                        studentId: Array.isArray(studentIds) ? studentIds[0] : studentIds
+                    });
+                }
             }
 
             onSuccess();
@@ -216,7 +262,7 @@ export default function AssignFeeModal({ isOpen, onClose, ensembleId, studentIds
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-200 mb-2">
-                                        Amount ($)
+                                        Total Amount ($)
                                     </label>
                                     <input
                                         type="number"
@@ -227,18 +273,71 @@ export default function AssignFeeModal({ isOpen, onClose, ensembleId, studentIds
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-200 mb-2">
-                                        Due Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={formData.dueDate}
-                                        onChange={e => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    />
-                                </div>
+                                {!isSplitPayment && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                                            Due Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={formData.dueDate}
+                                            onChange={e => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        />
+                                    </div>
+                                )}
                             </div>
+
+                            {/* Split Payment Toggle */}
+                            <div className="flex items-center gap-2 py-2">
+                                <input
+                                    type="checkbox"
+                                    id="split-payment"
+                                    checked={isSplitPayment}
+                                    onChange={e => setIsSplitPayment(e.target.checked)}
+                                    className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                                />
+                                <label htmlFor="split-payment" className="text-sm text-gray-200 select-none cursor-pointer">
+                                    Split into monthly payments
+                                </label>
+                            </div>
+
+                            {isSplitPayment && (
+                                <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3 animate-in fade-in slide-in-from-top-2">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                Number of Months
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="2"
+                                                max="12"
+                                                value={splitMonths}
+                                                onChange={e => setSplitMonths(parseInt(e.target.value) || 2)}
+                                                className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                First Payment Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={splitStartDate}
+                                                onChange={e => setSplitStartDate(e.target.value)}
+                                                className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400">
+                                        Estimated monthly payment: <span className="text-white font-medium">
+                                            ${formData.amountCents ? (parseFloat(formData.amountCents) / splitMonths).toFixed(2) : '0.00'}
+                                        </span>
+                                    </p>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">

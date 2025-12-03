@@ -13,7 +13,9 @@ import {
     XIcon,
     ClockIcon,
     MapPinIcon,
-    RepeatIcon
+    RepeatIcon,
+    UploadIcon,
+    FileSpreadsheetIcon
 } from 'lucide-react';
 import { getEnsembles, getEvents, getCalendarItems, createCalendarItem, deleteCalendarItem, getTicketEvents, createEvent, deleteEvent, getRooms } from '../lib/opusApi';
 import AutoAttendancePanel from '../components/AutoAttendancePanel';
@@ -29,6 +31,10 @@ export function CalendarView() {
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
     const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [importFile, setImportFile] = useState(null);
+    const [importPreview, setImportPreview] = useState([]);
+    const [importing, setImporting] = useState(false);
     const [newItem, setNewItem] = useState({
         title: '',
         type: 'reminder',
@@ -247,6 +253,88 @@ export function CalendarView() {
         }
     };
 
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setImportFile(file);
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const text = event.target.result;
+            parseCSV(text);
+        };
+
+        reader.readAsText(file);
+    };
+
+    const parseCSV = (text) => {
+        const lines = text.split('\n').filter(line => line.trim());
+        if (lines.length < 2) {
+            alert('CSV file must have at least a header row and one data row');
+            return;
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const events = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            const event = {};
+
+            headers.forEach((header, index) => {
+                event[header] = values[index] || '';
+            });
+
+            // Validate required fields
+            if (event.name && event.start_time) {
+                events.push({
+                    name: event.name,
+                    type: event.type || 'rehearsal',
+                    start_time: event.start_time,
+                    end_time: event.end_time || event.start_time,
+                    description: event.description || '',
+                    room_id: event.room_id || null,
+                });
+            }
+        }
+
+        setImportPreview(events);
+    };
+
+    const handleBulkImport = async () => {
+        if (importPreview.length === 0) {
+            alert('No events to import');
+            return;
+        }
+
+        if (!confirm(`Import ${importPreview.length} events?`)) return;
+
+        setImporting(true);
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+
+            // Create events one by one (or use bulk endpoint if available)
+            for (const event of importPreview) {
+                await createEvent({
+                    ensemble_id: selectedEnsembleId,
+                    ...event
+                });
+            }
+
+            alert(`Successfully imported ${importPreview.length} events!`);
+            setIsImportModalOpen(false);
+            setImportFile(null);
+            setImportPreview([]);
+            loadCalendarData();
+        } catch (err) {
+            console.error('Error importing events:', err);
+            alert('Failed to import events: ' + err.message);
+        } finally {
+            setImporting(false);
+        }
+    };
+
     const handleDateClick = (arg) => {
         setNewItem({
             ...newItem,
@@ -436,6 +524,13 @@ export function CalendarView() {
                     <p className="text-sm md:text-base text-gray-200">View all events, rehearsals, and important dates</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <button
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
+                    >
+                        <UploadIcon className="w-5 h-5" />
+                        <span>Import</span>
+                    </button>
                     <button
                         onClick={() => setIsSyncModalOpen(true)}
                         className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
@@ -807,6 +902,111 @@ export function CalendarView() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Import Modal */}
+            {isImportModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-white/20 max-h-[90vh] flex flex-col">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <h2 className="text-xl font-semibold text-white">Import Events from Spreadsheet</h2>
+                            <button
+                                onClick={() => {
+                                    setIsImportModalOpen(false);
+                                    setImportFile(null);
+                                    setImportPreview([]);
+                                }}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <XIcon className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 border-b border-white/10 bg-white/5">
+                            <div className="flex items-center gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Upload CSV File
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept=".csv"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            id="csv-upload"
+                                        />
+                                        <label
+                                            htmlFor="csv-upload"
+                                            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-black/20 border border-white/10 border-dashed rounded-lg text-gray-300 hover:bg-black/30 hover:text-white cursor-pointer transition-colors"
+                                        >
+                                            <FileSpreadsheetIcon className="w-5 h-5" />
+                                            {importFile ? importFile.name : 'Click to upload CSV'}
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        Required columns: name, start_time. Optional: end_time, type, description, room_id.
+                                    </p>
+                                </div>
+                                {importPreview.length > 0 && (
+                                    <button
+                                        onClick={handleBulkImport}
+                                        disabled={importing}
+                                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg disabled:opacity-50"
+                                    >
+                                        {importing ? 'Importing...' : `Import ${importPreview.length} Events`}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {importPreview.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400">
+                                    <UploadIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                    <p>Upload a CSV file to preview events here.</p>
+                                    <div className="mt-4 text-sm bg-white/5 p-4 rounded-lg inline-block text-left">
+                                        <p className="font-mono text-xs text-gray-500 mb-2">Example CSV Format:</p>
+                                        <pre className="font-mono text-xs text-gray-300">
+                                            name,start_time,end_time,type,description<br />
+                                            Spring Concert,2024-05-15T19:00:00,2024-05-15T21:00:00,concert,Annual spring performance<br />
+                                            Weekly Rehearsal,2024-05-20T15:30:00,2024-05-20T17:00:00,rehearsal,Regular practice
+                                        </pre>
+                                    </div>
+                                </div>
+                            ) : (
+                                <table className="w-full">
+                                    <thead className="bg-white/5 sticky top-0">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Event Name</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Start Time</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/10">
+                                        {importPreview.map((event, index) => (
+                                            <tr key={index} className="hover:bg-white/5">
+                                                <td className="px-6 py-4 whitespace-nowrap text-white font-medium">{event.name}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventTypeColor(event.type)}`}>
+                                                        {event.type}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                                                    {new Date(event.start_time).toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-300 text-sm truncate max-w-xs">
+                                                    {event.description}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

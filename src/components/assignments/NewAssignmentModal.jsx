@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { getEvents } from '../../lib/opusApi';
 
 export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId }) {
     const [step, setStep] = useState(1);
@@ -13,7 +14,18 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
         target_value: '',
         submission_required: true,
         grading_type: 'completion',
+        event_id: '',
+        visibility: 'visible',
     });
+    const [events, setEvents] = useState([]);
+
+    React.useEffect(() => {
+        if (ensembleId) {
+            getEvents(ensembleId)
+                .then(setEvents)
+                .catch(err => console.error('Failed to load events:', err));
+        }
+    }, [ensembleId]);
 
     if (!isOpen) return null;
 
@@ -45,6 +57,8 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
             status: 'active',
             submission_required: formData.submission_required,
             grading_type: formData.grading_type,
+            event_id: formData.event_id || null,
+            visibility: formData.visibility,
             created_by: parseInt(directorId),
             targets: [{
                 target_type: formData.target_type,
@@ -68,6 +82,8 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
             target_value: '',
             submission_required: true,
             grading_type: 'completion',
+            event_id: '',
+            visibility: 'visible',
         });
         setStep(1);
         onClose();
@@ -116,6 +132,28 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
                             rows={4}
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
+                    </div>
+
+                    {/* Link to Event */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Link to Event (Optional)
+                        </label>
+                        <select
+                            value={formData.event_id}
+                            onChange={(e) => setFormData({ ...formData, event_id: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                            <option value="">No Event Link</option>
+                            {events.map(event => (
+                                <option key={event.id} value={event.id}>
+                                    {event.name} ({new Date(event.start_time).toLocaleDateString()})
+                                </option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Linking to an event will show this assignment on the event details page.
+                        </p>
                     </div>
 
                     {/* Type */}
@@ -208,6 +246,21 @@ export default function NewAssignmentModal({ isOpen, onClose, onSave, ensembleId
                         >
                             <option value="completion">Completion Only (Complete/Missing)</option>
                             <option value="score">Score (0-100)</option>
+                        </select>
+                    </div>
+
+                    {/* Visibility */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Visibility
+                        </label>
+                        <select
+                            value={formData.visibility}
+                            onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                            <option value="visible">Public (Visible to Students)</option>
+                            <option value="hidden">Hidden (Draft)</option>
                         </select>
                     </div>
 

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadIcon, UsersIcon, PlusIcon, Mail } from 'lucide-react';
+import { UploadIcon, UsersIcon, PlusIcon, Mail, DollarSignIcon } from 'lucide-react';
 import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember, getEnsembleFeeSummary, sendInvites } from '../lib/opusApi';
 import ManageFeesModal from '../components/fees/ManageFeesModal';
+import AssignFeeModal from '../components/fees/AssignFeeModal';
 
 export default function Roster() {
   const navigate = useNavigate();
@@ -29,6 +30,10 @@ export default function Roster() {
   const [feeSummary, setFeeSummary] = useState({});
   const [managingFeesStudent, setManagingFeesStudent] = useState(null);
 
+  // Batch Selection State
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [isBatchAssignFeeOpen, setIsBatchAssignFeeOpen] = useState(false);
+
   useEffect(() => {
     loadEnsembles();
   }, []);
@@ -37,6 +42,7 @@ export default function Roster() {
     if (selectedEnsembleId) {
       loadRoster();
       loadSectionsAndParts();
+      setSelectedStudentIds([]); // Clear selection on ensemble change
     }
   }, [selectedEnsembleId]);
 
@@ -283,6 +289,23 @@ export default function Roster() {
     setIsAddModalOpen(true);
   };
 
+  // Selection Handlers
+  const toggleSelectAll = () => {
+    if (selectedStudentIds.length === roster.length) {
+      setSelectedStudentIds([]);
+    } else {
+      setSelectedStudentIds(roster.map(s => s.id));
+    }
+  };
+
+  const toggleSelectStudent = (id) => {
+    if (selectedStudentIds.includes(id)) {
+      setSelectedStudentIds(selectedStudentIds.filter(sid => sid !== id));
+    } else {
+      setSelectedStudentIds([...selectedStudentIds, id]);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8 max-w-6xl mx-auto">
@@ -313,7 +336,7 @@ export default function Roster() {
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 drop-shadow-lg">
-            Roster Management [v2.0 - FEES ENABLED]
+            Roster Management
           </h1>
           <p className="text-sm md:text-base text-gray-200">Manage your ensemble members</p>
         </div>
@@ -371,6 +394,32 @@ export default function Roster() {
         </div>
       )}
 
+      {/* Batch Actions Bar */}
+      {selectedStudentIds.length > 0 && (
+        <div className="mb-4 p-3 bg-purple-900/40 border border-purple-500/30 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-3">
+            <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              {selectedStudentIds.length}
+            </span>
+            <span className="text-sm text-purple-200 font-medium">Students Selected</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsBatchAssignFeeOpen(true)}
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+            >
+              <DollarSignIcon className="w-4 h-4" /> Assign Fee
+            </button>
+            <button
+              onClick={() => setSelectedStudentIds([])}
+              className="px-3 py-1.5 text-gray-400 hover:text-white text-sm"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white/10 backdrop-blur-3xl rounded-2xl border border-white/30 shadow-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-white/20 flex items-center justify-between bg-white/5">
           <div className="flex items-center gap-2">
@@ -397,6 +446,14 @@ export default function Roster() {
             <table className="w-full">
               <thead className="bg-white/5 border-b border-white/10">
                 <tr>
+                  <th className="px-6 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedStudentIds.length === roster.length && roster.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Name
                   </th>
@@ -424,8 +481,16 @@ export default function Roster() {
                 {roster.map((student) => (
                   <tr
                     key={student.id}
-                    className="hover:bg-white/5 transition-colors"
+                    className={`hover:bg-white/5 transition-colors ${selectedStudentIds.includes(student.id) ? 'bg-purple-500/10' : ''}`}
                   >
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedStudentIds.includes(student.id)}
+                        onChange={() => toggleSelectStudent(student.id)}
+                        className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                      />
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
@@ -663,6 +728,18 @@ export default function Roster() {
         }}
         student={managingFeesStudent}
         ensembleId={selectedEnsembleId}
+      />
+
+      {/* Batch Assign Fee Modal */}
+      <AssignFeeModal
+        isOpen={isBatchAssignFeeOpen}
+        onClose={() => setIsBatchAssignFeeOpen(false)}
+        ensembleId={selectedEnsembleId}
+        studentIds={selectedStudentIds}
+        onSuccess={() => {
+          loadRoster();
+          setSelectedStudentIds([]);
+        }}
       />
     </div>
   );

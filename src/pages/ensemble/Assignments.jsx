@@ -70,6 +70,12 @@ export default function Assignments() {
         }
     };
 
+    const getVisibilityColor = (visibility) => {
+        return visibility === 'visible'
+            ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+            : 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+    };
+
     const getTypeIcon = (type) => {
         switch (type) {
             case 'memorization': return '🧠';
@@ -195,6 +201,7 @@ export default function Assignments() {
                                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Type</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Due Date</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Completion</th>
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Visibility</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Status</th>
                                 </tr>
                             </thead>
@@ -235,6 +242,11 @@ export default function Assignments() {
                                                     {assignment.completed_submissions || 0}/{assignment.total_submissions || 0}
                                                 </span>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getVisibilityColor(assignment.visibility)}`}>
+                                                {assignment.visibility === 'visible' ? 'Public' : 'Hidden'}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(assignment.status)}`}>

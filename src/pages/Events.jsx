@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarIcon, PlusIcon, MapPinIcon, ClockIcon, TrashIcon, RepeatIcon } from 'lucide-react';
+import { CalendarIcon, PlusIcon, MapPinIcon, ClockIcon, TrashIcon, RepeatIcon, FileTextIcon, DownloadIcon, XIcon } from 'lucide-react';
 import { getEnsembles, getEvents, createEvent, deleteEvent, getRooms } from '../lib/opusApi';
 
 export function Events() {
@@ -9,6 +9,13 @@ export function Events() {
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // Absence Report State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportDate, setReportDate] = useState('');
+    const [reportData, setReportData] = useState(null);
+    const [loadingReport, setLoadingReport] = useState(false);
+
     const [newEvent, setNewEvent] = useState({
         name: '',
         type: 'rehearsal',
@@ -23,9 +30,15 @@ export function Events() {
     });
     const [creating, setCreating] = useState(false);
 
+    const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
+
     useEffect(() => {
         loadEnsembles();
         loadRooms();
+        // Default report date to 30 days ago
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+        setReportDate(date.toISOString().split('T')[0]);
     }, []);
 
     useEffect(() => {
@@ -65,6 +78,53 @@ export function Events() {
         } catch (err) {
             console.error('Failed to load events', err);
         }
+    };
+
+    const generateReport = async () => {
+        if (!selectedEnsembleId || !reportDate) return;
+        setLoadingReport(true);
+        try {
+            const res = await fetch(`${API_URL}/api/ensembles/${selectedEnsembleId}/absences?since=${reportDate}`);
+            if (res.ok) {
+                const data = await res.json();
+                setReportData(data);
+            } else {
+                alert('Failed to fetch report');
+            }
+        } catch (err) {
+            console.error('Error fetching report:', err);
+            alert('Error fetching report');
+        } finally {
+            setLoadingReport(false);
+        }
+    };
+
+    const downloadReportCSV = () => {
+        if (!reportData) return;
+
+        const headers = ['First Name', 'Last Name', 'Section', 'Part', 'Absences'];
+        const rows = reportData.map(s => [
+            s.first_name,
+            s.last_name,
+            s.section || '',
+            s.part || '',
+            s.absence_count
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `absence_report_${reportDate}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const generateRecurringEvents = () => {
@@ -196,6 +256,7 @@ export function Events() {
             weekday: 'short',
             month: 'short',
             day: 'numeric',
+            year: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
         });
@@ -251,13 +312,22 @@ export function Events() {
                     </h1>
                     <p className="text-sm md:text-base text-gray-200">Manage rehearsals, concerts, and performances</p>
                 </div>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
-                >
-                    <PlusIcon className="w-5 h-5" />
-                    <span>Add Event</span>
-                </button>
+                <div className="flex gap-3 w-full sm:w-auto">
+                    <button
+                        onClick={() => setIsReportModalOpen(true)}
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-all border border-white/20"
+                    >
+                        <FileTextIcon className="w-5 h-5" />
+                        <span>Absence Report</span>
+                    </button>
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
+                    >
+                        <PlusIcon className="w-5 h-5" />
+                        <span>Add Event</span>
+                    </button>
+                </div>
             </div>
 
             {/* Ensemble Selector */}
@@ -341,6 +411,94 @@ export function Events() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Absence Report Modal */}
+            {isReportModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-white/20 max-h-[90vh] flex flex-col">
+                        <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-white">Absence Report</h2>
+                            <button onClick={() => setIsReportModalOpen(false)} className="text-gray-400 hover:text-white">
+                                <XIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 border-b border-white/10 bg-white/5">
+                            <div className="flex flex-col sm:flex-row gap-4 items-end">
+                                <div className="flex-1 w-full">
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Count Absences Since
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={reportDate}
+                                        onChange={(e) => setReportDate(e.target.value)}
+                                        className="w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </div>
+                                <button
+                                    onClick={generateReport}
+                                    disabled={loadingReport}
+                                    className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-500 disabled:opacity-50"
+                                >
+                                    {loadingReport ? 'Generating...' : 'Generate Report'}
+                                </button>
+                                {reportData && (
+                                    <button
+                                        onClick={downloadReportCSV}
+                                        className="px-6 py-2 bg-blue-600/20 text-blue-300 border border-blue-500/30 rounded-lg font-medium hover:bg-blue-600/30 flex items-center gap-2"
+                                    >
+                                        <DownloadIcon className="w-4 h-4" />
+                                        Export CSV
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {!reportData ? (
+                                <div className="text-center py-12 text-gray-400">
+                                    Select a date and click Generate Report to see absence counts.
+                                </div>
+                            ) : reportData.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400">
+                                    No students found.
+                                </div>
+                            ) : (
+                                <table className="w-full">
+                                    <thead className="bg-white/5 sticky top-0">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Student</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Section</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Part</th>
+                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Absences</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/10">
+                                        {reportData.map((student) => (
+                                            <tr key={student.id} className="hover:bg-white/5">
+                                                <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
+                                                    {student.last_name}, {student.first_name}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-gray-300">{student.section}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-gray-300">{student.part}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <span className={`px-2 py-1 rounded text-sm font-bold ${student.absence_count === 0 ? 'bg-green-500/20 text-green-300' :
+                                                            student.absence_count < 3 ? 'bg-yellow-500/20 text-yellow-300' :
+                                                                'bg-red-500/20 text-red-300'
+                                                        }`}>
+                                                        {student.absence_count}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -47,6 +47,7 @@ import Planner from './pages/Planner';
 import EventDetail from './pages/EventDetail';
 import Beacons from './pages/Beacons';
 import RoomCalibration from './pages/RoomCalibration';
+import DirectorSettings from './pages/DirectorSettings';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -137,6 +138,7 @@ const App = () => {
 
             <Route path="seating" element={<SeatingChart />} />
             <Route path="pieces/:pieceId/planner" element={<Planner />} />
+            <Route path="settings" element={<DirectorSettings />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/director/today" replace />} />

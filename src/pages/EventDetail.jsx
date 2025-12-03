@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users, ArrowLeft, Edit2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, ArrowLeft, Edit2, Download, CheckCircle } from 'lucide-react';
 import AutoAttendancePanel from '../components/AutoAttendancePanel';
 
 export default function EventDetail() {
@@ -10,6 +10,7 @@ export default function EventDetail() {
     const [attendance, setAttendance] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [markingAll, setMarkingAll] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
 
@@ -74,6 +75,70 @@ export default function EventDetail() {
         } catch (err) {
             console.error('Error updating attendance:', err);
         }
+    };
+
+    const handleMarkAllPresent = async () => {
+        if (!confirm('Mark all UNMARKED students as Present?')) return;
+
+        setMarkingAll(true);
+        try {
+            const unmarkedStudents = attendance.filter(a => a.status === 'unmarked');
+
+            // Process in batches of 5 to avoid overwhelming the server
+            const batchSize = 5;
+            for (let i = 0; i < unmarkedStudents.length; i += batchSize) {
+                const batch = unmarkedStudents.slice(i, i + batchSize);
+                await Promise.all(batch.map(student =>
+                    fetch(`${API_URL}/api/events/${id}/attendance`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_id: student.id,
+                            status: 'present'
+                        })
+                    })
+                ));
+            }
+
+            loadAttendance();
+            alert(`Marked ${unmarkedStudents.length} students as present.`);
+        } catch (err) {
+            console.error('Error marking all present:', err);
+            alert('Failed to mark all present');
+        } finally {
+            setMarkingAll(false);
+        }
+    };
+
+    const handleExportCSV = () => {
+        if (!attendance.length) return;
+
+        const headers = ['First Name', 'Last Name', 'Email', 'Section', 'Part', 'Status', 'Source', 'Time'];
+        const rows = attendance.map(s => [
+            s.first_name,
+            s.last_name,
+            s.email || '',
+            s.section || '',
+            s.part || '',
+            s.status,
+            s.source || 'manual',
+            s.created_at ? new Date(s.created_at).toLocaleString() : ''
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${event.name}_attendance_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const getStatusBadge = (status) => {
@@ -230,18 +295,35 @@ export default function EventDetail() {
 
             {/* Attendance Table */}
             <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
-                <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <Users className="w-6 h-6 text-blue-400" />
                         <h2 className="text-xl font-semibold text-white">Attendance</h2>
                         <span className="text-gray-400 text-sm">({stats.total} students)</span>
                     </div>
-                    <button
-                        onClick={() => setRefreshKey(k => k + 1)}
-                        className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-gray-300 transition-colors"
-                    >
-                        Refresh
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleMarkAllPresent}
+                            disabled={markingAll || stats.unmarked === 0}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-green-600/20 text-green-300 border border-green-500/30 rounded-lg text-sm font-medium hover:bg-green-600/30 transition-colors disabled:opacity-50"
+                        >
+                            <CheckCircle className="w-4 h-4" />
+                            {markingAll ? 'Marking...' : 'Mark All Present'}
+                        </button>
+                        <button
+                            onClick={handleExportCSV}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/20 text-blue-300 border border-blue-500/30 rounded-lg text-sm font-medium hover:bg-blue-600/30 transition-colors"
+                        >
+                            <Download className="w-4 h-4" />
+                            Export CSV
+                        </button>
+                        <button
+                            onClick={() => setRefreshKey(k => k + 1)}
+                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-gray-300 transition-colors"
+                        >
+                            Refresh
+                        </button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">

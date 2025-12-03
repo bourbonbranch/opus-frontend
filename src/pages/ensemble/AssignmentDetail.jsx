@@ -101,8 +101,17 @@ export default function AssignmentDetail() {
                             <Clock className="w-4 h-4" />
                             {new Date(assignment.due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
+                        {assignment.event_id && (
+                            <span className="flex items-center gap-1 text-purple-400">
+                                <Calendar className="w-4 h-4" />
+                                Linked to: {assignment.event_name || 'Event'}
+                            </span>
+                        )}
+                        <span className={`px-2 py-0.5 rounded-full text-xs border ${assignment.visibility === 'visible' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-gray-500/20 text-gray-300 border-gray-500/30'}`}>
+                            {assignment.visibility === 'visible' ? 'Public' : 'Hidden'}
+                        </span>
                         <span className={`px-2 py-0.5 rounded-full text-xs border ${assignment.status === 'active' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
-                                'bg-gray-500/20 text-gray-300 border-gray-500/30'
+                            'bg-gray-500/20 text-gray-300 border-gray-500/30'
                             }`}>
                             {assignment.status}
                         </span>
