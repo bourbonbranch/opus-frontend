@@ -18,10 +18,11 @@ export default function EnsembleAttendance() {
             const API_URL = import.meta.env.VITE_API_URL || 'https://opus-backend-production.up.railway.app';
             const response = await fetch(`${API_URL}/api/ensembles/${id}/attendance?date=${date}`);
             const data = await response.json();
-            // Force default to 'present' if status is missing or null
+            // FORCE all records to 'present' status on initial load
+            // This ensures Present button is highlighted by default
             const recordsWithDefault = (data.records || []).map(r => ({
                 ...r,
-                status: r.status || 'present'
+                status: 'present'  // Always default to present
             }));
             setRecords(recordsWithDefault);
         } catch (error) {
