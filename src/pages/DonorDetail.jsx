@@ -16,6 +16,12 @@ export default function DonorDetail() {
     const [newNote, setNewNote] = useState('');
     const [editForm, setEditForm] = useState({});
     const [tagInput, setTagInput] = useState('');
+    const [showDonationModal, setShowDonationModal] = useState(false);
+    const [donationForm, setDonationForm] = useState({
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        message: ''
+    });
 
     useEffect(() => {
         loadDonor();
@@ -159,6 +165,42 @@ export default function DonorDetail() {
             loadDonor(); // Reload to show new activity
         } catch (err) {
             console.error('Error adding note:', err);
+        }
+    };
+
+    const handleSaveDonation = async () => {
+        if (!donationForm.amount) return;
+
+        try {
+            const amountCents = Math.round(parseFloat(donationForm.amount.replace(/,/g, '')) * 100);
+
+            const response = await fetch(`${VITE_API_BASE_URL}/api/donations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    donorId: donor.id,
+                    ensembleId: donor.ensemble_id,
+                    amountCents,
+                    donationDate: donationForm.date,
+                    message: donationForm.message,
+                    paymentMethod: 'manual'
+                })
+            });
+
+            if (response.ok) {
+                await loadDonor();
+                setShowDonationModal(false);
+                setDonationForm({
+                    amount: '',
+                    date: new Date().toISOString().split('T')[0],
+                    message: ''
+                });
+            } else {
+                alert('Failed to save donation');
+            }
+        } catch (err) {
+            console.error('Error saving donation:', err);
+            alert('Failed to save donation');
         }
     };
 
@@ -420,6 +462,80 @@ export default function DonorDetail() {
                     </div>
                 )}
 
+                {/* Log Donation Modal */}
+                {showDonationModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-2xl">
+                            <h2 className="text-xl font-semibold text-white mb-6">Log Donation</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-white/80 mb-2">Amount</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60">$</span>
+                                        <input
+                                            type="text"
+                                            value={donationForm.amount}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/[^0-9.]/g, '');
+                                                setDonationForm({ ...donationForm, amount: value });
+                                            }}
+                                            onBlur={(e) => {
+                                                const value = e.target.value;
+                                                if (value && !isNaN(value)) {
+                                                    const formatted = parseFloat(value).toLocaleString('en-US', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    });
+                                                    setDonationForm({ ...donationForm, amount: formatted });
+                                                }
+                                            }}
+                                            onFocus={(e) => {
+                                                const value = e.target.value.replace(/,/g, '');
+                                                setDonationForm({ ...donationForm, amount: value });
+                                            }}
+                                            placeholder="0.00"
+                                            className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/80 mb-2">Date</label>
+                                    <input
+                                        type="date"
+                                        value={donationForm.date}
+                                        onChange={(e) => setDonationForm({ ...donationForm, date: e.target.value })}
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/80 mb-2">Message (Optional)</label>
+                                    <textarea
+                                        value={donationForm.message}
+                                        onChange={(e) => setDonationForm({ ...donationForm, message: e.target.value })}
+                                        rows="3"
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-pink-500/50 resize-none"
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button
+                                        onClick={() => setShowDonationModal(false)}
+                                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleSaveDonation}
+                                        disabled={!donationForm.amount}
+                                        className="px-4 py-2 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
+                                    >
+                                        Save Donation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Three Column Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - Donor Summary */}
@@ -519,7 +635,16 @@ export default function DonorDetail() {
 
                     {/* Middle Column - Donations */}
                     <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-white/10 p-6">
-                        <h2 className="text-lg font-semibold text-white mb-4">Donation History</h2>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-white">Donation History</h2>
+                            <button
+                                onClick={() => setShowDonationModal(true)}
+                                className="text-pink-400 hover:text-pink-300 flex items-center gap-1 text-sm"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Log Donation
+                            </button>
+                        </div>
                         {donor.donations && donor.donations.length > 0 ? (
                             <div className="space-y-3">
                                 {donor.donations.map((donation) => (
