@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadIcon, UsersIcon, PlusIcon, Mail, DollarSignIcon } from 'lucide-react';
+import { UploadIcon, UsersIcon, PlusIcon, Mail, DollarSignIcon, CheckSquareIcon } from 'lucide-react';
 import { getEnsembles, getRoster, addRosterMember, importRoster, getEnsembleSections, getEnsembleParts, updateRosterMember, deleteRosterMember, getEnsembleFeeSummary, sendInvites } from '../lib/opusApi';
 import ManageFeesModal from '../components/fees/ManageFeesModal';
 import AssignFeeModal from '../components/fees/AssignFeeModal';
@@ -33,6 +33,7 @@ export default function Roster() {
   // Batch Selection State
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [isBatchAssignFeeOpen, setIsBatchAssignFeeOpen] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   useEffect(() => {
     loadEnsembles();
@@ -365,6 +366,19 @@ export default function Roster() {
             <span>Send Invites</span>
           </button>
           <button
+            onClick={() => {
+              if (isSelectionMode) setSelectedStudentIds([]);
+              setIsSelectionMode(!isSelectionMode);
+            }}
+            className={`flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] rounded-xl font-medium transition-all border border-white/20 ${isSelectionMode
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+          >
+            <CheckSquareIcon className="w-5 h-5" />
+            <span>{isSelectionMode ? 'Done Selecting' : 'Select Students'}</span>
+          </button>
+          <button
             onClick={openAddModal}
             className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-2xl shadow-purple-500/50 border border-white/20"
           >
@@ -446,14 +460,16 @@ export default function Roster() {
             <table className="w-full">
               <thead className="bg-white/5 border-b border-white/10">
                 <tr>
-                  <th className="px-6 py-3 w-10">
-                    <input
-                      type="checkbox"
-                      checked={selectedStudentIds.length === roster.length && roster.length > 0}
-                      onChange={toggleSelectAll}
-                      className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
-                    />
-                  </th>
+                  {isSelectionMode && (
+                    <th className="px-6 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedStudentIds.length === roster.length && roster.length > 0}
+                        onChange={toggleSelectAll}
+                        className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                      />
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Name
                   </th>
@@ -483,14 +499,16 @@ export default function Roster() {
                     key={student.id}
                     className={`hover:bg-white/5 transition-colors ${selectedStudentIds.includes(student.id) ? 'bg-purple-500/10' : ''}`}
                   >
-                    <td className="px-6 py-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedStudentIds.includes(student.id)}
-                        onChange={() => toggleSelectStudent(student.id)}
-                        className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
-                      />
-                    </td>
+                    {isSelectionMode && (
+                      <td className="px-6 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedStudentIds.includes(student.id)}
+                          onChange={() => toggleSelectStudent(student.id)}
+                          className="rounded border-gray-500 bg-gray-700 text-purple-600 focus:ring-purple-500"
+                        />
+                      </td>
+                    )}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
