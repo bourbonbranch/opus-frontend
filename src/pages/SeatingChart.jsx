@@ -468,6 +468,21 @@ export default function SeatingChart() {
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                            {/* Ensemble Selector */}
+                            {ensembles.length > 1 && (
+                                <select
+                                    value={selectedEnsembleId || ''}
+                                    onChange={(e) => handleEnsembleChange(parseInt(e.target.value))}
+                                    className="px-3 md:px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm font-medium min-h-[44px] hover:bg-white/20 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                    {ensembles.map(ens => (
+                                        <option key={ens.id} value={ens.id} className="bg-gray-800">
+                                            {ens.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+
                             <button
                                 onClick={() => setPlacedStudents([])}
                                 className="flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-orange-500/20"
