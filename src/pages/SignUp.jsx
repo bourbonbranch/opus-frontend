@@ -60,7 +60,7 @@ export default function SignUp() {
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-xl">
               <MusicIcon className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg">Opus</h1>
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">Novus</h1>
           </div>
 
           {/* Progress Indicator */}
@@ -90,7 +90,7 @@ export default function SignUp() {
           {/* Sign Up Card */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2">Create your account</h2>
-            <p className="text-gray-300 mb-6">Get started with Opus</p>
+            <p className="text-gray-300 mb-6">Get started with Novus</p>
 
             {error && (
               <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">

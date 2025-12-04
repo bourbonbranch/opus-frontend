@@ -78,7 +78,7 @@ export default function StudentCheckIn() {
 
             </div>
 
-            <p className="mt-8 text-gray-400 text-sm">Opus Attendance System</p>
+            <p className="mt-8 text-gray-400 text-sm">Novus Attendance System</p>
         </div>
     );
 }

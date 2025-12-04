@@ -56,7 +56,7 @@ export default function Login() {
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-2xl mb-4">
                             <MusicIcon className="w-8 h-8 text-white" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">Opus</h1>
+                        <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">Novus</h1>
                         <p className="text-gray-300 text-center">Ensemble Management Made Simple</p>
                     </div>
 
