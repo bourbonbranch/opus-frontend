@@ -94,6 +94,20 @@ export default function SeatingChart() {
         }
     };
 
+    const handleEnsembleChange = (newEnsembleId) => {
+        if (newEnsembleId === selectedEnsembleId) return;
+
+        if (placedStudents.length > 0) {
+            if (!confirm('Switching ensembles will clear the current seating arrangement. Continue?')) {
+                return;
+            }
+        }
+
+        setSelectedEnsembleId(newEnsembleId);
+        setPlacedStudents([]); // Clear placed students
+        loadRoster(newEnsembleId); // Load new roster
+    };
+
     const loadRoster = async (ensembleId) => {
         try {
             const rosterData = await getRoster(ensembleId);
