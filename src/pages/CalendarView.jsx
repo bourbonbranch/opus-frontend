@@ -52,7 +52,9 @@ export function CalendarView() {
         is_recurring: false,
         recurrence_pattern: 'weekly',
         recurrence_days: [],
+        recurrence_days: [],
         recurrence_end_date: '',
+        ensemble_id: '',
     });
     const [creating, setCreating] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -76,6 +78,7 @@ export function CalendarView() {
             setEnsembles(data || []);
             if (data && data.length > 0) {
                 setSelectedEnsembleId(data[0].id);
+                setNewEvent(prev => ({ ...prev, ensemble_id: data[0].id }));
             }
         } catch (err) {
             console.error('Failed to load ensembles', err);
@@ -172,7 +175,7 @@ export function CalendarView() {
                 alert(`Successfully created ${recurringEvents.length} recurring events!`);
             } else {
                 await createEvent({
-                    ensemble_id: selectedEnsembleId,
+                    ensemble_id: newEvent.ensemble_id, // Use newEvent.ensemble_id
                     room_id: newEvent.room_id || null,
                     name: newEvent.name,
                     type: newEvent.type,
@@ -180,6 +183,7 @@ export function CalendarView() {
                     end_time: new Date(newEvent.end_time).toISOString(),
                     description: newEvent.description,
                 });
+                alert('Successfully created event!');
             }
 
             setNewEvent({
@@ -193,6 +197,7 @@ export function CalendarView() {
                 recurrence_pattern: 'weekly',
                 recurrence_days: [],
                 recurrence_end_date: '',
+                ensemble_id: selectedEnsembleId || (ensembles.length > 0 ? ensembles[0].id : ''), // Reset to current or first ensemble
             });
             setIsAddEventModalOpen(false);
             loadCalendarData();
@@ -612,6 +617,23 @@ export function CalendarView() {
                             </button>
                         </div>
                         <form onSubmit={handleAddEvent} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-200 mb-2">
+                                    Ensemble *
+                                </label>
+                                <select
+                                    value={newEvent.ensemble_id}
+                                    onChange={(e) => setNewEvent({ ...newEvent, ensemble_id: parseInt(e.target.value) })}
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    required
+                                >
+                                    <option value="">Select Ensemble...</option>
+                                    {ensembles.map(ens => (
+                                        <option key={ens.id} value={ens.id}>{ens.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Event Name *
