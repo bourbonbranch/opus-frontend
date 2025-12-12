@@ -52,7 +52,6 @@ export function CalendarView() {
         is_recurring: false,
         recurrence_pattern: 'weekly',
         recurrence_days: [],
-        recurrence_days: [],
         recurrence_end_date: '',
         ensemble_id: '',
     });
