@@ -308,7 +308,7 @@ export default function Messages() {
                                 >
                                     <div className="flex items-start gap-3">
                                         {/* Avatar Bubble */}
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0 ${selectedConversation?.id === conv.id ? 'bg-purple-600' : 'bg-gradient-to-br from-gray-600 to-slate-700 group-hover:from-purple-600 group-hover:to-blue-600 transition-all'}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0 ${selectedConversation?.id === conv.id ? 'bg-purple-600' : 'bg-gradient-to-br from-indigo-900 to-purple-900 border border-white/10 group-hover:from-purple-600 group-hover:to-blue-600 transition-all'}`}>
                                             {getInitials(conv.studentName || conv.title)}
                                         </div>
 
