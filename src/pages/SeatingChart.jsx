@@ -10,13 +10,13 @@ import {
     rectIntersection
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
-import { Users, Settings, ChevronRight, ChevronLeft, Wand2, RotateCcw, SaveIcon, FolderOpenIcon } from 'lucide-react';
+import { Users, Settings, ChevronRight, ChevronLeft, Wand2, RotateCcw, SaveIcon, FolderOpenIcon, Share } from 'lucide-react';
 import SeatingCanvas from '../components/seating/SeatingCanvas';
 import StudentBank from '../components/seating/StudentBank';
 import RiserConfigurationPanel from '../components/seating/RiserConfigurationPanel';
 import AutoSeatingModal from '../components/seating/AutoSeatingModal';
 import SaveConfigurationModal from '../components/seating/SaveConfigurationModal';
-import { getEnsembles, getRoster, saveSeatingConfiguration, getSeatingConfigurations, getSeatingConfiguration } from '../lib/opusApi';
+import { getEnsembles, getRoster, saveSeatingConfiguration, getSeatingConfigurations, getSeatingConfiguration, publishSeatingConfiguration } from '../lib/opusApi';
 import { generateAutoSeating } from '../utils/autoSeating';
 
 // Custom collision detection algorithm
@@ -233,6 +233,19 @@ export default function SeatingChart() {
         } catch (err) {
             console.error('Error loading configuration:', err);
             alert('Failed to load configuration: ' + err.message);
+        }
+    };
+
+    const handlePublish = async () => {
+        if (!selectedConfigId) return;
+        if (!confirm('Are you sure you want to publish this seating chart to students? They will see their assigned seats immediately.')) return;
+
+        try {
+            await publishSeatingConfiguration(selectedConfigId);
+            alert('Seating chart published successfully!');
+        } catch (err) {
+            console.error('Failed to publish:', err);
+            alert('Failed to publish seating chart: ' + err.message);
         }
     };
 
@@ -545,6 +558,17 @@ export default function SeatingChart() {
                                 <SaveIcon className="w-4 h-4" />
                                 <span className="hidden sm:inline">Save</span>
                             </button>
+
+                            {selectedConfigId && (
+                                <button
+                                    onClick={handlePublish}
+                                    className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium shadow-lg shadow-blue-500/20 min-h-[44px]"
+                                    title="Publish to students"
+                                >
+                                    <Share className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Publish</span>
+                                </button>
+                            )}
                         </div>
                     </div>
 

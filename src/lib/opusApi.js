@@ -593,6 +593,18 @@ export async function deleteSeatingConfiguration(configId) {
   return handleResponse(res);
 }
 
+// Publish configuration
+export async function publishSeatingConfiguration(configId, note = null) {
+  const res = await fetch(`${API_BASE_URL}/api/seating-configurations/${configId}/publish`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ note }),
+  });
+  return handleResponse(res);
+}
+
 // ─────────────── ASSIGNMENTS ───────────────
 
 // Create new assignment
