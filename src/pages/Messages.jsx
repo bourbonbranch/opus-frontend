@@ -308,7 +308,7 @@ export default function Messages() {
                                 >
                                     <div className="flex items-start gap-3">
                                         {/* Avatar Bubble */}
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0 ${selectedConversation?.id === conv.id ? 'bg-purple-600' : 'bg-gradient-to-br from-gray-700 to-gray-600 group-hover:from-purple-600 group-hover:to-blue-600 transition-all'}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0 ${selectedConversation?.id === conv.id ? 'bg-purple-600' : 'bg-gradient-to-br from-gray-600 to-slate-700 group-hover:from-purple-600 group-hover:to-blue-600 transition-all'}`}>
                                             {getInitials(conv.studentName || conv.title)}
                                         </div>
 
@@ -665,7 +665,7 @@ function ThreadView({ messages, onReply }) {
                             <div className={`flex gap-3 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 {/* Student Avatar (Left) */}
                                 {!isMe && (
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-lg flex-shrink-0 mt-1">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-lg flex-shrink-0 mt-1">
                                         {getInitials(msg.senderName)}
                                     </div>
                                 )}
@@ -678,10 +678,10 @@ function ThreadView({ messages, onReply }) {
                                     </p>
                                 </div>
 
-                                {/* Director Avatar (Right) - Optional but looks nice for symmetry if desired, or can omit */}
+                                {/* Director Avatar (Right) */}
                                 {isMe && (
-                                    <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-xs font-bold text-white shadow-lg flex-shrink-0 mt-1">
-                                        DIR
+                                    <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-[10px] font-bold text-white shadow-lg flex-shrink-0 mt-1">
+                                        YOU
                                     </div>
                                 )}
                             </div>
