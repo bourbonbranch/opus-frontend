@@ -301,27 +301,36 @@ export default function Messages() {
                                 <div
                                     key={conv.id}
                                     onClick={() => openConversation(conv)}
-                                    className={`p-4 rounded-xl cursor-pointer transition-colors border ${selectedConversation?.id === conv.id
+                                    className={`p-4 rounded-xl cursor-pointer transition-colors border group ${selectedConversation?.id === conv.id
                                         ? 'bg-purple-500/20 border-purple-500/50'
-                                        : 'bg-transparent border-transparent hover:bg-white/5'
+                                        : 'bg-transparent border-white/5 hover:bg-white/5'
                                         }`}
                                 >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h3 className={`font-semibold text-sm ${conv.unreadCount > 0 ? 'text-white' : 'text-gray-300'}`}>
-                                            {conv.title}
-                                        </h3>
-                                        <span className="text-xs text-gray-500">
-                                            {new Date(conv.updatedAt).toLocaleDateString()}
-                                        </span>
+                                    <div className="flex items-start gap-3">
+                                        {/* Avatar Bubble */}
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0 ${selectedConversation?.id === conv.id ? 'bg-purple-600' : 'bg-gradient-to-br from-gray-700 to-gray-600 group-hover:from-purple-600 group-hover:to-blue-600 transition-all'}`}>
+                                            {getInitials(conv.title)}
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h3 className={`font-semibold text-sm truncate pr-2 ${conv.unreadCount > 0 ? 'text-white' : 'text-gray-300'}`}>
+                                                    {conv.title}
+                                                </h3>
+                                                <span className="text-xs text-gray-500 flex-shrink-0">
+                                                    {new Date(conv.updatedAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-400 line-clamp-1">
+                                                {conv.lastMessage || 'No messages'}
+                                            </p>
+                                            {conv.unreadCount > 0 && activeTab === 'messages' && (
+                                                <span className="inline-block mt-2 px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
+                                                    {conv.unreadCount} NEW
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className="text-sm text-gray-400 line-clamp-1">
-                                        {conv.lastMessage || 'No messages'}
-                                    </p>
-                                    {conv.unreadCount > 0 && activeTab === 'messages' && (
-                                        <span className="inline-block mt-2 px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
-                                            {conv.unreadCount} NEW
-                                        </span>
-                                    )}
                                 </div>
                             ))
                         )}
