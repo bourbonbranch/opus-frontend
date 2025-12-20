@@ -247,7 +247,7 @@ export default function Messages() {
                 />
                 {/* Placeholder for future stat */}
                 <StatCard
-                    icon={<UsersIcon className="w-6 h-6 text-green-400" />}
+                    icon={<UsersIcon className="w-6 h-6 text-blue-400" />}
                     label="Total Recipients"
                     value={roster.length}
                     subtext="Active students"
