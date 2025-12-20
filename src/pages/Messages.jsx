@@ -590,6 +590,12 @@ export default function Messages() {
     );
 }
 
+// --- HELPERS ---
+
+const getInitials = (name) => {
+    return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+};
+
 // --- SUBCOMPONENTS ---
 
 function StatCard({ icon, label, value, subtext }) {
@@ -648,10 +654,6 @@ function ThreadView({ messages, onReply }) {
     React.useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-
-    const getInitials = (name) => {
-        return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
-    };
 
     return (
         <div className="flex-1 flex flex-col h-full">
