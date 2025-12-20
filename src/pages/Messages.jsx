@@ -309,13 +309,13 @@ export default function Messages() {
                                     <div className="flex items-start gap-3">
                                         {/* Avatar Bubble */}
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0 ${selectedConversation?.id === conv.id ? 'bg-purple-600' : 'bg-gradient-to-br from-gray-700 to-gray-600 group-hover:from-purple-600 group-hover:to-blue-600 transition-all'}`}>
-                                            {getInitials(conv.title)}
+                                            {getInitials(conv.studentName || conv.title)}
                                         </div>
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">
                                                 <h3 className={`font-semibold text-sm truncate pr-2 ${conv.unreadCount > 0 ? 'text-white' : 'text-gray-300'}`}>
-                                                    {conv.title}
+                                                    {conv.studentName || conv.title}
                                                 </h3>
                                                 <span className="text-xs text-gray-500 flex-shrink-0">
                                                     {new Date(conv.updatedAt).toLocaleDateString()}
@@ -358,7 +358,7 @@ export default function Messages() {
                                 </div>
 
                                 {selectedConversation.type === 'announcement' && (
-                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg border border-green-500/20 text-sm">
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20 text-sm">
                                         <EyeIcon className="w-4 h-4" />
                                         <span>Seen 12/45</span> {/* Mock data for now, ideally fetch from backend */}
                                     </div>
