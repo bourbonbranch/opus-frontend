@@ -273,6 +273,30 @@ export async function getMessages(directorId) {
   return handleResponse(res);
 }
 
+export async function getDirectorConversations(directorId) {
+  const id = directorId ?? localStorage.getItem('directorId');
+  if (!id) throw new Error('Director ID required');
+
+  const res = await fetch(`${API_BASE_URL}/api/director/conversations?director_id=${id}`);
+  return handleResponse(res);
+}
+
+export async function getConversationMessages(conversationId) {
+  const res = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`);
+  return handleResponse(res);
+}
+
+export async function replyToConversation(conversationId, content) {
+  const res = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content })
+  });
+  return handleResponse(res);
+}
+
 export async function sendMessage(payload) {
   // expects: { director_id, ensemble_id?, subject, content, recipients_summary, recipient_ids }
   const res = await fetch(`${API_BASE_URL}/messages`, {
