@@ -41,11 +41,18 @@ export default function SubmissionDrawer({ isOpen, onClose, submission, onSave }
     };
 
     const handleSave = async () => {
-        await onSave(submission.id, {
+        // If there's a score, automatically set status to graded
+        const finalStatus = (score !== '' && score !== null) ? 'graded' : status;
+
+        const payload = {
             score: score === '' ? null : parseFloat(score),
             feedback,
-            status
-        });
+            status: finalStatus
+        };
+
+        console.log('[SubmissionDrawer] Saving submission', submission.id, 'with payload:', payload);
+
+        await onSave(submission.id, payload);
         onClose();
     };
 
@@ -156,6 +163,7 @@ export default function SubmissionDrawer({ isOpen, onClose, submission, onSave }
                                 >
                                     <option value="not_started">Not Started</option>
                                     <option value="submitted">Submitted</option>
+                                    <option value="graded">Graded</option>
                                     <option value="late">Late</option>
                                     <option value="missing">Missing</option>
                                     <option value="excused">Excused</option>
@@ -168,7 +176,13 @@ export default function SubmissionDrawer({ isOpen, onClose, submission, onSave }
                                 <input
                                     type="number"
                                     value={score}
-                                    onChange={(e) => setScore(e.target.value)}
+                                    onChange={(e) => {
+                                        setScore(e.target.value);
+                                        // Auto-set status to 'graded' when score is entered
+                                        if (e.target.value && status !== 'graded') {
+                                            setStatus('graded');
+                                        }
+                                    }}
                                     placeholder="Enter score..."
                                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
