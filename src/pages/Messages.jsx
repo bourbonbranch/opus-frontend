@@ -640,20 +640,45 @@ function ThreadView({ messages, onReply }) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    const getInitials = (name) => {
+        return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+    };
+
     return (
         <div className="flex-1 flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {messages.map((msg) => {
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {messages.map((msg, index) => {
                     const isMe = msg.sender === 'director';
                     return (
-                        <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[70%] rounded-2xl p-4 ${isMe ? 'bg-purple-600 text-white rounded-br-none' : 'bg-white/10 text-gray-200 rounded-bl-none'}`}>
-                                {!isMe && <p className="text-xs font-bold text-gray-400 mb-1">{msg.senderName}</p>}
-                                <p>{msg.content}</p>
-                                <p className={`text-xs mt-2 ${isMe ? 'text-purple-200' : 'text-gray-500'}`}>
-                                    {new Date(msg.created_at || msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </p>
+                        <div key={msg.id} className="group">
+                            <div className={`flex gap-3 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                {/* Student Avatar (Left) */}
+                                {!isMe && (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-lg flex-shrink-0 mt-1">
+                                        {getInitials(msg.senderName)}
+                                    </div>
+                                )}
+
+                                <div className={`max-w-[70%] rounded-2xl p-4 shadow-sm ${isMe ? 'bg-purple-600 text-white rounded-br-none' : 'bg-white/10 text-gray-200 rounded-bl-none'}`}>
+                                    {!isMe && <p className="text-xs font-bold text-gray-400 mb-1">{msg.senderName}</p>}
+                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                    <p className={`text-[10px] mt-2 text-right ${isMe ? 'text-purple-200' : 'text-gray-500'}`}>
+                                        {new Date(msg.created_at || msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+
+                                {/* Director Avatar (Right) - Optional but looks nice for symmetry if desired, or can omit */}
+                                {isMe && (
+                                    <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-xs font-bold text-white shadow-lg flex-shrink-0 mt-1">
+                                        DIR
+                                    </div>
+                                )}
                             </div>
+
+                            {/* Separator Line (except for last item) */}
+                            {index < messages.length - 1 && (
+                                <div className="h-px bg-white/5 my-6 mx-12" />
+                            )}
                         </div>
                     );
                 })}
