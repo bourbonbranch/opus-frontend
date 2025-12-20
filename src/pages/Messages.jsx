@@ -59,27 +59,39 @@ export default function Messages() {
 
     const loadData = async () => {
         setLoading(true);
+        const directorId = localStorage.getItem('directorId');
+
         try {
-            const directorId = localStorage.getItem('directorId');
+            // Load Ensembles (Critical for Compose)
+            const ens = await getEnsembles().catch(err => {
+                console.error("Failed to load ensembles:", err);
+                return [];
+            });
+            setEnsembles(ens || []);
+
+            // Load Conversations
             if (directorId) {
-                const convs = await getDirectorConversations(directorId);
-                // Ensure reply_enabled is boolean if coming from backend
+                const convs = await getDirectorConversations(directorId).catch(err => {
+                    console.error("Failed to load conversations:", err);
+                    return [];
+                });
                 setConversations(convs || []);
             }
 
-            const ens = await getEnsembles();
-            setEnsembles(ens || []);
-
-            if (ens.length > 0) {
+            // Load Roster (Depends on Ensembles)
+            if (ens && ens.length > 0) {
                 const allStudents = [];
-                for (const e of ens) {
-                    const students = await getRoster(e.id);
-                    allStudents.push(...students.map(s => ({ ...s, ensemble_name: e.name })));
-                }
+                // Use Promise.all for faster parallel roster fetching
+                const rosterPromises = ens.map(e => getRoster(e.id).then(students =>
+                    students.map(s => ({ ...s, ensemble_name: e.name }))
+                ).catch(() => []));
+
+                const results = await Promise.all(rosterPromises);
+                allStudents.push(...results.flat());
                 setRoster(allStudents);
             }
         } catch (err) {
-            console.error('Failed to load data', err);
+            console.error('Critical error loading data', err);
         } finally {
             setLoading(false);
         }
@@ -290,8 +302,8 @@ export default function Messages() {
                                     key={conv.id}
                                     onClick={() => openConversation(conv)}
                                     className={`p-4 rounded-xl cursor-pointer transition-colors border ${selectedConversation?.id === conv.id
-                                            ? 'bg-purple-500/20 border-purple-500/50'
-                                            : 'bg-transparent border-transparent hover:bg-white/5'
+                                        ? 'bg-purple-500/20 border-purple-500/50'
+                                        : 'bg-transparent border-transparent hover:bg-white/5'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
@@ -591,8 +603,8 @@ function TabButton({ active, onClick, label, count }) {
         <button
             onClick={onClick}
             className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors relative ${active
-                    ? 'border-purple-500 text-purple-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200'
+                ? 'border-purple-500 text-purple-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200'
                 }`}
         >
             {label}
@@ -611,8 +623,8 @@ function TypeToggle({ current, value, label, onClick }) {
         <button
             onClick={() => onClick(value)}
             className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${isSelected
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                ? 'bg-purple-600 border-purple-500 text-white'
+                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
                 }`}
         >
             {label}
