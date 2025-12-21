@@ -72,28 +72,40 @@ export default function Planner() {
         setError(null);
         try {
             // 1. Fetch Piece Details
-            const pieceRes = await fetch(`${VITE_API_BASE_URL}/api/files/${pieceId}`);
+            const pieceRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}`);
             if (!pieceRes.ok) {
                 const errText = await pieceRes.text();
                 throw new Error(`Failed to fetch piece (${pieceRes.status}): ${errText}`);
             }
             const pieceData = await pieceRes.json();
-            setPiece(pieceData);
 
-            // 2. Fetch Sections
-            const sectionsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/sections`);
-            const sectionsData = await sectionsRes.json();
-            setSections(Array.isArray(sectionsData) ? sectionsData : []);
+            // Normalize data structure for UI
+            // Use the latest version for the PDF
+            const latestVersion = pieceData.versions?.[0];
+            const pdfUrl = latestVersion?.file_path;
+
+            setPiece({
+                ...pieceData,
+                title: pieceData.title,
+                composer: pieceData.composer,
+                storage_url: pdfUrl, // UI expects this for PDF
+                currentVersionId: latestVersion?.id
+            });
+
+            // 2. Fetch Sections (Stubbed if not yet implemented backend side)
+            // const sectionsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/sections`);
+            // const sectionsData = await sectionsRes.json();
+            setSections([]); // TODO: Implement backend sections
 
             // 3. Fetch Annotations
             const annotationsRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/annotations`);
             const annotationsData = await annotationsRes.json();
             setAnnotations(Array.isArray(annotationsData) ? annotationsData : []);
 
-            // 4. Fetch Plans
-            const plansRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/rehearsal-plans`);
-            const plansData = await plansRes.json();
-            setPlans(Array.isArray(plansData) ? plansData : []);
+            // 4. Fetch Plans (Stubbed)
+            // const plansRes = await fetch(`${VITE_API_BASE_URL}/api/pieces/${pieceId}/rehearsal-plans`);
+            // const plansData = await plansRes.json();
+            setPlans([]); // TODO: Implement backend plans
 
         } catch (err) {
             console.error('Error fetching planner data:', err);
