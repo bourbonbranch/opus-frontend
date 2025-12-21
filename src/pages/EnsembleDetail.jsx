@@ -32,7 +32,6 @@ export default function EnsembleDetail() {
         { path: 'rooms', label: 'Rooms', icon: MapPin },
         { path: 'assignments', label: 'Assignments', icon: FileText },
         { path: 'library', label: 'Library', icon: Library },
-        { path: 'messages', label: 'Messages', icon: MessageSquare },
         { path: 'events', label: 'Events', icon: CalendarDays },
         { path: 'settings', label: 'Settings', icon: Settings },
     ];
@@ -66,25 +65,36 @@ export default function EnsembleDetail() {
                 </button>
 
                 {/* Header */}
-                <div className="mb-6">
-                    <div className="flex items-center gap-3 mb-2">
-                        {ensemble.color_hex && (
-                            <div
-                                className="w-4 h-4 rounded-full"
-                                style={{ backgroundColor: ensemble.color_hex }}
-                            />
-                        )}
-                        <h1 className="text-3xl font-bold text-white">{ensemble.name}</h1>
-                        {ensemble.short_code && (
-                            <span className="px-3 py-1 bg-white/10 text-white/80 text-sm rounded">
-                                {ensemble.short_code}
-                            </span>
+                <div className="mb-6 flex justify-between items-end">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            {ensemble.color_hex && (
+                                <div
+                                    className="w-4 h-4 rounded-full"
+                                    style={{ backgroundColor: ensemble.color_hex }}
+                                />
+                            )}
+                            <h1 className="text-3xl font-bold text-white">{ensemble.name}</h1>
+                            {ensemble.short_code && (
+                                <span className="px-3 py-1 bg-white/10 text-white/80 text-sm rounded">
+                                    {ensemble.short_code}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-white/60 capitalize">{ensemble.type}</p>
+                        {ensemble.description && (
+                            <p className="text-white/70 mt-2">{ensemble.description}</p>
                         )}
                     </div>
-                    <p className="text-white/60 capitalize">{ensemble.type}</p>
-                    {ensemble.description && (
-                        <p className="text-white/70 mt-2">{ensemble.description}</p>
-                    )}
+                    <button
+                        onClick={() => navigate('/director/messages', {
+                            state: { composeAnnouncement: true, ensembleId: ensemble.id }
+                        })}
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium shadow-lg hover:shadow-purple-500/20"
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        Send Announcement
+                    </button>
                 </div>
 
                 {/* Tabs */}

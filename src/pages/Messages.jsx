@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
     PlusIcon, SearchIcon, UsersIcon, SendIcon, CheckCheckIcon,
     ClockIcon, MessageSquareIcon, ArrowLeftIcon, MegaphoneIcon,
@@ -10,6 +11,9 @@ import {
 } from '../lib/opusApi';
 
 export default function Messages() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     // --- STATE ---
     const [activeTab, setActiveTab] = useState('messages'); // 'messages' | 'announcements'
     const [conversations, setConversations] = useState([]);
@@ -56,6 +60,20 @@ export default function Messages() {
     useEffect(() => {
         loadData();
     }, []);
+
+    // Handle Redirects (e.g. "Send Announcement" from Ensemble page)
+    useEffect(() => {
+        if (location.state?.composeAnnouncement && location.state?.ensembleId) {
+            setActiveTab('announcements');
+            setIsComposeOpen(true);
+            setComposeType('announcement');
+            setRecipientType('ensemble');
+            setSelectedEnsembleId(location.state.ensembleId);
+
+            // Clear state to prevent re-opening on refresh (optional, but cleaner)
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, navigate]);
 
     const loadData = async () => {
         setLoading(true);
