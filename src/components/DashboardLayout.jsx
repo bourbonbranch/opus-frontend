@@ -137,8 +137,8 @@ export function DashboardLayout() {
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 <div className="p-6 border-b border-gray-700">
-                    <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                        <h1 className="text-2xl font-bold">Novus</h1>
+                    <div className="flex items-center">
+                        <img src="/logo-horizontal.png" alt="Novus" className="h-8 w-auto object-contain" />
                     </div>
                     <p className="text-sm text-gray-400 mt-1">Director Dashboard</p>
                 </div>
