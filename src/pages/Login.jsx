@@ -53,10 +53,10 @@ export default function Login() {
                 <div className="w-full max-w-md">
                     {/* Logo */}
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-2xl mb-4">
-                            <MusicIcon className="w-8 h-8 text-white" />
+                        <div className="w-48 h-auto mb-4 flex items-center justify-center">
+                            <img src="/logo-white.png" alt="Novus Logo" className="w-full h-auto object-contain drop-shadow-2xl" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">Novus</h1>
+                        {/* <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">Novus</h1> */}
                         <p className="text-gray-300 text-center">Ensemble Management Made Simple</p>
                     </div>
 
