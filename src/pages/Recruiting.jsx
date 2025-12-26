@@ -85,6 +85,13 @@ export default function Recruiting() {
 
                     <div className="flex gap-3">
                         <button
+                            onClick={() => navigate('/director/recruiting/pipeline')}
+                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                        >
+                            <Filter className="w-4 h-4" />
+                            <span className="hidden sm:inline">Pipeline</span>
+                        </button>
+                        <button
                             onClick={() => navigate('/director/recruiting/analytics')}
                             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                         >
@@ -99,25 +106,18 @@ export default function Recruiting() {
                             <span className="hidden sm:inline">Import CSV</span>
                         </button>
                         <button
-                            onClick={() => navigate('/director/recruiting/qr-code')}
-                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-                        >
-                            <QrCode className="w-4 h-4" />
-                            <span className="hidden sm:inline">QR Code</span>
-                        </button>
-                        <button
-                            onClick={() => navigate('/director/recruiting/pipeline')}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
-                        >
-                            <Filter className="w-4 h-4" />
-                            <span className="hidden sm:inline">Pipeline</span>
-                        </button>
-                        <button
                             onClick={() => navigate('/director/recruiting/new')}
                             className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-lg shadow-purple-500/20"
                         >
                             <UserPlus className="w-4 h-4" />
                             <span className="hidden sm:inline">Add Prospect</span>
+                        </button>
+                        <button
+                            onClick={() => navigate('/director/recruiting/qr-code')}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                        >
+                            <QrCode className="w-4 h-4" />
+                            <span className="hidden sm:inline">QR Code</span>
                         </button>
                     </div>
                 </div>
@@ -189,7 +189,7 @@ export default function Recruiting() {
                         <div className="text-3xl font-bold text-white">{prospects.length}</div>
                     </div>
                     <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 backdrop-blur-xl rounded-xl border border-white/10 p-6">
-                        <div className="text-white/60 text-sm mb-1">Hot Leads</div>
+                        <div className="text-white/60 text-sm mb-1">Leads</div>
                         <div className="text-3xl font-bold text-white">
                             {prospects.filter(p => p.interest_level === 'hot').length}
                         </div>

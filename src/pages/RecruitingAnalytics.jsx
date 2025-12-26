@@ -73,7 +73,7 @@ export default function RecruitingAnalytics() {
                     <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 backdrop-blur-xl rounded-xl border border-white/10 p-6">
                         <div className="flex items-center gap-3 mb-2">
                             <Target className="w-6 h-6 text-red-400" />
-                            <div className="text-white/60 text-sm">Hot Leads</div>
+                            <div className="text-white/60 text-sm">Leads</div>
                         </div>
                         <div className="text-3xl font-bold text-white">{interestLevels.hot || 0}</div>
                     </div>

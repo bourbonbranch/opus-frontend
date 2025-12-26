@@ -512,7 +512,7 @@ export default function SeatingChart() {
 
                             <button
                                 onClick={() => setPlacedStudents([])}
-                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-orange-500/20"
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors text-sm font-medium min-h-[44px] shadow-lg shadow-gray-500/20"
                                 title="Reset - Return all students to bank"
                             >
                                 <RotateCcw className="w-4 h-4" />

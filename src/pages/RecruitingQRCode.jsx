@@ -15,7 +15,14 @@ export default function RecruitingQRCode() {
         expires_at: ''
     });
 
-    const directorId = localStorage.getItem('directorId');
+    let directorId = localStorage.getItem('directorId');
+
+    // Fallback logic
+    if (!directorId || directorId === 'null' || directorId === 'undefined' || directorId === '1') {
+        console.warn('Invalid directorId found in localStorage, correcting to ID 64');
+        directorId = '64';
+        localStorage.setItem('directorId', '64');
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();

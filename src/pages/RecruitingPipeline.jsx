@@ -88,7 +88,7 @@ function PipelineStage({ stage, prospects }) {
                 }}
             >
                 <div className="flex items-center justify-between mb-4 flex-shrink-0">
-                    <h2 className="text-white font-semibold">{stage.name}</h2>
+                    <h2 className="text-white font-semibold whitespace-nowrap">{stage.name}</h2>
                     <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white">
                         {prospects.length}
                     </span>

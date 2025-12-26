@@ -376,7 +376,7 @@ export default function ProspectDetail() {
                                         className="mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block"
                                         style={{
                                             backgroundColor: `${prospect.stage_color}20`,
-                                            color: prospect.stage_color,
+                                            color: 'white',
                                             borderColor: `${prospect.stage_color}40`,
                                             borderWidth: '1px'
                                         }}
